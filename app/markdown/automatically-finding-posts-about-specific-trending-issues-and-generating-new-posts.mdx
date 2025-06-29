@@ -1,0 +1,500 @@
+---
+title: "특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기 (Takeoff. 제작기)"
+tags: ["takeoff", "langchain", "vectorize", "llm"]
+date: "2025-06-29"
+---
+
+# 특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기
+
+어찌보면 [Takeoff.](https://ai-takeoff.dev) 서비스를 만들게 된 핵심 구현 목표이다.
+
+개인적으로 Reddit, Hackernews에서 AI 관련 게시물을 자주 챙겨보는데, 이런 해외 커뮤니티에서 원하는 주제에 대한 글을 가져와서
+게시하는 서비스를 만들어보고 싶어서 시작하게 되었다.
+
+초기 아이디어는 크롤링으로 커뮤니티 글을 가져와서 LLM을 통해 후처리는 하는 방식을 생각했었는데, 다행히도 가져오고자 하는 커뮤니티들이 RSS
+를 제공하고 있어서 크롤링 없이 쉽게 가져올 수 있었다.
+
+가져오고자 하는 커뮤니티는 2개로 정했다.
+- [r/Singularity](https://www.reddit.com/r/Singularity/)
+- [hackernews](https://news.ycombinator.com/)
+
+r/Singularity 서브레딧은 원래 특이점에 관한 전반적인 정보를 교류하는 곳이지만, 최근에는 AI 관련 글이 많이 올라오고 있고 무엇보다 
+멤버 수가 3.7M으로 매우 큰 커뮤니티이기 때문에 선택했다.
+
+hackernews는 AI 뿐만 아니라 양질의 소프트웨어 기술 관련 글이 많이 올라오기에 선택했다.
+
+## RSS 파싱하기
+선택한 두 커뮤니티의 RSS 주소는 다음과 같다.
+- r/Singularity: https://www.reddit.com/r/singularity/.rss?sort=top
+- hackernews: https://hnrss.org/best'
+
+![rss](/markdown/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts/0.png)
+
+보다시피 xml 형식으로 제공되어 있기 때문에 별도의 파싱 로직이 필요하였다.
+
+```typescript
+const titleMatch = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/s);
+const descMatch = itemXml.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/s);
+const pubDateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
+// ...
+```
+
+정규식을 통해 필요한 정보를 추출하였다.
+
+## 포스트 작성하기
+Reddit이나 Hackernews의 글을 읽어본 적이 있다면 글의 내용이 아예 없고 링크만 있는 경우가 많은 것을 알 것이다.
+
+레딧 게시물 예시
+![post](/markdown/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts/1.png)
+
+해커뉴스의 경우 아예 게시물 클릭 시 링크로 이동하기 때문에 내용이 없다.
+![hackernews](/markdown/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts/2.png)
+
+이런 경우를 해결하기 위해서 게시물 내부에 링크가 있는 경우 직접 이동해서 크롤링하는 방식을 사용하려고 했으나..
+
+[URL 컨텍스트](https://ai.google.dev/gemini-api/docs/url-context?hl=ko)
+
+Google Gemini API에서 실험용으로 제공하는 URL 컨텍스트가 떠올라서 적용해보기로 했다.
+
+URL 컨텍스트 도구를 사용하면 Gemini에 URL을 프롬프트로 제공하면 모델은 URL에서 콘텐츠를 직접 가져와서 응답을 생성한다고 한다.
+
+실험용이니 만큼 한도가 일일 쿼리 1500회 정도로 제한되어 있지만 현재 프로젝트에 사용하기에는 충분했다.
+
+### 특정 이슈 게시물 찾기
+프로젝트의 목표가 AI 관련 이슈를 찾아서 게시하는 것이기 때문에 이를 위한 로직이 필요하다.
+아무래도 LLM이 주어진 내용을 이해하고 판단하는데 적절하다고 생각되어서 이를 위한 프롬프트를 작성하였다.
+
+```typescript
+export function generateFilterPrompt({ title, description }: FilterPromptParams): string {
+  return `다음 게시글이 새로운 AI, LLM 모델 또는 AI/LLM을 활용한 소프트웨어에 관한 내용인지 판단해주세요.
+
+제목: ${title}
+내용: ${description}
+
+판단 기준:
+1. 새로운 AI/LLM 모델 출시 (GPT, Claude, Gemini, Llama 등)
+2. AI/LLM 관련 연구 논문이나 학술 연구 발표
+3. AI/LLM을 활용한 새로운 도구, 프레임워크, 라이브러리 출시
+4. AI/LLM 기술의 혁신적인 발전이나 돌파구
+5. AI/LLM 업계의 주요 발표나 업데이트
+
+다음 중 하나에 해당하면 관련성이 높다고 판단:
+- AI/ML 관련 arXiv, Nature, Science 등의 논문 링크
+- AI/LLM 모델을 활용한 GitHub 새 릴리스나 새 프로젝트
+- OpenAI, Anthropic, Google, Meta 등 AI 회사의 공식 발표
+- 새로운 언어 모델이나 멀티모달 모델 출시
+- AI 에이전트, AI 코딩 도구, AI 생성형 서비스
+- ChatGPT, Claude, Copilot 등 AI 제품의 새로운 기능
+
+관련성이 낮은 것들:
+- AI와 관련 없는 일반적인 소프트웨어나 기술
+- 단순한 업계 뉴스나 인사 소식
+- AI가 아닌 다른 분야의 연구나 기술
+- 개인적인 의견에 대한 게시물
+
+응답은 XML 형태로 작성하며 reason 과 confidence를 포함해야 합니다.
+reason은 판단 이유를 한 문장으로 작성하며 confidence는 0.0-1.0 사이의 숫자로 작성해야 합니다.
+confidence는 1에 가까울 수록 관련성이 높다고 판단하며 0에 가까울 수록 관련성이 낮다고 판단합니다.
+앞서 제시한 기준을 참고하여 판단해주세요.
+
+응답 형식 (XML):
+<result>
+  <reason>판단 이유를 한 문장으로</reason>
+  <confidence>0.0-1.0 (1에 가까울 수록 AI/LLM 관련성이 높다고 판단)</confidence>
+</result>`;
+} 
+```
+
+AI와 LLM 그리고 그 관련 제품 및 서비스 등에 언급하는 게시물들을 찾도록 프롬프트를 작성하였고, 왜 그 게시물의 관련성이 높다고 혹은 낮다고 
+판단했는지에 대한 이유도 출력하여 추후에 참고할 수 있도록 했다.
+
+작동 예시는 다음과 같다.
+- [예시 링크 1](https://www.reddit.com/r/singularity/comments/1ln28x8/openai_employee_reacting_to_meta_hiring_4_more/)
+```text
+AI 필터링 결과: 게시글은 OpenAI 직원이 Meta의 연구원 채용에 반응하는 내용으로, 
+이는 새로운 AI/LLM 모델 출시, 연구 논문 발표, 새로운 도구 출시,  
+기술적 돌파구 또는 AI/LLM 제품의 주요 업데이트가 아닌 단순한 AI 업계의 인사 소식에 
+해당하여 관련성이 낮습니다. - 0.2
+```
+
+- [예시 링크 2](https://www.reddit.com/r/singularity/comments/1lnbdy9/salesforce_ceo_marc_benioff_says_ai_now_does_half/)
+```text
+AI 필터링 결과: 해당 게시글은 Salesforce CEO가 자사 내에서 AI/LLM 기반 소프트웨어가 업무의 절반을 처리하고 있다는 
+현재의 성과를 언급하는 내용으로, AI/LLM을 활용한 소프트웨어의 실제 적용 및 그 성과에 대한 중요한 업계 소식으로 볼 수 있습니다. 
+이는 새로운 모델이나 도구의 직접적인 출시 발표는 아니지만, AI/LLM 기술의 발전과 활용 현황에 대한 업데이트에 해당합니다. - 0.7
+```
+
+### 게시물 작성 프롬프트 작성하기
+게시물을 작성하기 위한 프롬프트를 작성하였다. LLM 기본 말투는 너무 친절한 말투라고 느꼈기 때문에 조금 더 딱딱한 말투를 
+구현하고자 하였다.
+
+그 결과는 다음과 같다.
+
+```typescript
+export const generateCommonBlogWritePrompt = (content?: string, similarPosts?: string[]) => {
+    return `
+주어진 내용을 바탕으로 개조식(個條式) 스타일로 정리하여 한국어 블로그 포스트로 작성할 것.
+${content ? `<content>${content}</content>` : ''}
+
+작성 원칙:
+1. 제목은 핵심 내용을 간결하게 요약.
+2. 본문은 번호와 기호를 활용한 개조식으로 체계적으로 구성.
+3. 각 항목은 간결하고 명확하게 작성하되, 너무 짧은 문장은 지양.
+4. 중요한 내용은 굵은 글씨(**텍스트**)로 강조.
+5. 계층 구조를 활용하여 주제별로 분류.
+6. 기술적 내용을 이해하기 쉽게 설명.
+7. 실용적 정보와 핵심 포인트에 집중.
+8. 내용의 성격에 따라 자유롭게 구성하되, 읽기 쉽고 이해하기 쉽게 작성
+
+에러 발생 조건:
+- URL 접근이 불가능한 경우.
+
+출력 형식:
+<title>
+개조식 포스트 제목. 제목만 반드시 작성. 다른 부가적인 설명 및 주석은 작성하지 말 것.
+</title>
+<content>
+개조식 포스트 내용. 내용만 반드시 작성. 다른 부가적인 설명 및 주석은 작성하지 말 것.
+
+하면 안되는 것:
+- ~다, ~요 등의 조사 표현을 사용하지 말 것.
+</content>
+<category>
+- 해당 포스트의 카테고리. 예시: LLM, ML, AI, CS
+- 2개 이상일 경우 콤마(,)로 구분.
+- 카테고리는 반드시 영어로 작성.
+</category>
+
+에러 발생 조건 중 하나라도 발생한 경우 다음 출력 형식을 사용할 것:
+<error>
+에러 발생 메시지. 여기에는 원인을 간단히 작성합니다.
+</error>
+
+title, content, category와 error 태그는 동시에 존재할 수 없습니다.
+
+위 원칙을 바탕으로 내용에 가장 적합한 형식으로 자유롭게 작성할 것.
+오직 포스트만 작성할 것. 다른 부가적인 내용은 작성하지 말 것.
+    `
+}
+```
+
+한국어 문체를 찾다가 [개조식](https://namu.wiki/w/%EA%B0%9C%EC%A1%B0%EC%8B%9D)이 딱 맞는 것 같아서 지시사항으로 넣었고, 
+URL 컨텍스트 도구를 사용하게 되는 경우 특정 URL (유료로 제공되는 아티클 등)은 Gemini가 지시사항을 무시하고 경고를 출력하기 때문에 
+이를 상쇄하는 프롬프트를 추가하였다.
+
+결과물을 DB에 저장해야 하기 때문에 출력 형식을 제목, 내용, 카테고리로 정의하여 xml 형식으로 출력하도록 하였다.
+
+코드는 다음과 같다.
+```typescript
+// LLM 초기화
+this.llm = new ChatGoogleGenerativeAI({
+            apiKey: env.GEMINI_API_KEY,
+            model: config.model || 'gemini-2.5-flash-preview-05-20',
+            temperature: config.temperature || 0.4,
+        })
+// ...
+```
+
+```typescript
+const prompt = this.prompt(post, simliarPosts);
+// bindTools를 통해 URL 컨텍스트 도구를 사용하도록 설정
+const response = await this.llm.bindTools([{ urlContext: {} }]).pipe(new StringOutputParser()).invoke(prompt);
+
+// 결과물을 파싱
+const titleMatch = response.match(/<title>\s*(.*?)\s*<\/title>/s);
+const contentMatch = response.match(/<content>\s*(.*?)\s*<\/content>/s);
+const categoryMatch = response.match(/<category>\s*(.*?)\s*<\/category>/s);
+const errorMatch = response.match(/<error>\s*(.*?)\s*<\/error>/s);
+```
+
+프롬프트를 통해 작성한 게시물 중 하나를 가져왔다.
+![post](/markdown/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts/5.png)
+
+### 포스트 저장하기
+Takeoff. 프로젝트에서 데이터베이스는 [Cloudflare D1](https://www.cloudflare.com/ko-kr/developer-platform/products/d1/)을 사용하였고,
+ORM으로 [Drizzle ORM](https://orm.drizzle.team/)을 사용하였다.
+
+drizzle로 간단한 CRUD 로직을 작성 후에 저장하였다. 동일한 URL에 대한 게시물이 있는지 확인 후에 저장하는 로직을 추가하였다.
+
+```typescript
+export class PostManager {
+    // ...
+    async savePost(post: ProcessedPost): Promise<AiPost | null> {
+		try {
+			// 이미 존재하는 게시글인지 확인
+			if (await this.isPostExists(post.originalUrl)) {
+				console.log(`이미 존재하는 게시글: ${post.originalTitle}`);
+				return null;
+			}
+
+			const result = await this.db
+				.insert(aiPosts)
+				.values({
+					title: post.title,
+					content: post.content,
+					author: post.author,
+					originalUrl: post.originalUrl,
+					category: post.category,
+					platform: post.platform,
+					community: post.community,
+					originalTitle: post.originalTitle,
+					originalAuthor: post.originalAuthor,
+					postScore: post.postScore,
+				})
+				.returning()
+				.execute();
+
+			console.log(`게시글 저장 완료: ${post.title}`);
+			return result[0];
+		} catch (error) {
+			console.error('게시글 저장 중 오류:', error);
+			throw new Error(`게시글 저장 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+		}
+	}
+    // ...
+}
+```
+
+## 동일한 이슈를 다루는 게시물 중복 방지
+커뮤니티 특성상 아무리 Best 게시물만 올라오는 RSS 피드를 사용하더라도 동일한 이슈를 다루는 게시물이 중복되어 올라오는 경우가 있다.
+
+이를 방지하기 위해서 동일한 이슈를 다루는 게시물이 있는지 확인하는 로직을 추가하였다.
+
+아이디어는 다음과 같다.
+- 성공적으로 저장되는 내 게시물을 벡터화하여 데이터베이스에 저장
+- 앞서 작성한 이슈 필터링 프롬프트로 통과된 게시물의 제목으로 임베딩하여 유사 게시물 검색
+- 가져온 유사 게시물들을 LLM에 입력하여 동일한 이슈를 다루는 게시물인지 판단
+- 동일한 이슈를 다루는 게시물이 있으면 저장하지 않음
+
+먼저, 저장된 게시물을 벡터화하여 데이터베이스에 저장하는 로직을 작성하였다.
+
+```typescript
+export async function vectorizeText(text: string) {
+    const embeddings = new GoogleGenAI({
+        apiKey: env.GEMINI_API_KEY,
+    })
+
+    const vector = await embeddings.models.embedContent({
+        model: "text-embedding-004",
+        contents: text,
+        config: {
+            taskType: 'RETRIEVAL_DOCUMENT',
+            outputDimensionality: 768,
+        }
+    });
+
+    if (!vector.embeddings) {
+        throw new Error('Failed to vectorize text');
+    }
+
+    return vector.embeddings[0].values;
+}
+```
+
+벡터 데이터베이스로 [Cloudflare Vectorize](https://developers.cloudflare.com/vectorize/)를 사용하였다.
+
+벡터화한 데이터를 벡터 데이터베이스에 저장. 메타데이터로 게시물 ID를 저장하여 벡터 검색 시 게시물 ID를 찾을 수 있도록 하였다.
+
+```typescript
+const inserted = await env.VECTORIZE.insert([{
+    id: post.id.toString(),
+    values: vector,
+    metadata: {
+        postId: post.id,
+    }
+}]);
+```
+
+다음 코드는 벡터 데이터베이스에서 유사 게시물을 검색하는 로직이다.
+
+쿼리를 통해 벡터화 한 데이터를 벡터 데이터베이스에서 상위 3개의 게시물을 가져오도록 한다. 여기서 쿼리는 처리하고자 하는 게시물의 제목으로 지정하였다.
+
+```typescript
+export async function retrieveSimilarPosts(query: string): Promise<AiPost[]> {
+    const postManager = new PostManager(env.DB);
+
+    const embeddings = new GoogleGenAI({
+        apiKey: env.GEMINI_API_KEY,
+    })
+
+    const vector = await embeddings.models.embedContent({
+        model: "text-embedding-004",
+        contents: query,
+        config: {
+            taskType: 'RETRIEVAL_DOCUMENT',
+            outputDimensionality: 768,
+        }
+    });
+    
+    if (!vector.embeddings) {
+        throw new Error('Failed to vectorize text');
+    }
+
+    const result = await env.VECTORIZE.query(vector.embeddings[0].values!, {
+        topK: 3,
+        returnValues: true,
+        returnMetadata: true,
+    });
+
+    if (!result) {
+        throw new Error('Failed to query vectorize');
+    }
+
+    const threshold = 0.5;
+    
+    const postIds = result.matches
+			.filter((match) => match.metadata?.postId && match.score && match.score > threshold)
+			.map((match) => match.metadata?.postId!.toString()) as string[];
+    const posts = await postManager.getPostsByIds(postIds);
+    return posts;
+}
+```
+
+LLM에 입력하여 동일한 이슈를 다루는 게시물인지 판단하는 로직이다.
+
+LLM 호출 최적화를 위해 게시물 작성 프롬프트와 동일한 이슈를 판단하는 프롬프트를 하나로 합쳐서 호출하도록 하였다.
+
+기존의 블로그 작성 프롬프트에 에러 발생 조건을 추가하여 유사한 내용인 경우 에러를 반환하도록 하였다.
+
+```typescript
+export const generateCommonBlogWritePrompt = (content?: string, similarPosts?: string[]) => {
+    return `
+주어진 내용을 바탕으로 개조식(個條式) 스타일로 정리하여 한국어 블로그 포스트로 작성할 것.
+${content ? `<content>${content}</content>` : ''}
+
+작성 원칙:
+1. 제목은 핵심 내용을 간결하게 요약.
+2. 본문은 번호와 기호를 활용한 개조식으로 체계적으로 구성.
+3. 각 항목은 간결하고 명확하게 작성하되, 너무 짧은 문장은 지양.
+4. 중요한 내용은 굵은 글씨(**텍스트**)로 강조.
+5. 계층 구조를 활용하여 주제별로 분류.
+6. 기술적 내용을 이해하기 쉽게 설명.
+7. 실용적 정보와 핵심 포인트에 집중.
+8. 내용의 성격에 따라 자유롭게 구성하되, 읽기 쉽고 이해하기 쉽게 작성
+
+에러 발생 조건:
+- URL 접근이 불가능한 경우.
+- 문서 유사도 검색을 통해 이미 작성된 포스트가 작성할 포스트 내용과 유사한 경우.
+
+${similarPosts && (
+    `다음은 문서 유사도 검색을 통해 이미 작성된 포스트 목록의 내용입니다.
+    <similar-posts>
+    ${similarPosts.map((post) => `- ${post}`).join('\n')}
+    </similar-posts>`
+)}
+
+출력 형식:
+<title>
+개조식 포스트 제목. 제목만 반드시 작성. 다른 부가적인 설명 및 주석은 작성하지 말 것.
+</title>
+<content>
+개조식 포스트 내용. 내용만 반드시 작성. 다른 부가적인 설명 및 주석은 작성하지 말 것.
+
+하면 안되는 것:
+- ~다, ~요 등의 조사 표현을 사용하지 말 것.
+</content>
+<category>
+- 해당 포스트의 카테고리. 예시: LLM, ML, AI, CS
+- 2개 이상일 경우 콤마(,)로 구분.
+- 카테고리는 반드시 영어로 작성.
+</category>
+
+에러 발생 조건 중 하나라도 발생한 경우 다음 출력 형식을 사용할 것:
+<error>
+에러 발생 메시지. 여기에는 원인을 간단히 작성합니다.
+</error>
+
+title, content, category와 error 태그는 동시에 존재할 수 없습니다.
+
+위 원칙을 바탕으로 내용에 가장 적합한 형식으로 자유롭게 작성할 것.
+오직 포스트만 작성할 것. 다른 부가적인 내용은 작성하지 말 것.
+    `
+}
+```
+
+중복 방지 기능을 구현 후 일주일 정도 운영하여 얻은 유사도 필터 로그 중 하나를 가져왔다.
+
+![유사도 필터 예시](/markdown/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts/3.png)
+
+## Cron 작업으로 주기적으로 실행하기
+이제 서비스를 운영하기 위해 Cron 작업을 통해 주기적으로 실행하도록 하였다.
+
+백엔드 환경으로 [Cloudflare Workers](https://developers.cloudflare.com/workers/)를 사용하였기 때문에 `wrangler.jsonc` 
+파일을 수정하여 쉽게 cron trigger을 활성화 할 수 있었다.
+
+한 시간마다 실행하도록 설정하였으며, 현재 Gemini API와 Cloudflare의 무료 플랜을 사용하고 있으므로 한도를 초과하지 않도록 Cron 스케쥴러를 조정하였다.
+```jsonc
+"triggers": {
+    "crons": [
+        "20 * * * *",
+        "40 * * * *", 
+    ]
+}
+//...
+```
+
+매 시간 20분과 40분에 실행하도록 하여 20분에는 Hackernews, 40분에는 Reddit과 관련된 작업을 실행하도록 하였다.
+
+## 필터링 최적화
+매번 모든 포스트를 읽고 필터링하는 방식은 비효율적이므로 별도로 이미 필터링한 게시물에 대해서는 스킵할 수 있도록 구현하였다.
+
+이슈 필터로 걸러진 게시물은 해당 결과를 저장하여 다음 번 실행 시 스킵할 수 있도록 하였다.
+
+```typescript
+const filtered = await filter.filterAll(result);
+
+// 필터링 된 포스트를 처리하지 않음
+if (!filtered.shouldProcess) {
+    // 이슈 필터로 필터링 된 경우 필터링 결과를 저장
+    if (filtered.reason === "ai_relevance" && filtered.aiReason) {
+        await filterManager.saveFilteredPost({
+            originalUrl: result.url,
+            originalTitle: result.title,
+            platform: data.platform,
+            community: data.community,
+            filterReason: filtered.aiReason,
+            filterType: filtered.reason
+        });
+    }
+    continue;
+}
+```
+
+`filter.filterAll(result)` 내부의 로직 중 일부
+
+`filterPostManager`에서 이미 필터링 된 게시물인지 확인한다. 존재한다면 반환 값에 `shouldProcess`를 `false`로 설정하여 처리하지 않도록 하였다.
+
+```typescript
+export class CommonFilter {
+//...
+    async filterAll(post: ParserResult): Promise<FilterResult> {
+        // ...
+        const isFiltered = await this.filterPostManager.isPostFiltered(post.url);
+        if (isFiltered) {
+            return {
+                shouldProcess: false,
+                reason: 'already_exists',
+            };
+        }
+        // ...
+    }
+}
+```
+
+![필터링 최적화 결과](/markdown/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts/4.png)
+
+이미 필터링 된 게시물로 처리되어 중복 처리되는 것을 방지할 수 있었다.
+
+---
+
+전체코드는 [여기서](https://github.com/windopper/takeoff) 확인 할 수 있습니다.
+
+
+
+
+
+
+
+
+
+

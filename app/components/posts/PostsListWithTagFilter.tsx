@@ -1,0 +1,92 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import MarkdownItem from "./MarkdownItem";
+import TagFilter from "./TagFilter";
+import { MarkdownFile } from "@/app/types/weblog";
+
+interface PostsListProps {
+  markdownFiles: MarkdownFile[];
+}
+
+export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps) {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // 모든 태그와 각 태그별 포스트 개수 계산
+  const { allTags, tagCounts } = useMemo(() => {
+    const tags = Array.from(new Set(markdownFiles.flatMap(file => file.tags))).sort();
+    const counts = tags.reduce((acc, tag) => {
+      acc[tag] = markdownFiles.filter(file => file.tags.includes(tag)).length;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return { allTags: tags, tagCounts: counts };
+  }, [markdownFiles]);
+
+  // 선택된 태그에 따라 포스트 필터링
+  const filteredPosts = useMemo(() => {
+    if (selectedTags.length === 0) {
+      return markdownFiles;
+    }
+    
+    return markdownFiles.filter(file => 
+      selectedTags.some(tag => file.tags.includes(tag))
+    );
+  }, [markdownFiles, selectedTags]);
+
+  // 최신순으로 정렬
+  const sortedPosts = useMemo(() => {
+    return [...filteredPosts].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }, [filteredPosts]);
+
+  const handleTagFilter = (tags: string[]) => {
+    setSelectedTags(tags);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-zinc-100 mb-4">포스트 목록</h1>
+        
+        <TagFilter 
+          allTags={allTags} 
+          tagCounts={tagCounts} 
+          onTagFilter={handleTagFilter} 
+        />
+      </div>
+
+      {sortedPosts.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">
+            {selectedTags.length > 0 
+              ? "선택된 태그에 해당하는 포스트가 없습니다."
+              : "아직 작성된 포스트가 없습니다."
+            }
+          </p>
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="mt-4 px-4 py-2 text-sm text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-md border border-zinc-700 hover:border-zinc-600 transition-colors duration-200"
+            >
+              모든 포스트 보기
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {selectedTags.length > 0 && (
+            <div className="text-sm text-zinc-400 mb-4">
+              {sortedPosts.length}개의 포스트가 선택된 태그와 일치합니다.
+            </div>
+          )}
+          
+          <div className="flex flex-col gap-4">
+            {sortedPosts.map((file) => (
+              <MarkdownItem key={file.name} file={file} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+} 

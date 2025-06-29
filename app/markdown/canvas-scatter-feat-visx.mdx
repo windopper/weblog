@@ -1,0 +1,150 @@
+---
+title: "canvas로 scatterplot 그리기 (feat. visx)"
+tags: ["takeoff", "canvas", "visx", "scatterplot", "data-visualization", "react"]
+date: "2025-06-25"
+---
+
+# canvas로 scatterplot 그리기 (feat. visx)
+
+![완성결과](/markdown/canvas-scatter-feat-visx/0.png)
+
+완성결과
+
+LLM 벤치마크 페이지 구현을 위해 날짜, 점수 축을 위한 scatterplot을 만들어보려고 한다. 
+
+페이지 스타일링 일관성을 위해 `visx`와 캔버스로 직접 구현하였다.
+
+svg가 아닌 캔버스를 통해 구현하여 줌/패닝시에 웹 반응성을 높였으며 다량의 데이터 포인트가 존재해도 끊김없이 기능을 수행할 수 있도록 한다.
+
+# 축 범위 구하기
+
+먼저 입력 데이터의 최소/최대를 통한 초기 데이터 스케일이 필요하기 때문에 `@visx/scale`의 `scaleTime`과 `scaleLinear`를 통해 값을 가져왔다.
+
+`scale` 계열 함수들은 데이터 값을 화면의 픽셀 위치로 변환하는 역할을 한다. 추후에 캔버스에 데이터 포인트를 그릴 때도 사용할 것이다.
+
+`extent`는 데이터 포인트들의 최소/최대를 배열 형태로 반환한다. `ex) [-1, 1]`
+
+```tsx
+export const createInitialXScale = (data: ScatterPlotData[], innerWidth: number) => {
+  const dateExtent = calculateDateExtent(data);
+  return scaleTime({
+    domain: dateExtent,
+    range: [0, innerWidth],
+  });
+};
+
+export const createInitialYScale = (data: ScatterPlotData[], innerHeight: number) => {
+  const yExtent = calculateYExtent(data);
+  return scaleLinear({
+    domain: yExtent,
+    range: [innerHeight, 0],
+  });
+};
+```
+
+# 그리드, 축 그리기
+
+앞서 구한 스케일을 통해 격자선과 축을 그려준다.
+
+`ticks` 함수는 데이터 범위에 맞게 눈금들을 자동으로 계산하여 배열로 반환해준다. 항상 원하는 눈금 개수를 반환하지는 않고 사람이 읽기 편한 숫자들로 구성된 눈금을 생성해준다.
+
+`ticks`를 활용하여 격자선을 그려준다.
+
+```tsx
+// 수평 격자선
+const yTicks = yScale.ticks(5);
+yTicks.forEach((value: number) => {
+  const y = yScale(value) + this.margin.top;
+  this.ctx.beginPath();
+  this.ctx.moveTo(this.margin.left, y);
+  this.ctx.lineTo(this.width - this.margin.right, y);
+  this.ctx.stroke();
+});
+
+// 수직 격자선
+const xTicks = xScale.ticks(6);
+xTicks.forEach((value: Date) => {
+  const x = xScale(value) + this.margin.left;
+  this.ctx.beginPath();
+  this.ctx.moveTo(x, this.margin.top);
+  this.ctx.lineTo(x, this.height - this.margin.bottom);
+  this.ctx.stroke();
+});
+```
+
+추가로 축을 그려준다.
+
+```tsx
+// X축
+this.ctx.beginPath();
+this.ctx.moveTo(this.margin.left, this.height - this.margin.bottom);
+this.ctx.lineTo(this.width - this.margin.right, this.height - this.margin.bottom);
+this.ctx.stroke();
+
+// Y축
+this.ctx.beginPath();
+this.ctx.moveTo(this.margin.left, this.margin.top);
+this.ctx.lineTo(this.margin.left, this.height - this.margin.bottom);
+this.ctx.stroke();
+```
+
+눈금 레이블을 적절한 위치에 그려준다.
+
+```tsx
+// X축 레이블
+xTicks.forEach((value: Date) => {
+  const x = xScale(value) + this.margin.left;
+  const label = `${value.toLocaleString("en", { month: "short" })} ${value.getFullYear()}`;
+  this.ctx.fillText(label, x, this.height - this.margin.bottom + 20);
+});
+
+// Y축 레이블
+this.ctx.textAlign = "right";
+this.ctx.textBaseline = "middle";
+yTicks.forEach((value: number) => {
+  const y = yScale(value) + this.margin.top;
+  const label = `${Math.round(value)}${this.postfix}`;
+  this.ctx.fillText(label, this.margin.left - 10, y);
+});
+```
+
+# 클리핑
+
+데이터 포인트들이 축 바깥으로 나가지 않도록 클리핑해준다.
+
+```tsx
+this.ctx.save();
+this.ctx.beginPath();
+this.ctx.rect(this.margin.left, this.margin.top, 
+              this.width - this.margin.left - this.margin.right, 
+              this.height - this.margin.top - this.margin.bottom);
+this.ctx.clip();
+```
+
+# 각 데이터 포인트 그리기
+
+이제 입력 데이터의 포인트를 플롯 위에 그릴 차례다. 
+
+scatterplot 이므로 점의 형태로 캔버스위에 그려주면 된다. 주의해야 할 점은 앞서 구한 스케일을 통해 실제 값을 화면 상의 픽셀로 바꿔줘야 한다.
+
+```tsx
+data.forEach((point) => {
+  const x = xScale(point.x) + margin.left;
+  const y = yScale(point.y) + margin.top;
+  const radius = 4;
+  
+  this.ctx.beginPath();
+  this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+  this.ctx.fill();
+  this.ctx.stroke();
+});
+```
+
+포인트 레이블도 그려준다.
+
+```tsx
+modelLabels.forEach(({ x, y, color, label }) => {
+  this.ctx.fillText(label, x - 10, y - 10);
+  this.ctx.globalAlpha = 1;
+});
+```
