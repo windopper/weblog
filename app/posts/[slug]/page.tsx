@@ -1,13 +1,9 @@
+'use cache';
+
 import { notFound } from "next/navigation";
-import fs from "fs";
-import path from "path";
-import { compileMDX } from 'next-mdx-remote/rsc';
-import remarkGfm from 'remark-gfm';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import rehypePrettyCode from 'rehype-pretty-code';
-import { extractTOC } from '../../libs/toc';
+
 import TableOfContents from '../../components/posts/TableOfContents';
+import { getMarkdownFiles, getMDXContent } from "@/app/action/markdown";
 
 interface PageProps {
   params: Promise<{
@@ -15,65 +11,20 @@ interface PageProps {
   }>;
 }
 
-interface FrontMatter {
-  title: string;
-  tags: string[];
-  date: string;
+async function generateMetadata({ params }: PageProps) {
+  'use cache';
+  const { slug } = await params;
+  const result = await getMDXContent(slug);
+  return {
+    title: result?.frontmatter.title
+  };
 }
 
-/** @type {import('rehype-pretty-code').Options} */
-const prettyCodeOptions = {
-  keepBackground: false,
-  theme: 'github-dark',
-  defaultLang: 'text',
-};
-
-/** @type {import('rehype-autolink-headings').Options} */
-const autolinkHeadingsOptions = {
-  behavior: 'append',
-  properties: {
-    className: ['anchor'],
-    ariaLabel: 'Link to section',
-  },
-};
-
-async function getMDXContent(slug: string) {
-  const markdownDir = path.join(process.cwd(), "app", "markdown");
-  const filePath = path.join(markdownDir, `${slug}.mdx`);
-  
-  // 파일이 존재하는지 확인
-  if (!fs.existsSync(filePath)) {
-    return null;
-  }
-
-  try {
-    // MDX 파일 읽기
-    const source = fs.readFileSync(filePath, 'utf8');
-    
-    // MDX 컴파일
-    const { content, frontmatter } = await compileMDX<FrontMatter>({
-      source,
-      options: {
-        parseFrontmatter: true,
-        mdxOptions: {
-          remarkPlugins: [remarkGfm],
-          rehypePlugins: [
-            rehypeSlug,
-            [rehypeAutolinkHeadings, autolinkHeadingsOptions],
-            [rehypePrettyCode, prettyCodeOptions],
-          ],
-        },
-      },
-    });
-
-    // table of contents 추출
-    const toc = extractTOC(source);
-
-    return { content, frontmatter, toc };
-  } catch (error) {
-    console.error(`MDX 로드 오류 - ${slug}:`, error);
-    return null;
-  }
+export async function generateStaticParams() {
+  const markdownFiles = await getMarkdownFiles();
+  return markdownFiles.map((file) => ({
+    slug: file.name
+  }));
 }
 
 export default async function PostPage({ params }: PageProps) {

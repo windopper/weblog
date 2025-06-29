@@ -1,3 +1,4 @@
+'use cache';
 
 import PostsListWithTagFilter from "../components/posts/PostsListWithTagFilter";
 import { getMarkdownFiles } from "../action/markdown";

@@ -1,11 +1,19 @@
 "use server";
 
-import path from "path";
 import fs from "fs";
-import matter from "gray-matter";
+import path from "path";
+import { compileMDX } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypePrettyCode from "rehype-pretty-code";
+import { extractTOC, TOCItem } from "../libs/toc";
 import { MarkdownFile } from "../types/weblog";
+import matter from "gray-matter";
+import { ReactNode } from "react";
 
-export async function getMarkdownFiles(): Promise<MarkdownFile[]> {
+export const getMarkdownFiles = async (): Promise<MarkdownFile[]> => {
+  'use cache';
   const markdownDir = path.join(process.cwd(), "app", "markdown");
 
   try {
@@ -76,4 +84,72 @@ export async function getMarkdownFiles(): Promise<MarkdownFile[]> {
     console.error("마크다운 파일 읽기 오류:", error);
     return [];
   }
+};
+
+interface FrontMatter {
+  title: string;
+  tags: string[];
+  date: string;
 }
+
+// 개별 마크다운 파일 내용을 읽는 캐시된 함수
+export const getMDXContent = async (
+  slug: string
+): Promise<{
+  content: ReactNode;
+  frontmatter: FrontMatter;
+  toc: TOCItem[];
+} | null> => {
+  /** @type {import('rehype-pretty-code').Options} */
+  const prettyCodeOptions = {
+    keepBackground: false,
+    theme: "github-dark",
+    defaultLang: "text",
+  };
+
+  /** @type {import('rehype-autolink-headings').Options} */
+  const autolinkHeadingsOptions = {
+    behavior: "append",
+    properties: {
+      className: ["anchor"],
+      ariaLabel: "Link to section",
+    },
+  };
+
+  const markdownDir = path.join(process.cwd(), "app", "markdown");
+  const filePath = path.join(markdownDir, `${slug}.mdx`);
+
+  // 파일이 존재하는지 확인
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+
+  try {
+    // MDX 파일 읽기
+    const source = fs.readFileSync(filePath, "utf8");
+
+    // MDX 컴파일
+    const { content, frontmatter } = await compileMDX<FrontMatter>({
+      source,
+      options: {
+        parseFrontmatter: true,
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [
+            rehypeSlug,
+            [rehypeAutolinkHeadings, autolinkHeadingsOptions],
+            [rehypePrettyCode, prettyCodeOptions],
+          ],
+        },
+      },
+    });
+
+    // table of contents 추출
+    const toc = extractTOC(source);
+
+    return { content, frontmatter, toc };
+  } catch (error) {
+    console.error(`MDX 로드 오류 - ${slug}:`, error);
+    return null;
+  }
+};

@@ -1,13 +1,11 @@
+'use cache';
+
 import Link from "next/link";
 import { ShootingStars } from "./components/ui/shooting-stars";
 import { StarsBackground } from "./components/ui/stars-background";
-import PostsListWithTagFilter from "./components/posts/PostsListWithTagFilter";
 import { getMarkdownFiles } from "./action/markdown";
 import PostsList from "./components/posts/PostsList";
 
-
-import { TbBrandThreejs } from "react-icons/tb";
-import Image from "next/image";
 import Preferences from "./components/main/Preferences";
 import { FaGithub } from "react-icons/fa";
 import TakeoffButton from "./components/main/TakeoffButton";
