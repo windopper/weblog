@@ -10,6 +10,7 @@ import CompiledMDXImage from "./mdx/CompiledMDXImage";
 import CompiledMDXPre from "./mdx/CompiledMDXPre";
 import fs from "fs";
 import path from "path";
+import InteractiveButton from "./mdx/InteractiveButton";
 
 interface FrontMatter {
   title: string;
@@ -58,6 +59,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
       components: {
         img: CompiledMDXImage,
         pre: CompiledMDXPre,
+        InteractiveButton,
       },
     });
 
