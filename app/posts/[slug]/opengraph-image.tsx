@@ -33,8 +33,8 @@ export default async function OpengraphImage({ id }: {
   const slug = id;
   const post = await getMDXContent(slug);
   
-  const fontMediumPath = path.join(process.cwd(), 'public/fonts/SeoulAlrimTTF-Medium.ttf');
-  const fontHeavyPath = path.join(process.cwd(), 'public/fonts/SeoulAlrimTTF-Heavy.ttf');
+  const fontMediumPath = path.join(process.cwd(), 'app/fonts/SeoulAlrimTTF-Medium.ttf');
+  const fontHeavyPath = path.join(process.cwd(), 'app/fonts/SeoulAlrimTTF-Heavy.ttf');
   
   const fontMedium = fs.readFileSync(fontMediumPath);
   const fontHeavy = fs.readFileSync(fontHeavyPath);
