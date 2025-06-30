@@ -1,3 +1,93 @@
+---
+title: "Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기"
+tags: ["Next.js", "opengraph image", "weblog"]
+date: "2025-06-30"
+---
+
+# Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기
+
+소셜 미디어에서 링크를 공유할 때 보이는 이미지, 즉 오픈그래프(Open Graph) 이미지는 사용자의 클릭률을 크게 좌우하는 중요한 요소이다.
+
+블로그나 콘텐츠 사이트에서 각 포스트마다 고유한 오픈그래프 이미지를 일일이 제작하는 것은 현실적이지 않기 때문에 동적으로 오픈그래프 이미지를 생성하는 것이 효과적이다.
+
+Next.js v13.3.0에서 소개된 `opengraph-image` 메타데이터 파일을 사용하여 동적으로 오픈그래프 이미지를 생성해보겠다.
+
+다음은 완성본이다.
+
+![완성본](/markdown/dynamic-generate-opengraph-image-with-nextjs-15/0.png)
+
+디스코드에서 공유할 때 보이는 이미지.
+
+![완성본](/markdown/dynamic-generate-opengraph-image-with-nextjs-15/1.png)
+
+## 사용법
+[공식 문서](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image#generate-images-using-code-js-ts-tsx)
+
+기본적인 사용법은 다음과 같다.
+
+```tsx
+import { ImageResponse } from 'next/og'
+
+export default async function OpengraphImage() {
+  return new ImageResponse(
+    (
+      // JSX 형태
+      <div>
+        Hello world!
+      </div>
+    ),
+  );
+}
+```
+
+Props로 전달할 수 있는 옵션은 다음과 같다.
+```tsx
+export default function Image({ params }: { params: { slug: string } }) {
+  // ...
+}
+```
+
+폰트도 추가하고 싶다면 다음과 같이 추가할 수 있다.
+
+```tsx
+//...
+export default async function Image() {
+  const interSemiBold = await readFile(
+    join(process.cwd(), 'assets/Inter-SemiBold.ttf')
+  )
+ 
+  return new ImageResponse(
+    (
+      // JSX 형태
+      <div>
+        Hello world!
+      </div>
+    ),
+    // ImageResponse options
+    {
+      ...size,
+      fonts: [
+        {
+          name: 'Inter',
+          data: interSemiBold,
+          style: 'normal',
+          weight: 400,
+        },
+      ],
+    }
+  )
+}
+```
+
+`ImageResponse` API는 [이 문서](https://vercel.com/docs/og-image-generation/og-image-api) 에서 자세히 설명하고 있다. 
+
+## 오픈그래프 이미지 jsx로 작성하기
+오픈그래프를 생성하는데 사용되는 `@vercel/og` 패키지는 내부적으로 [Satori](https://github.com/vercel/satori)를 사용하기 때문에
+모든 CSS를 지원하지 않는다.[^1]
+
+따라서 이 점을 유의하며 오픈그래프 이미지를 생성하기 위한 JSX 코드를 작성한다.
+
+```tsx
 import { getMarkdownFile, getMarkdownFileWithFetch } from "@/app/action/markdown";
 import { readFileSync } from "fs";
 import { ImageResponse } from "next/og";
@@ -183,3 +273,33 @@ export default async function OpengraphImage({
     imageOptions
   );
 }
+```
+
+## 로컬에서 OG 이미지 미리 보기
+개발자 도구를 열고 Elements 탭에서 head 태그를 열어보면 meta 태그 중 `og:image` 속성을 찾을 수 있다.
+
+![og:image](/markdown/dynamic-generate-opengraph-image-with-nextjs-15/2.png)
+
+`content`를 복사 한 후 접속하면 이미지를 미리 볼 수 있다.
+
+![og:image](/markdown/dynamic-generate-opengraph-image-with-nextjs-15/3.png)
+
+
+## 추가로
+[OG Image Playground](https://og-playground.vercel.app/)에서 오픈그래프 이미지를 미리 그려볼 수 있다.
+![오픈그래프 이미지 테스트](/markdown/dynamic-generate-opengraph-image-with-nextjs-15/4.png)
+
+기본적으로 생성된 이미지는 dynamic API나 캐시되지 않은 데이터를 사용하지 않는 한 빌드 타임에 정적으로 최적화되고 캐시된다.[^2]
+
+[^1]: [Satori 문서](https://github.com/vercel/satori?tab=readme-ov-file#css)
+[^2]: [next.js opengraph-image](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image#generate-images-using-code-js-ts-tsx)
+
+
+
+
+
+
+
+
+
+

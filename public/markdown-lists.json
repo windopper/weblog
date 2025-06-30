@@ -26,6 +26,17 @@
     "path": "/posts/canvas-scatter-feat-visx"
   },
   {
+    "name": "dynamic-generate-opengraph-image-with-nextjs-15",
+    "title": "Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기",
+    "tags": [
+      "Next.js",
+      "opengraph image",
+      "weblog"
+    ],
+    "createdAt": "2025-06-30T00:00:00.000Z",
+    "path": "/posts/dynamic-generate-opengraph-image-with-nextjs-15"
+  },
+  {
     "name": "welcome",
     "title": "블로그에 오신 것을 환영합니다",
     "tags": [

@@ -12,6 +12,7 @@ import { ReactNode } from "react";
 import { prefixUrl } from "../libs/constants";
 import fs from "fs";
 import path from "path";
+import MDXImage from "../components/mdx-image";
 
 export const getMarkdownFiles = async (): Promise<MarkdownFile[]> => {
   "use cache";
@@ -20,10 +21,11 @@ export const getMarkdownFiles = async (): Promise<MarkdownFile[]> => {
     const jsonFile = fs.readFileSync(path.join(process.cwd(), "public", "markdown-lists.json"), "utf8");
     const markdownLists = JSON.parse(jsonFile);
     // convert createdAt to Date
-    return markdownLists.map((file: MarkdownFile) => ({
+    const sortedMarkdownLists = markdownLists.map((file: MarkdownFile) => ({
       ...file,
       createdAt: new Date(file.createdAt),
     }));
+    return sortedMarkdownLists.sort((a: MarkdownFile, b: MarkdownFile) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error("마크다운 파일 읽기 오류:", error);
     return [];
@@ -59,69 +61,6 @@ export const getMarkdownFileWithFetch = async (file: string) => {
     }
   } catch (error) {
     console.error(`메타데이터 추출 오류 - ${file}:`, error);
-    return null;
-  }
-};
-
-interface FrontMatter {
-  title: string;
-  tags: string[];
-  date: string;
-}
-
-// 개별 마크다운 파일 내용을 읽는 캐시된 함수
-export const getMDXContent = async (
-  slug: string
-): Promise<{
-  content: ReactNode;
-  frontmatter: FrontMatter;
-  toc: TOCItem[];
-} | null> => {
-  /** @type {import('rehype-pretty-code').Options} */
-  const prettyCodeOptions = {
-    keepBackground: false,
-    theme: "github-dark",
-    defaultLang: "text",
-  };
-
-  /** @type {import('rehype-autolink-headings').Options} */
-  const autolinkHeadingsOptions = {
-    behavior: "append",
-    properties: {
-      className: ["anchor"],
-      ariaLabel: "Link to section",
-    },
-  };
-
-  try {
-    // MDX 파일 읽기
-    // const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
-    const source = await fetch(`${prefixUrl}/markdown-posts/${slug}.mdx`).then(
-      (res) => res.text()
-    );
-
-    // MDX 컴파일
-    const { content, frontmatter } = await compileMDX<FrontMatter>({
-      source,
-      options: {
-        parseFrontmatter: true,
-        mdxOptions: {
-          remarkPlugins: [remarkGfm],
-          rehypePlugins: [
-            rehypeSlug,
-            [rehypeAutolinkHeadings, autolinkHeadingsOptions],
-            [rehypePrettyCode, prettyCodeOptions],
-          ],
-        },
-      },
-    });
-
-    // table of contents 추출
-    const toc = extractTOC(source);
-
-    return { content, frontmatter, toc };
-  } catch (error) {
-    console.error(`MDX 로드 오류 - ${slug}:`, error);
     return null;
   }
 };

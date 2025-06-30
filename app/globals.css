@@ -1,20 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@font-face {
-  font-family: 'SeoulAlrimTTF-Heavy';
-  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-Heavy.woff2') format('woff2');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'SeoulAlrimTTF-Medium';
-  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -25,6 +11,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-seoul-alrim-ttf-medium: var(--font-seoul-alrim-ttf-medium);
+  --font-seoul-alrim-ttf-heavy: var(--font-seoul-alrim-ttf-heavy);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,7 +23,7 @@
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-100 font-[SeoulAlrimTTF-Medium];
+  @apply bg-zinc-950 text-zinc-100 font-seoul-alrim-ttf-medium;
   overflow: auto;
 }
 
@@ -123,6 +111,28 @@ pre::-webkit-scrollbar-thumb {
 
 pre::-webkit-scrollbar-thumb:hover {
   @apply bg-zinc-500;
+}
+
+/* 얇은 스크롤바 스타일 for CompiledMDXPre */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-zinc-700 rounded-full;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-600;
+}
+
+.thin-scrollbar::-webkit-scrollbar-corner {
+  @apply bg-transparent;
 }
 
 /* 추가 코드 하이라이팅 토큰 스타일 */

@@ -1,6 +1,5 @@
-import { getMarkdownFile, getMarkdownFiles, getMDXContent } from '@/app/action/markdown';
+import { getMarkdownFile, getMarkdownFiles } from '@/app/action/markdown';
 import MdxLayout from '@/app/components/mdx-layout'
-import { prefixUrl } from '@/app/libs/constants';
 import { MarkdownFile } from '@/app/types/weblog';
 import { Metadata } from 'next';
 

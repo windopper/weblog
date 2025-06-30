@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +11,16 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const seoulAlrimTTFMedium = localFont({
+  src: "../public/fonts/SeoulAlrimTTF-Medium.ttf",
+  variable: "--font-seoul-alrim-ttf-medium",
+});
+
+const seoulAlrimTTFHeavy = localFont({
+  src: "../public/fonts/SeoulAlrimTTF-Heavy.ttf",
+  variable: "--font-seoul-alrim-ttf-heavy",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +42,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} 
+        ${seoulAlrimTTFMedium.variable} ${seoulAlrimTTFHeavy.variable} antialiased`}
+      >
         {children}
       </body>
     </html>
