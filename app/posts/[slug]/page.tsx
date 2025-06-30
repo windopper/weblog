@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import TableOfContents from '../../components/posts/TableOfContents';
 import { getMarkdownFiles, getMDXContent } from "@/app/action/markdown";
+import { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{
@@ -11,12 +12,14 @@ interface PageProps {
   }>;
 }
 
-async function generateMetadata({ params }: PageProps) {
-  'use cache';
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const result = await getMDXContent(slug);
   return {
-    title: result?.frontmatter.title
+    title: result?.frontmatter.title,
+    openGraph: {
+      title: result?.frontmatter.title,
+    }
   };
 }
 

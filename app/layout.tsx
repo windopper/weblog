@@ -16,6 +16,12 @@ export const metadata: Metadata = {
   title: "kamilereon",
   applicationName: "kamilereon",
   description: "kamilereon's blog",
+  openGraph: {
+    title: "kamilereon",
+    description: "kamilereon's blog",
+    url: "https://kamilereon.net",
+    siteName: "kamilereon",
+  },
 };
 
 export default function RootLayout({
