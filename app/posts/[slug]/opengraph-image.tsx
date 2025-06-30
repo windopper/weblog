@@ -1,7 +1,5 @@
 import { getMDXContent, getMarkdownFiles } from '@/app/action/markdown';
 import { ImageResponse } from 'next/og'
-import path from 'path'
-import fs from 'fs'
  
 const size = {
   width: 1200,
@@ -27,17 +25,23 @@ export async function generateImageMetadata({ params }: { params: Promise<{ slug
   ];
 }
 
+async function loadSeouAlrimFont(font: string) {
+  const prefix = process.env.NEXT_PUBLIC_VERCEL_URL ? process.env.NEXT_PUBLIC_VERCEL_URL : 'http://localhost:3000';
+  const url = `${prefix}/fonts/${font}.ttf`;
+  const response = await fetch(url);
+ 
+  if (response.status == 200) {
+    return await response.arrayBuffer()
+  }
+  throw new Error("failed to load font data");
+}
+
 export default async function OpengraphImage({ id }: { 
   id: string;
 }) {
   const slug = id;
   const post = await getMDXContent(slug);
-  
-  const fontMediumPath = path.join(process.cwd(), 'app/fonts/SeoulAlrimTTF-Medium.ttf');
-  const fontHeavyPath = path.join(process.cwd(), 'app/fonts/SeoulAlrimTTF-Heavy.ttf');
-  
-  const fontMedium = fs.readFileSync(fontMediumPath);
-  const fontHeavy = fs.readFileSync(fontHeavyPath);
+
 
   return new ImageResponse(
     (
@@ -108,13 +112,13 @@ export default async function OpengraphImage({ id }: {
       fonts: [
         {
           name: 'SeoulAlrimTTF-Medium',
-          data: fontMedium,
+          data: await loadSeouAlrimFont('SeoulAlrimTTF-Medium'),
           style: 'normal',
           weight: 400,
         },
         {
           name: 'SeoulAlrimTTF-Heavy',
-          data: fontHeavy,
+          data: await loadSeouAlrimFont('SeoulAlrimTTF-Heavy'),
           style: 'normal',
           weight: 700,
         },
