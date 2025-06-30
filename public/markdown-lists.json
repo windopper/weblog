@@ -1,0 +1,40 @@
+[
+  {
+    "name": "automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts",
+    "title": "특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기 (Takeoff. 제작기)",
+    "tags": [
+      "takeoff",
+      "langchain",
+      "vectorize",
+      "llm"
+    ],
+    "createdAt": "2025-06-29T00:00:00.000Z",
+    "path": "/posts/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts"
+  },
+  {
+    "name": "canvas-scatter-feat-visx",
+    "title": "canvas로 scatterplot 그리기 (feat. visx)",
+    "tags": [
+      "takeoff",
+      "canvas",
+      "visx",
+      "scatterplot",
+      "data-visualization",
+      "react"
+    ],
+    "createdAt": "2025-06-25T00:00:00.000Z",
+    "path": "/posts/canvas-scatter-feat-visx"
+  },
+  {
+    "name": "welcome",
+    "title": "블로그에 오신 것을 환영합니다",
+    "tags": [
+      "welcome",
+      "introduction",
+      "blog"
+    ],
+    "createdAt": "2024-01-10T00:00:00.000Z",
+    "path": "/posts/welcome",
+    "isPrivate": true
+  }
+]

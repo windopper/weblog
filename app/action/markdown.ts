@@ -17,19 +17,13 @@ export const getMarkdownFiles = async (): Promise<MarkdownFile[]> => {
   "use cache";
 
   try {
-    const fileNames = await fetch(`${prefixUrl}/api/markdown-files`)
-      .then((res) => res.json())
-      .then((data) => data.files);
-      
-    const markdownFiles = fileNames.filter(
-      (file: string) => file.endsWith(".mdx") || file.endsWith(".md")
-    );
-
-    return await Promise.all(
-      markdownFiles.map(async (file: string) => {
-        return getMarkdownFile(file);
-      })
-    );
+    const jsonFile = fs.readFileSync(path.join(process.cwd(), "public", "markdown-lists.json"), "utf8");
+    const markdownLists = JSON.parse(jsonFile);
+    // convert createdAt to Date
+    return markdownLists.map((file: MarkdownFile) => ({
+      ...file,
+      createdAt: new Date(file.createdAt),
+    }));
   } catch (error) {
     console.error("마크다운 파일 읽기 오류:", error);
     return [];
@@ -90,10 +84,14 @@ const extractMetadataFromMarkdown = (
 };
 
 export const getMarkdownFile = async (file: string) => {
+  const fileName = file.replace(/\.(mdx|md)$/, "");
+
   try {
-    const fileName = file.replace(/\.(mdx|md)$/, "");
-    const fileContent = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${fileName}.mdx`), "utf8");
-    return extractMetadataFromMarkdown(fileName, fileContent);
+    const markdownLists = await getMarkdownFiles();
+    const file = markdownLists.find((file: MarkdownFile) => file.name === fileName);
+    if (file) {
+      return file;
+    }
   } catch (error) {
     console.error(`메타데이터 추출 오류 - ${file}:`, error);
     return null;
@@ -102,18 +100,21 @@ export const getMarkdownFile = async (file: string) => {
 
 export const getMarkdownFileWithFetch = async (file: string) => {
   try {
-    const fileName = file.replace(/\.(mdx|md)$/, "");
-    const fileContent = await fetch(`${prefixUrl}/markdown-posts/${fileName}.mdx`).then(
-      (res) => res.text()
+    const fileContent = await fetch(`${prefixUrl}/markdown-lists`).then(
+      (res) => res.json()
     );
-    return extractMetadataFromMarkdown(fileName, fileContent);
+    const markdownMetadata = fileContent.find((markdownFile: MarkdownFile) => markdownFile.name === file);
+    if (markdownMetadata) {
+      return {
+        ...markdownMetadata,
+        createdAt: new Date(markdownMetadata.createdAt),
+      }
+    }
   } catch (error) {
     console.error(`메타데이터 추출 오류 - ${file}:`, error);
     return null;
   }
 };
-
-
 
 interface FrontMatter {
   title: string;
