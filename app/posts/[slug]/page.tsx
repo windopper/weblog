@@ -1,33 +1,13 @@
-'use cache';
-
 import { notFound } from "next/navigation";
 
 import TableOfContents from '../../components/posts/TableOfContents';
-import { getMarkdownFiles, getMDXContent } from "@/app/action/markdown";
+import { getMDXContent } from "@/app/action/markdown";
 import { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{
     slug: string;
   }>;
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const result = await getMDXContent(slug);
-  return {
-    title: result?.frontmatter.title,
-    openGraph: {
-      title: result?.frontmatter.title,
-    }
-  };
-}
-
-export async function generateStaticParams() {
-  const markdownFiles = await getMarkdownFiles();
-  return markdownFiles.map((file) => ({
-    slug: file.name
-  }));
 }
 
 export default async function PostPage({ params }: PageProps) {

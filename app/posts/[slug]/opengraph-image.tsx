@@ -8,6 +8,13 @@ const size = {
   height: 630,
 }
 
+export async function generateStaticParams() {
+  const markdownFiles = await getMarkdownFiles();
+  return markdownFiles.map((file) => ({
+    slug: file.name
+  }));
+}
+
 export async function generateImageMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   
@@ -19,7 +26,7 @@ export async function generateImageMetadata({ params }: { params: Promise<{ slug
     },
   ];
 }
- 
+
 export default async function OpengraphImage({ id }: { 
   id: string;
 }) {
