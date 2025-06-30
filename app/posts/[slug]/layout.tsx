@@ -1,5 +1,7 @@
-import { getMarkdownFiles, getMDXContent } from '@/app/action/markdown';
+import { getMarkdownFile, getMarkdownFiles, getMDXContent } from '@/app/action/markdown';
 import MdxLayout from '@/app/components/mdx-layout'
+import { prefixUrl } from '@/app/libs/constants';
+import { MarkdownFile } from '@/app/types/weblog';
 import { Metadata } from 'next';
 
 interface PageProps {
@@ -10,19 +12,22 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const markdownFiles = await getMarkdownFiles();
-  return markdownFiles.map((file) => ({
-    slug: file.name
+  
+  return markdownFiles.map((file: MarkdownFile) => ({
+    slug: file.name,
   }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const result = await getMDXContent(slug);
+  const result = await getMarkdownFile(slug);
+
   return {
-    title: result?.frontmatter.title,
+    title: result?.title || "",
     openGraph: {
-      title: result?.frontmatter.title,
+      title: result?.title || "",
     },
+    keywords: result?.tags || [],
   };
 }
 
