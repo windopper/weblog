@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import TableOfContents from '../../components/posts/TableOfContents';
 import { getMDXContent } from "@/app/action/markdown";
-import { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{

@@ -95,7 +95,10 @@ export const getMDXContent = async (
 
   try {
     // MDX 파일 읽기
-    const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
+    // const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
+    const source = await fetch(`${prefixUrl}/markdown-posts/${slug}.mdx`).then(
+      (res) => res.text()
+    );
 
     // MDX 컴파일
     const { content, frontmatter } = await compileMDX<FrontMatter>({

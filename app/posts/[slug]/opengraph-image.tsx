@@ -81,7 +81,6 @@ export default async function OpengraphImage({
               linear-gradient(90deg, rgba(39, 39, 42, 0.4) 1px, transparent 1px)
             `,
             backgroundSize: "40px 40px",
-            zIndex: 0,
             display: "flex",
           }}
         />
@@ -94,7 +93,6 @@ export default async function OpengraphImage({
             left: 0,
             width: "100%",
             height: "100%",
-            zIndex: 1,
             display: "flex",
           }}
         >
@@ -204,7 +202,6 @@ export default async function OpengraphImage({
             width: "100%",
             height: "100%",
             background: "radial-gradient(circle at center, rgba(24, 24, 27, 0.7) 0%, rgba(9, 9, 11, 0.9) 70%)",
-            zIndex: 0,
             display: "flex",
           }}
         />
@@ -218,7 +215,6 @@ export default async function OpengraphImage({
           height: "1300px",
           borderRadius: '100%',
           border: '10px dashed #3f3f46',
-          zIndex: 3,
         }} />
         <div
           style={{
@@ -230,7 +226,6 @@ export default async function OpengraphImage({
             padding: "16px",
             width: "160px",
             height: "160px",
-            zIndex: 4,
           }}
         >
           ✨
@@ -248,7 +243,6 @@ export default async function OpengraphImage({
             width: "100%",
             textAlign: "center",
             padding: "0 16px",
-            zIndex: 4,
             textShadow: "0 2px 4px rgba(0, 0, 0, 0.5)",
           }}
         >
@@ -262,7 +256,6 @@ export default async function OpengraphImage({
             alignItems: "center",
             justifyContent: "center",
             gap: "8px",
-            zIndex: 4,
           }}
         >
           {tags &&
