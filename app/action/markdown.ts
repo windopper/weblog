@@ -100,7 +100,7 @@ export const getMarkdownFile = async (file: string) => {
 
 export const getMarkdownFileWithFetch = async (file: string) => {
   try {
-    const fileContent = await fetch(`${prefixUrl}/markdown-lists`).then(
+    const fileContent = await fetch(`${prefixUrl}/markdown-lists.json`).then(
       (res) => res.json()
     );
     const markdownMetadata = fileContent.find((markdownFile: MarkdownFile) => markdownFile.name === file);
