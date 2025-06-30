@@ -1,27 +1,36 @@
-import { getMDXContent } from '@/app/action/markdown';
+import { getMDXContent, getMarkdownFiles } from '@/app/action/markdown';
 import { ImageResponse } from 'next/og'
+import path from 'path'
+import fs from 'fs'
  
 const size = {
   width: 1200,
   height: 630,
 }
- 
-export default async function OpengraphImage({ params }: { params: Promise<{ slug: string }> }) {
+
+export async function generateImageMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  
+  return [
+    {
+      id: slug,
+      size,
+      contentType: 'image/png',
+    },
+  ];
+}
+ 
+export default async function OpengraphImage({ id }: { 
+  id: string;
+}) {
+  const slug = id;
   const post = await getMDXContent(slug);
-
-  // 폰트 파일 로드
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
-    : 'http://localhost:3000';
-    
-  const fontMedium = fetch(
-    new URL('/fonts/SeoulAlrimTTF-Medium.ttf', baseUrl)
-  ).then((res) => res.arrayBuffer());
-
-  const fontHeavy = fetch(
-    new URL('/fonts/SeoulAlrimTTF-Heavy.ttf', baseUrl)
-  ).then((res) => res.arrayBuffer());
+  
+  const fontMediumPath = path.join(process.cwd(), 'public/fonts/SeoulAlrimTTF-Medium.ttf');
+  const fontHeavyPath = path.join(process.cwd(), 'public/fonts/SeoulAlrimTTF-Heavy.ttf');
+  
+  const fontMedium = fs.readFileSync(fontMediumPath);
+  const fontHeavy = fs.readFileSync(fontHeavyPath);
 
   return new ImageResponse(
     (
@@ -92,13 +101,13 @@ export default async function OpengraphImage({ params }: { params: Promise<{ slu
       fonts: [
         {
           name: 'SeoulAlrimTTF-Medium',
-          data: await fontMedium,
+          data: fontMedium,
           style: 'normal',
           weight: 400,
         },
         {
           name: 'SeoulAlrimTTF-Heavy',
-          data: await fontHeavy,
+          data: fontHeavy,
           style: 'normal',
           weight: 700,
         },
