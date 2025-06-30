@@ -1,4 +1,5 @@
 import { getMarkdownFile, getMarkdownFileWithFetch } from "@/app/action/markdown";
+import { prefixUrl } from "@/app/libs/constants";
 import { readFileSync } from "fs";
 import { ImageResponse } from "next/og";
 import { join } from "path";
@@ -27,7 +28,14 @@ export async function generateImageMetadata({
 }
 
 async function loadSeouAlrimFont(font: string) {
-  const data = await readFileSync(join(process.cwd(), "public", "fonts", `${font}.ttf`));
+  const data = await fetch(`${prefixUrl}/fonts/${font}.ttf`).then(
+    (res) => res.arrayBuffer()
+  );
+
+  if (!data) {
+    throw new Error(`Font file not found: ${font}.ttf`);
+  }
+
   return data;
 }
 
