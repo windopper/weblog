@@ -18,10 +18,12 @@ export default function ConditionalPostHeader({ title }: { title: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  if (!showHeader) return null;
+
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-50 bg-zinc-900/50 backdrop-blur-sm border
-     border-zinc-800 rounded-b-lg p-4 w-full transition-all duration-300 ${showHeader ? 'opacity-100' : 'opacity-0'}`}
+     border-zinc-800 rounded-b-lg p-4 w-full transition-all duration-300`}
     >
       <div className="flex flex-row items-center gap-2">
         <ChevronLeft size={24} onClick={handleBack} className="cursor-pointer" />

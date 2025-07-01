@@ -62,7 +62,7 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
       </button>}
 
       {/* 데스크톱 TOC */}
-      <div className="hidden xl:block fixed top-24 right-4 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto">
+      <div className="hidden xl:block fixed top-24 right-4 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-50">
         <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-lg p-4">
           <h3 className="text-md font-semibold text-zinc-300 my-2 uppercase tracking-wider">
             목차

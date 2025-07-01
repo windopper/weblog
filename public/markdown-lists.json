@@ -37,6 +37,17 @@
     "path": "/posts/dynamic-generate-opengraph-image-with-nextjs-15"
   },
   {
+    "name": "implementing-i18n-takeoff",
+    "title": "Takeoff. 서비스 다국어 지원하기 (feat. Next.js 15)",
+    "tags": [
+      "takeoff",
+      "i18n",
+      "Next.js"
+    ],
+    "createdAt": "2025-07-01T00:00:00.000Z",
+    "path": "/posts/implementing-i18n-takeoff"
+  },
+  {
     "name": "welcome",
     "title": "블로그에 오신 것을 환영합니다",
     "tags": [

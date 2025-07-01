@@ -106,7 +106,7 @@ export const ShootingStars: React.FC<ShootingStarsProps> = ({
       distance: 0,
     };
     
-    setStars(prevStars => [...prevStars, newStar]);
+    setStars(prevStars => [newStar]);
   }, [minSpeed, maxSpeed]);
 
   useEffect(() => {
@@ -170,7 +170,7 @@ export const ShootingStars: React.FC<ShootingStarsProps> = ({
     <svg
       ref={svgRef}
       className={cn("w-full h-full absolute inset-0", className)}
-      onClick={handleClick}
+      // onClick={handleClick}
     >
       {stars.map(star => (
         <rect

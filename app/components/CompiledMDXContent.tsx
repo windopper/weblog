@@ -14,6 +14,7 @@ import PostTags from "./posts/PostTags";
 import NextPrevPostButton from "./posts/NextPrevPostButton";
 import { getMarkdownFiles } from "../action/markdown";
 import ConditionalPostHeader from "./posts/ConditionalPostHeader";
+import PreviewWeb from "./mdx/PreviewWeb";
 
 interface FrontMatter {
   title: string;
@@ -43,11 +44,21 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
     const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
     const markdownLists = await getMarkdownFiles();
     const currentIndex = markdownLists.findIndex((file) => file.name === slug);
-    const nextPost = markdownLists[currentIndex + 1];
-    const prevPost = markdownLists[currentIndex - 1];
-    // const source = await fetch(`${prefixUrl}/markdown-posts/${slug}.mdx`).then(
-    //   (res) => res.text()
-    // );
+    const nextPost = markdownLists[currentIndex - 1];
+    const prevPost = markdownLists[currentIndex + 1];
+
+    // 커스텀 컴포넌트 파일 들 동적으로 임포트
+    // 존재하는 경우만 임포트
+    const checkCustomComponentDir = fs.existsSync(path.join(process.cwd(), "app/components/mdx", slug));
+    let customComponents: Record<string, React.ComponentType<any>> = {};
+    if (checkCustomComponentDir) {
+      const customComponentList = fs.readdirSync(path.join(process.cwd(), "app/components/mdx", slug));
+      customComponents = customComponentList.reduce((acc, file) => {
+        const component = require(`../components/mdx/${slug}/${file}`).default;
+        acc[file.replace(".tsx", "")] = component;
+        return acc;
+      }, {} as Record<string, React.ComponentType<any>>);
+    }
 
     // MDX 컴파일
     const { content, frontmatter } = await compileMDX<FrontMatter>({
@@ -67,6 +78,8 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         img: CompiledMDXImage,
         pre: CompiledMDXPre,
         InteractiveButton,
+        PreviewWeb,
+        ...customComponents,
       },
     });
 
