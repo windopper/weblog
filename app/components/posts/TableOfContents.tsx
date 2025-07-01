@@ -53,13 +53,13 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
   return (
     <>
       {/* 모바일 토글 버튼 */}
-      <button
+      {!isOpen && <button
         onClick={() => setIsOpen(!isOpen)}
         className="xl:hidden fixed top-20 right-4 z-50 bg-zinc-900/80 backdrop-blur-sm border border-zinc-700 rounded-lg p-2 text-zinc-300 hover:text-white transition-colors"
         aria-label="목차 토글"
       >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+        <Menu size={20} />
+      </button>}
 
       {/* 데스크톱 TOC */}
       <div className="hidden xl:block fixed top-24 right-4 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto">
@@ -102,9 +102,17 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
              border-zinc-800 rounded-lg p-4 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-semibold text-zinc-300 mb-3 uppercase tracking-wider">
-              목차
-            </h3>
+            <div className="flex flex-row justify-between items-center mb-3">
+              <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
+                목차
+              </h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-zinc-300 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
             <nav>
               <ul className="space-y-2">
                 {toc.map((item) => (

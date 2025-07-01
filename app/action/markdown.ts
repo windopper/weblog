@@ -1,18 +1,9 @@
 "use server";
 
-import { compileMDX } from "next-mdx-remote/rsc";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypePrettyCode from "rehype-pretty-code";
-import { extractTOC, TOCItem } from "../libs/toc";
 import { MarkdownFile } from "../types/weblog";
-import matter from "gray-matter";
-import { ReactNode } from "react";
 import { prefixUrl } from "../libs/constants";
 import fs from "fs";
 import path from "path";
-import MDXImage from "../components/mdx-image";
 
 export const getMarkdownFiles = async (): Promise<MarkdownFile[]> => {
   "use cache";

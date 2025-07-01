@@ -18,7 +18,10 @@ import {
     SiDocker, 
     SiGit, 
     SiD3Dotjs,
-    SiFastapi
+    SiFastapi,
+    SiDrizzle,
+    SiLangchain,
+    SiGithubactions
   } from "react-icons/si";
 import { TbBrandThreejs } from "react-icons/tb";
 
@@ -75,17 +78,25 @@ export default function Preferences() {
           <SiD3Dotjs className="w-8 h-8 text-orange-500" />
           <span className="text-xs">D3.js</span>
         </div>
+        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-[#2088FF]/10 border border-[#2088FF]/20">
+          <SiGithubactions className="w-8 h-8" color="#2088FF" />
+          <span className="text-xs">Github Action</span>
+        </div>
         <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
           <SiCloudflare className="w-8 h-8 text-orange-500" />
           <span className="text-xs">Cloudflare</span>
         </div>
         <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-blue-600/10 border border-blue-600/20">
           <SiGooglecloud className="w-8 h-8 text-blue-600" />
-          <span className="text-xs">Google Cloud</span>
+          <span className="text-xs">GCP</span>
         </div>
         <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-black/10 border border-gray-500/20">
           <SiVercel className="w-8 h-8 text-white" />
           <span className="text-xs">Vercel</span>
+        </div>
+        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-[#C5F74F]/10 border border-[#C5F74F]/20">
+          <SiDrizzle className="w-8 h-8" color="#C5F74F" />
+          <span className="text-xs">Drizzle</span>
         </div>
         <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
           <SiDocker className="w-8 h-8 text-blue-500" />
@@ -94,6 +105,10 @@ export default function Preferences() {
         <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
           <SiGit className="w-8 h-8 text-red-500" />
           <span className="text-xs">Git</span>
+        </div>
+        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-[#1C3C3C]/10 border border-[#1C3C3C]/20">
+          <SiLangchain className="w-8 h-8" color="#1C3C3C" />
+          <span className="text-xs">Langchain</span>
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-import { prefixUrl } from "../libs/constants";
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -11,6 +10,10 @@ import CompiledMDXPre from "./mdx/CompiledMDXPre";
 import fs from "fs";
 import path from "path";
 import InteractiveButton from "./mdx/InteractiveButton";
+import PostTags from "./posts/PostTags";
+import NextPrevPostButton from "./posts/NextPrevPostButton";
+import { getMarkdownFiles } from "../action/markdown";
+import ConditionalPostHeader from "./posts/ConditionalPostHeader";
 
 interface FrontMatter {
   title: string;
@@ -38,6 +41,10 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
   try {
     // MDX 파일 읽기
     const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
+    const markdownLists = await getMarkdownFiles();
+    const currentIndex = markdownLists.findIndex((file) => file.name === slug);
+    const nextPost = markdownLists[currentIndex + 1];
+    const prevPost = markdownLists[currentIndex - 1];
     // const source = await fetch(`${prefixUrl}/markdown-posts/${slug}.mdx`).then(
     //   (res) => res.text()
     // );
@@ -68,13 +75,16 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
 
     return (
       <div className="relative">
+        <ConditionalPostHeader title={frontmatter.title} />
         <TableOfContents toc={toc} />
+        <PostTags tags={frontmatter.tags} />
         <article
           className="prose-zinc prose prose-sm md:prose-md lg:prose-lg prose-invert 
     max-w-none w-full px-4 lg:px-0"
         >
           {content}
         </article>
+        <NextPrevPostButton nextPost={nextPost} prevPost={prevPost} />
       </div>
     );
   } catch (error) {

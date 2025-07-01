@@ -52,8 +52,8 @@ export default async function Home() {
       <Preferences />
 
       <div className="fixed top-0 left-0 w-full h-full z-10 overflow-hidden">
-        <ShootingStars />
         <StarsBackground />
+        <ShootingStars />
       </div>
     </div>
   );
