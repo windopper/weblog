@@ -15,6 +15,7 @@ import NextPrevPostButton from "./posts/NextPrevPostButton";
 import { getMarkdownFiles } from "../action/markdown";
 import ConditionalPostHeader from "./posts/ConditionalPostHeader";
 import PreviewWeb from "./mdx/PreviewWeb";
+import TakeoffPostFlag from "./takeoff/TakeoffPostFlag";
 
 interface FrontMatter {
   title: string;
@@ -86,6 +87,9 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
     // table of contents 추출
     const toc = extractTOC(source);
 
+    // check has takeoff tag
+    const hasTakeoffTag = frontmatter.tags.includes("takeoff");
+
     return (
       <div className="relative">
         <ConditionalPostHeader title={frontmatter.title} />
@@ -97,6 +101,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         >
           {content}
         </article>
+        {hasTakeoffTag && <TakeoffPostFlag />}
         <NextPrevPostButton nextPost={nextPost} prevPost={prevPost} />
       </div>
     );

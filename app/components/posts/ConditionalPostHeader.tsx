@@ -3,6 +3,7 @@
 import useBack from "@/app/hooks/useBack";
 import { ChevronLeft } from "lucide-react"
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function ConditionalPostHeader({ title }: { title: string }) {
   const [showHeader, setShowHeader] = useState(false);
@@ -18,22 +19,37 @@ export default function ConditionalPostHeader({ title }: { title: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!showHeader) return null;
-
   return (
-    <div
-      className={`fixed top-0 left-0 right-0 z-50 bg-zinc-900/50 backdrop-blur-sm border
-     border-zinc-800 rounded-b-lg p-4 w-full transition-all duration-300`}
-    >
-      <div className="flex flex-row items-center gap-2">
-        <ChevronLeft size={24} onClick={handleBack} className="cursor-pointer" />
-        <h1 className="text-zinc-200 md:text-xl text-sm font-bold">{title}</h1>
-      </div>
+    <AnimatePresence>
+      {showHeader && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ 
+            duration: 0.3,
+            ease: "easeInOut"
+          }}
+          className={`fixed top-0 left-0 right-0 z-50 bg-zinc-900/50 backdrop-blur-sm border
+         border-zinc-800 rounded-b-lg p-4 w-full`}
+        >
+          <div className="flex flex-row items-center gap-2">
+            <ChevronLeft size={24} onClick={handleBack} className="cursor-pointer" />
+            <h1 className="text-zinc-200 md:text-xl text-sm font-bold">{title}</h1>
+          </div>
 
-      {/* Progress scoll bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
-        <div className="h-full bg-zinc-200" style={{ width: `${scrollY}%` }} />
-      </div>
-    </div>
+          {/* Progress scoll bar */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
+            <motion.div 
+              className="h-full bg-zinc-200" 
+              style={{ width: `${scrollY}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${scrollY}%` }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
+            />
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
