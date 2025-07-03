@@ -46,17 +46,5 @@
     ],
     "createdAt": "2025-07-01T00:00:00.000Z",
     "path": "/posts/implementing-i18n-takeoff"
-  },
-  {
-    "name": "welcome",
-    "title": "블로그에 오신 것을 환영합니다",
-    "tags": [
-      "welcome",
-      "introduction",
-      "blog"
-    ],
-    "createdAt": "2024-01-10T00:00:00.000Z",
-    "path": "/posts/welcome",
-    "isPrivate": true
   }
 ]

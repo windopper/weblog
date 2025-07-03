@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://kamilereon.net
+
+# Sitemaps
+Sitemap: https://kamilereon.net/sitemap.xml
