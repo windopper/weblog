@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaArrowRight, FaExternalLinkAlt, FaGithub, FaLink } from "react-icons/fa";
+import { BsStack } from "react-icons/bs";
 
 export default function TakeoffButton() {
   return (
     <div className="flex flex-row items-center justify-between gap-4">
-      <Link href="https://ai-takeoff.dev" className="flex flex-row items-center gap-4">
+      <Link href="/takeoff" className="flex flex-row items-center gap-4">
         <Image
           src="/image/takeoff.png"
           alt="Takeoff."
@@ -21,6 +22,9 @@ export default function TakeoffButton() {
         </div>
       </Link>
       <div className="flex flex-row items-center gap-4">
+        <Link href="/takeoff">
+          <BsStack className="w-8 h-8" />
+        </Link>
         <Link href="https://github.com/windopper/takeoff">
           <FaGithub className="w-8 h-8" />
         </Link>

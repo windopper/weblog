@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useTime, useTransform } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TbArrowRight } from "react-icons/tb";
 
 const benchmarks = [
@@ -270,9 +270,8 @@ function SvgGraph() {
 
               {/* 점 */}
               {points.map((point, index) => (
-                <>
+                <React.Fragment key={index}>
                   <motion.circle
-                    key={index}
                     cx={point.x}
                     cy={point.y}
                     r={3}
@@ -318,7 +317,7 @@ function SvgGraph() {
                     />
                   )}
                   </AnimatePresence>
-                </>
+                </React.Fragment>
               ))}
             </>
           )}

@@ -2,7 +2,7 @@ import Takeoff from "@/app/components/icon/Takeoff";
 import ShaderBackground from "@/app/components/ui/shader-background";
 import { AnimatePresence, motion, useTime, useTransform } from "framer-motion";
 import { Check } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 const NEON_DURATION = 500;
 
@@ -48,22 +48,25 @@ export default function WeeklyNewsBentoBackground() {
               <ConsoleOrganize
                 preText="게시글 정리 중..."
                 postText="게시글 정리 완료"
+                key={`0-console-organize`}
               />
             )}
             {consoleStep > 1 && (
               <ConsoleOrganize
                 preText="뉴스 선택 중..."
                 postText="뉴스 선택 완료"
+                key={`1-console-organize`}
               />
             )}
             {consoleStep > 2 && (
               <ConsoleOrganize
                 preText="주간 뉴스 생성 중..."
                 postText="주간 뉴스 생성 완료"
+                key={`2-console-organize`}
               />
             )}
             {consoleStep > 3 && (
-              <PublishWeeklyNews />
+              <PublishWeeklyNews key={`3-publish-weekly-news`} />
             )}
             {/* <PublishWeeklyNews /> */}
           </AnimatePresence>
@@ -130,6 +133,7 @@ function ConsoleText({ text }: { text: string }) {
 }
 
 function ConsoleOrganize({ preText, postText }: { preText: string; postText: string }) {
+  const id = useId();
   const time = useTime();
   const [done, setDone] = useState(false);
 
@@ -153,7 +157,7 @@ function ConsoleOrganize({ preText, postText }: { preText: string; postText: str
             <>
               <Takeoff className="w-4 h-4" />
               <motion.div
-                key="loading-text"
+                key={`${id}-loading-text`}
                 className="text-zinc-300 text-xs font-light italic"
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
