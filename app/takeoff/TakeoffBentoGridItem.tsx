@@ -1,7 +1,6 @@
 import { ArrowRightIcon } from "lucide-react";
-import { motion, useMotionValue, useMotionTemplate } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { motion } from "motion/react";
+import { useRef } from "react";
 
 export default function TakeoffBentoGridItem({
   icon,
@@ -19,7 +18,6 @@ export default function TakeoffBentoGridItem({
   background?: React.ReactNode;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   return (
     <motion.div

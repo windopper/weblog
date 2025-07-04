@@ -111,23 +111,6 @@ export default function TakeoffBentoGrid() {
             background={<WeeklyNewsBentoBackground />}
           />
         </motion.div>
-
-        {/* 다국어 지원 */}
-        {/* <TakeoffBentoGridItem
-          icon={<Globe size={36} className="text-zinc-700" />}
-          title="다국어 지원"
-          description="한국어, 영어 지원"
-          background={
-            <div className="mt-4 flex gap-2">
-              <span className="text-xs px-2 py-1 bg-teal-500/20 text-teal-300 rounded">
-                🇰🇷 KR
-              </span>
-              <span className="text-xs px-2 py-1 bg-teal-500/20 text-teal-300 rounded">
-                🇺🇸 EN
-              </span>
-            </div>
-          }
-        /> */}
       </motion.div>
     </div>
   )

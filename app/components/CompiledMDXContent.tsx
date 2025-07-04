@@ -16,6 +16,9 @@ import { getMarkdownFiles } from "../action/markdown";
 import ConditionalPostHeader from "./posts/ConditionalPostHeader";
 import PreviewWeb from "./mdx/PreviewWeb";
 import TakeoffPostFlag from "./takeoff/TakeoffPostFlag";
+import MDXComponentWrapper from "./mdx/MDXComponentWrapper";
+import ConnectedComponent, { ConnectedComponentItem } from "./mdx/ConnectedComponent";
+import MDXToComponent from "./mdx/MDXToComponent";
 
 interface FrontMatter {
   title: string;
@@ -80,6 +83,10 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         pre: CompiledMDXPre,
         InteractiveButton,
         PreviewWeb,
+        MDXComponentWrapper,
+        ConnectedComponent,
+        ConnectedComponentItem,
+        MDXToComponent,
         ...customComponents,
       },
     });
@@ -97,7 +104,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         <PostTags tags={frontmatter.tags} />
         <article
           className="prose-zinc prose prose-sm md:prose-md lg:prose-lg prose-invert 
-    max-w-none w-full px-4 lg:px-0"
+    max-w-none w-full px-4 lg:px-0 [&_figure]:m-0 [&_img]:m-0"
         >
           {content}
         </article>

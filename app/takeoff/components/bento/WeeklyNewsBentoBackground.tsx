@@ -1,5 +1,4 @@
 import Takeoff from "@/app/components/icon/Takeoff";
-import ShaderBackground from "@/app/components/ui/shader-background";
 import { AnimatePresence, motion, useTime, useTransform } from "framer-motion";
 import { Check } from "lucide-react";
 import { useEffect, useId, useState } from "react";
@@ -68,7 +67,6 @@ export default function WeeklyNewsBentoBackground() {
             {consoleStep > 3 && (
               <PublishWeeklyNews key={`3-publish-weekly-news`} />
             )}
-            {/* <PublishWeeklyNews /> */}
           </AnimatePresence>
         </div>
       </div>

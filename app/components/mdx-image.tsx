@@ -57,7 +57,7 @@ export default function MDXImage({
           height: "300px",
           backgroundColor: "var(--tw-color-gray-200)",
           borderRadius: "0.5rem",
-          margin: "1rem 0",
+          // margin: "1rem 0",
         }}
       >
         <span
@@ -82,7 +82,7 @@ export default function MDXImage({
   return (
     <span
       className={`relative inline-block w-full overflow-hidden rounded-lg ${className}`}
-      style={{ display: "block", margin: "1rem 0" }}
+      style={{ display: "block" }}
     >
       {isLoading && (
         <span
@@ -106,7 +106,7 @@ export default function MDXImage({
         height={height}
         priority={priority}
         className={`transition-opacity duration-300 ${
-          isLoading ? "opacity-0" : "opacity-100"
+          isLoading ? "opacity-0" : "opacity-100" 
         }`}
         style={{
           width: "100%",

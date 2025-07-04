@@ -26,6 +26,19 @@
     "path": "/posts/canvas-scatter-feat-visx"
   },
   {
+    "name": "design-page-with-bento-grid",
+    "title": "Bento Grid 스타일로 프로젝트 소개 페이지 꾸미기",
+    "tags": [
+      "takeoff",
+      "bento",
+      "grid",
+      "Next.js",
+      "react"
+    ],
+    "createdAt": "2025-07-03T00:00:00.000Z",
+    "path": "/posts/design-page-with-bento-grid"
+  },
+  {
     "name": "dynamic-generate-opengraph-image-with-nextjs-15",
     "title": "Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기",
     "tags": [

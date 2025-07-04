@@ -133,7 +133,7 @@ function NotificationItem({
 
         {/* embed */}
         <div className="flex flex-col border-l-2 rounded-l-sm border-blue-500 pl-2">
-          <h1 className="text-sm font-medium text-zinc-100">{title}</h1>
+          <h3 className="text-sm font-medium text-zinc-100">{title}</h3>
           <p className="text-xs text-zinc-400">{description}</p>
         </div>
       </div>
