@@ -3,10 +3,12 @@ import Image from "next/image";
 
 interface MarkdownItemContentProps {
   file: MarkdownFile;
+  hideThumbnail?: boolean;
 }
 
 export default function MarkdownItemContent({
   file,
+  hideThumbnail = false,
 }: MarkdownItemContentProps) {
   const thumbnail = file.thumbnail
     ? file.thumbnail
@@ -14,13 +16,15 @@ export default function MarkdownItemContent({
 
   return (
     <div className="flex flex-col justify-start gap-2">
-      <Image
-        src={thumbnail}
+      {!hideThumbnail && (
+        <Image
+          src={thumbnail}
         alt={file.title}
         width={1200}
         height={630}
-        className="w-full rounded-lg"
-      />
+          className="w-full rounded-lg"
+        />
+      )}
       <h2 className="text-md font-semibold text-zinc-100 my-2">{file.title}</h2>
 
       {file.description && (

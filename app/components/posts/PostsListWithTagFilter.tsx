@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import MarkdownItem from "./MarkdownItem";
+import { useState, useMemo, useEffect, ButtonHTMLAttributes } from "react";
 import TagFilter from "./TagFilter";
 import { MarkdownFile } from "@/app/types/weblog";
 import { useRouter, useSearchParams } from "next/navigation";
+import PostsList, { PostListViewType } from "./PostsList";
+import { AlignJustify, FileText, Grid, LayoutGrid, Square } from "lucide-react";
 
 interface PostsListProps {
   markdownFiles: MarkdownFile[];
@@ -12,6 +13,7 @@ interface PostsListProps {
 
 export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [viewType, setViewType] = useState<PostListViewType>("small");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -83,22 +85,21 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-zinc-100 mb-4">포스트 목록</h1>
-        
-        <TagFilter 
-          allTags={allTags} 
-          tagCounts={tagCounts} 
+
+        <TagFilter
+          allTags={allTags}
+          tagCounts={tagCounts}
           selectedTags={selectedTags}
-          onTagFilter={handleTagFilter} 
+          onTagFilter={handleTagFilter}
         />
       </div>
 
       {sortedPosts.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
-            {selectedTags.length > 0 
+            {selectedTags.length > 0
               ? "선택된 태그에 해당하는 포스트가 없습니다."
-              : "아직 작성된 포스트가 없습니다."
-            }
+              : "아직 작성된 포스트가 없습니다."}
           </p>
           {selectedTags.length > 0 && (
             <button
@@ -111,25 +112,56 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
         </div>
       ) : (
         <div className="space-y-4">
-          {selectedTags.length > 0 && (
-            <div className="text-sm text-zinc-400 mb-4">
-              {sortedPosts.length}개의 포스트가 선택된 태그와 일치합니다.
-              <button
-                onClick={clearAllFilters}
-                className="ml-4 text-zinc-500 hover:text-zinc-300 underline"
-              >
-                필터 초기화
-              </button>
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-zinc-400">
+              {selectedTags.length > 0 &&(
+                <>
+                  {sortedPosts.length}개의 포스트가 선택된 태그와 일치합니다.
+                  <button
+                    onClick={clearAllFilters}
+                    className="ml-4 text-zinc-500 hover:text-zinc-300 underline"
+                  >
+                    필터 초기화
+                  </button>
+                </>
+              )}
             </div>
-          )}
-          
+            <div className="flex gap-2">
+              <ViewTypeButton onClick={() => setViewType("large")} isActive={viewType === "large"}>
+                <Square className="w-4 h-4" />
+              </ViewTypeButton>
+              <ViewTypeButton onClick={() => setViewType("small")} isActive={viewType === "small"}>
+                <LayoutGrid className="w-4 h-4" />
+              </ViewTypeButton>
+              <ViewTypeButton onClick={() => setViewType("only-content")} isActive={viewType === "only-content"}>
+                <FileText className="w-4 h-4" />
+              </ViewTypeButton>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-4">
-            {sortedPosts.map((file) => (
-              <MarkdownItem key={file.name} file={file} />
-            ))}
+            <PostsList markdownFiles={sortedPosts} type={viewType} />
           </div>
         </div>
       )}
     </div>
   );
 } 
+
+function ViewTypeButton({ children, isActive, ...params }: ButtonHTMLAttributes<HTMLButtonElement> & { isActive: boolean }) {
+  return (
+    <button
+      {...params}
+      className={`px-2 py-2 text-sm text-zinc-300
+       ${
+         isActive
+           ? "bg-zinc-700 border-zinc-600"
+           : "bg-zinc-800 border-zinc-700"
+       }
+       hover:bg-zinc-700 rounded-md border border-zinc-700 hover:border-zinc-600
+        transition-colors duration-200 cursor-pointer`}
+    >
+      {children}
+    </button>
+  );
+}

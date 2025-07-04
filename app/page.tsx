@@ -37,7 +37,7 @@ export default async function Home() {
           <span className="font-bold py-4">최근 게시물</span>
           <Link href="/posts">더보기</Link>
         </div>
-        <PostsList markdownFiles={latest4PublicMarkdownFiles} />
+        <PostsList markdownFiles={latest4PublicMarkdownFiles} type="small" />
       </div>
 
       {/* 토이 프로젝트 */}

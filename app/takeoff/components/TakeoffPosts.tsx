@@ -46,7 +46,7 @@ export default function TakeoffPosts() {
       transition={{ duration: 0.8, ease: "easeOut" }}
       viewport={{ once: true, margin: "-100px" }}
     >
-      <PostsList markdownFiles={posts} />
+      <PostsList markdownFiles={posts} type="small" />
     </motion.div>
   );
 }
