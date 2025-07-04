@@ -6,4 +6,5 @@ export interface MarkdownFile {
     tags: string[];
     description?: string;
     isPrivate: boolean;
+    thumbnail: string;
   }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import MarkdownItem from "./MarkdownItem";
 import TagFilter from "./TagFilter";
 import { MarkdownFile } from "@/app/types/weblog";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface PostsListProps {
   markdownFiles: MarkdownFile[];
@@ -11,6 +12,17 @@ interface PostsListProps {
 
 export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // 페이지 로드 시 URL에서 태그 정보 읽어오기
+  useEffect(() => {
+    const tagsParam = searchParams.get('tags');
+    if (tagsParam) {
+      const tags = decodeURIComponent(tagsParam).split(',').filter(tag => tag.trim());
+      setSelectedTags(tags);
+    }
+  }, [searchParams]);
 
   // 모든 태그와 각 태그별 포스트 개수 계산
   const { allTags, tagCounts } = useMemo(() => {
@@ -41,6 +53,30 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
 
   const handleTagFilter = (tags: string[]) => {
     setSelectedTags(tags);
+    
+    // URL 매개변수 업데이트
+    const params = new URLSearchParams(searchParams);
+    
+    if (tags.length > 0) {
+      params.set('tags', encodeURIComponent(tags.join(',')));
+    } else {
+      params.delete('tags');
+    }
+    
+    // URL 업데이트 (페이지 새로고침 없이)
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  // 모든 필터 초기화
+  const clearAllFilters = () => {
+    setSelectedTags([]);
+    
+    // URL에서 tags 매개변수 제거
+    const params = new URLSearchParams(searchParams);
+    params.delete('tags');
+    
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    router.replace(newUrl, { scroll: false });
   };
 
   return (
@@ -51,6 +87,7 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
         <TagFilter 
           allTags={allTags} 
           tagCounts={tagCounts} 
+          selectedTags={selectedTags}
           onTagFilter={handleTagFilter} 
         />
       </div>
@@ -65,7 +102,7 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
           </p>
           {selectedTags.length > 0 && (
             <button
-              onClick={() => setSelectedTags([])}
+              onClick={clearAllFilters}
               className="mt-4 px-4 py-2 text-sm text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-md border border-zinc-700 hover:border-zinc-600 transition-colors duration-200"
             >
               모든 포스트 보기
@@ -77,6 +114,12 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
           {selectedTags.length > 0 && (
             <div className="text-sm text-zinc-400 mb-4">
               {sortedPosts.length}개의 포스트가 선택된 태그와 일치합니다.
+              <button
+                onClick={clearAllFilters}
+                className="ml-4 text-zinc-500 hover:text-zinc-300 underline"
+              >
+                필터 초기화
+              </button>
             </div>
           )}
           

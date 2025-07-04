@@ -36,7 +36,8 @@
       "react"
     ],
     "createdAt": "2025-07-03T00:00:00.000Z",
-    "path": "/posts/design-page-with-bento-grid"
+    "path": "/posts/design-page-with-bento-grid",
+    "thumbnail": "/markdown/design-page-with-bento-grid/0.png"
   },
   {
     "name": "dynamic-generate-opengraph-image-with-nextjs-15",

@@ -63,11 +63,9 @@ export default function Architecture() {
             transition={{ duration: 0.2 }}
             key={`${hover}-background`}
           />
-        )}
-        {hover === "sqlite" && (
-          <ArchitectureDescription key={`${hover}-description`} />
         )} */}
       </AnimatePresence>
+      <ArchitectureDescription />
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}

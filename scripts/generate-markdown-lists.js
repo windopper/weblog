@@ -33,6 +33,7 @@ const extractMetadataFromMarkdown = (fileName, fileContent) => {
         path: `/posts/${fileName}`,
         isPrivate: data.isPrivate,
         description: data.description,
+        thumbnail: data.thumbnail,
     }
 }
 
