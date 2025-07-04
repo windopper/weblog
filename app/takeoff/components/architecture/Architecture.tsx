@@ -52,7 +52,7 @@ export default function Architecture() {
       className="flex flex-col w-full relative"
     >
       <AnimatePresence>
-        {hover !== "none" && (
+        {/* {hover !== "none" && (
           <motion.div
             className="absolute -top-10 -left-10 w-[calc(100%+100px)] h-[calc(100%+100px)] z-10 rounded-md
         backdrop-blur-sm bg-radial from-black/50 to-transparent
@@ -66,7 +66,7 @@ export default function Architecture() {
         )}
         {hover === "sqlite" && (
           <ArchitectureDescription key={`${hover}-description`} />
-        )}
+        )} */}
       </AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
