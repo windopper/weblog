@@ -20,7 +20,6 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id);
-            console.log(entry.target.id);
           }
         });
       },

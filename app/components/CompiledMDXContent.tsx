@@ -19,6 +19,7 @@ import TakeoffPostFlag from "./takeoff/TakeoffPostFlag";
 import MDXComponentWrapper from "./mdx/MDXComponentWrapper";
 import ConnectedComponent, { ConnectedComponentItem } from "./mdx/ConnectedComponent";
 import MDXToComponent from "./mdx/MDXToComponent";
+import MoveToTopButton from "./common/MoveToTopButton";
 
 interface FrontMatter {
   title: string;
@@ -110,6 +111,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         </article>
         {hasTakeoffTag && <TakeoffPostFlag />}
         <NextPrevPostButton nextPost={nextPost} prevPost={prevPost} />
+        <MoveToTopButton />
       </div>
     );
   } catch (error) {
