@@ -28,13 +28,17 @@ const seoulAlrimTTFHeavy = localFont({
 export const metadata: Metadata = {
   title: "kamilereon",
   applicationName: "kamilereon",
-  description: "kamilereon's blog",
+  description: `웹 개발, AI 기술, 소프트웨어 아키텍처 기술 블로그`,
   openGraph: {
     title: "kamilereon",
-    description: "kamilereon's blog",
+    description: "웹 개발, AI 기술, 소프트웨어 아키텍처 기술 블로그",
     url: "https://kamilereon.net",
     siteName: "kamilereon",
   },
+  authors: [{ name: "kamilereon", url: "https://github.com/windopper" }],
+  creator: "kamilereon",
+  publisher: "kamilereon",
+  keywords: ["web", "ai", "software", "architecture", "blog"],
 };
 
 export default function RootLayout({
@@ -42,6 +46,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body

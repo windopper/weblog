@@ -9,7 +9,8 @@
       "llm"
     ],
     "createdAt": "2025-06-29T00:00:00.000Z",
-    "path": "/posts/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts"
+    "path": "/posts/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts",
+    "slicedContent": "\r\n# 특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기\r\n\r\n어찌보면 [Takeoff.](https://ai-takeoff.dev) 서비스를 만들게 된 핵심 구현 목표"
   },
   {
     "name": "canvas-scatter-feat-visx",
@@ -23,7 +24,8 @@
       "react"
     ],
     "createdAt": "2025-06-25T00:00:00.000Z",
-    "path": "/posts/canvas-scatter-feat-visx"
+    "path": "/posts/canvas-scatter-feat-visx",
+    "slicedContent": "\n# canvas로 scatterplot 그리기 (feat. visx)\n\n![완성결과](/markdown/canvas-scatter-feat-visx/0.png)\n\n완성결과\n\nLL"
   },
   {
     "name": "create-mcp-server-with-smithery",
@@ -35,7 +37,8 @@
       "ai"
     ],
     "createdAt": "2025-07-06T00:00:00.000Z",
-    "path": "/posts/create-mcp-server-with-smithery"
+    "path": "/posts/create-mcp-server-with-smithery",
+    "slicedContent": "\r\n# 나만의 MCP 서버 만들기 (with. Smithery)\r\n\r\n2024년 11월 25일 Anthropic이 개발한 [MCP](https://modelcontextprotoc"
   },
   {
     "name": "design-page-with-bento-grid",
@@ -49,7 +52,8 @@
     ],
     "createdAt": "2025-07-03T00:00:00.000Z",
     "path": "/posts/design-page-with-bento-grid",
-    "thumbnail": "/markdown/design-page-with-bento-grid/0.png"
+    "thumbnail": "/markdown/design-page-with-bento-grid/0.png",
+    "slicedContent": "# Bento Grid 스타일로 프로젝트 소개 페이지 꾸미기\r\n\r\n프로젝트의 기능을 한 눈에 볼 수 있는 페이지를 작성하려고 몇 가지 디자인 레퍼런스를 둘러보던 중 눈에 들어온 디"
   },
   {
     "name": "dynamic-generate-opengraph-image-with-nextjs-15",
@@ -60,7 +64,8 @@
       "weblog"
     ],
     "createdAt": "2025-06-30T00:00:00.000Z",
-    "path": "/posts/dynamic-generate-opengraph-image-with-nextjs-15"
+    "path": "/posts/dynamic-generate-opengraph-image-with-nextjs-15",
+    "slicedContent": "\r\n# Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기\r\n\r\n소셜 미디어에서 링크를 공유할 때 보이는 이미지, 즉 오픈그래프(Open Graph) 이미지는 사용자의 클"
   },
   {
     "name": "implementing-i18n-takeoff",
@@ -71,6 +76,7 @@
       "Next.js"
     ],
     "createdAt": "2025-07-01T00:00:00.000Z",
-    "path": "/posts/implementing-i18n-takeoff"
+    "path": "/posts/implementing-i18n-takeoff",
+    "slicedContent": "\r\n# Takeoff. 서비스 다국어 지원하기 (feat. Next.js 15)\r\n\r\nTakeoff. 서비스 다국어 지원하기 (feat. Next.js 15)\r\n\r\n서비스 언어를 "
   }
 ]

@@ -1,5 +1,3 @@
-'use cache';
-
 import Link from "next/link";
 import { ShootingStars } from "./components/ui/shooting-stars";
 import { StarsBackground } from "./components/ui/stars-background";
@@ -9,6 +7,36 @@ import PostsList from "./components/posts/PostsList";
 import Preferences from "./components/main/Preferences";
 import { FaGithub } from "react-icons/fa";
 import TakeoffButton from "./components/main/TakeoffButton";
+import { Blog, WithContext } from "schema-dts";
+
+const jsonLdData: WithContext<Blog> = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "@id": "https://kamilereon.net",
+  mainEntityOfPage: "https://kamilereon.net",
+  name: "kamilereon 기술 블로그",
+  description: "웹 개발, AI 기술, 소프트웨어 아키텍처에 대한 기술 블로그입니다. React, Next.js, AI 기술 등 다양한 개발 경험을 공유합니다.",
+  url: "https://kamilereon.net",
+  author: {
+    "@type": "Person",
+    name: "kamilereon",
+    url: "https://github.com/windopper",
+    sameAs: [
+      "https://github.com/windopper"
+    ]
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "kamilereon",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://kamilereon.net/image/weblog.png",
+      width: "512",
+      height: "512"
+    }
+  },
+  inLanguage: "ko-KR"
+}
 
 export default async function Home() {
   const markdownFiles = await getMarkdownFiles();
@@ -16,7 +44,13 @@ export default async function Home() {
   const latest4PublicMarkdownFiles = publicMarkdownFiles.slice(0, 4);
 
   return (
-    <div className="flex flex-col gap-4 py-32 px-8 items-center justify-center min-h-screen">
+    <section className="flex flex-col gap-4 py-32 px-8 items-center justify-center min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLdData).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* Profile */}
       <div className="flex flex-col gap-5 items-center justify-center z-50">
         <h1 className="text-4xl font-bold">kamilereon</h1>
@@ -55,6 +89,6 @@ export default async function Home() {
         <StarsBackground />
         <ShootingStars />
       </div>
-    </div>
+    </section>
   );
 }

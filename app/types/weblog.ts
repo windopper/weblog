@@ -7,4 +7,5 @@ export interface MarkdownFile {
     description?: string;
     isPrivate: boolean;
     thumbnail: string;
+    slicedContent: string;
   }

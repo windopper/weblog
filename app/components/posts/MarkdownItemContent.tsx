@@ -18,11 +18,12 @@ export default function MarkdownItemContent({
     <div className="flex flex-col justify-start gap-2">
       {!hideThumbnail && (
         <Image
-          src={thumbnail}
+        src={thumbnail}
         alt={file.title}
         width={1200}
         height={630}
-          className="w-full rounded-lg"
+        className="w-full rounded-lg"
+        priority
         />
       )}
       <h2 className="text-md font-semibold text-zinc-100 my-2">{file.title}</h2>
