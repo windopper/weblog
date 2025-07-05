@@ -1,6 +1,5 @@
 'use server';
 
-import { MarkdownFile } from "@/app/types/weblog";
 import { ImageResponse } from "next/og";
 
 export default async function getPostThumbnailImage({ title, tags, imageOptions }: { title: string, tags: string[], imageOptions: any }) {

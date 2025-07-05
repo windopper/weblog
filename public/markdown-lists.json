@@ -26,6 +26,18 @@
     "path": "/posts/canvas-scatter-feat-visx"
   },
   {
+    "name": "create-mcp-server-with-smithery",
+    "title": "나만의 MCP 서버 만들기 (with. Smithery)",
+    "tags": [
+      "takeoff",
+      "mcp",
+      "smithery",
+      "ai"
+    ],
+    "createdAt": "2025-07-06T00:00:00.000Z",
+    "path": "/posts/create-mcp-server-with-smithery"
+  },
+  {
     "name": "design-page-with-bento-grid",
     "title": "Bento Grid 스타일로 프로젝트 소개 페이지 꾸미기",
     "tags": [

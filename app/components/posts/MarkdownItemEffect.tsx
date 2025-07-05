@@ -17,10 +17,6 @@ export default function MarkdownItemEffect({ children, file }: MarkdownItemProps
   const translateX = useSpring(0, { stiffness: 2000, damping: 60 });
   const translateY = useSpring(0, { stiffness: 2000, damping: 60 });
 
-  const thumbnail = file.thumbnail
-    ? file.thumbnail
-    : `/api/post/thumbnail?title=${file.title}&tags=${file.tags.join(",")}`;
-
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e;
@@ -57,7 +53,7 @@ export default function MarkdownItemEffect({ children, file }: MarkdownItemProps
       containerRef.current?.removeEventListener("mousemove", handleMouseMove);
       containerRef.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [thumbnail]);
+  }, []);
 
   return (
     <Link

@@ -23,30 +23,43 @@ export default function TakeoffPage() {
       <div className="container mx-auto px-4 py-16">
         <Hero />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true, margin: "-100px" }}
-          className="flex flex-col gap-12 mb-16"
+          className="flex flex-col gap-12"
         >
           <TakeoffBentoGrid />
-
-          <motion.div 
-            initial={{ opacity: 0, y: 100 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className={`flex flex-col items-center justify-center`}
-          >
-            <h2 className="text-2xl font-bold mb-16 text-zinc-100">
-              기술 스택
-            </h2>
-            <TechStack />
-          </motion.div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, margin: "-100px" }}
+          className="flex flex-col items-center justify-center mb-16"
+        >
+          <h2 className="text-2xl font-bold text-zinc-100 my-16">정보</h2>
+          <div className="flex flex-row font-bold text-zinc-100 gap-4">
+            <p>제작 기간</p>
+            <div className="border-r-[1px] border-zinc-400" />
+            <p>2025.06.17 ~ 2025.06.30</p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          viewport={{ once: true, margin: "-100px" }}
+          className={`flex flex-col items-center justify-center`}
+        >
+          <h2 className="text-2xl font-bold my-16 text-zinc-100">기술 스택</h2>
+          <TechStack />
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -59,7 +72,20 @@ export default function TakeoffPage() {
           <Architecture />
         </motion.div>
 
-        <motion.div 
+        {/* <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, margin: "-100px" }}
+          className="flex flex-col items-center justify-center mb-16"
+        >
+          <h2 className="text-2xl font-bold text-zinc-100 my-16">
+            데이터베이스 스키마
+          </h2>
+          <SchemaGroup />
+        </motion.div> */}
+
+        <motion.div
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}

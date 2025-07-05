@@ -12,7 +12,7 @@ async function loadSeouAlrimFont(font: string) {
     }
   
     return data;
-  }
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
