@@ -44,7 +44,7 @@ export default async function Home() {
   const latest4PublicMarkdownFiles = publicMarkdownFiles.slice(0, 4);
 
   return (
-    <section className="flex flex-col gap-4 py-32 px-8 items-center justify-center min-h-screen">
+    <div className="flex flex-col gap-4 py-32 px-8 items-center justify-center min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -89,6 +89,6 @@ export default async function Home() {
         <StarsBackground />
         <ShootingStars />
       </div>
-    </section>
+    </div>
   );
 }
