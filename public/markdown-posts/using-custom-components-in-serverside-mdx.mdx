@@ -1,0 +1,390 @@
+---
+title: '서버사이드 MDX에서 커스텀 컴포넌트 사용하기'    
+tags: ['Next.js', 'MDX', 'React']
+date: '2025-07-06'
+---
+
+# 서버사이드 MDX에서 커스텀 컴포넌트 사용하기
+현재 이 블로그에서는 `next-mdx-remote`의 `compileMDX`를 사용하여 MDX 파일을 서버사이드에서 컴파일하고 있다.
+
+그러나 서버사이드에서 컴파일하는 방식은 MDX 내부에서 클라이언트 사이드에서만 동작하는 코드를 사용할 수 없는 문제가 있다.
+
+<MDXComponentWrapper topDescription="onClick 이벤트를 사용하는 컴포넌트를 호출하면 에러가 발생합니다">
+![example](/markdown/using-custom-components-in-serverside-mdx/0.png)
+</MDXComponentWrapper>
+```tsx
+<button onClick={() => alert('Hello')}>Click me</button>
+```
+
+`compileMDX`의 `components` 옵션에 커스텀 컴포넌트를 추가할 수 있도록 하는 방법이 있기 때문에, 이를 통해 MDX 파일에 
+직접 구현한 컴포넌트를 사용할 수 있다.
+
+![components](/markdown/using-custom-components-in-serverside-mdx/1.png)
+
+## 커스텀 컴포넌트 사용하기
+커스텀 컴포넌트를 추가하기 위해서는 일반적인 JSX 코드를 작성하는 것과 같은 방식으로 컴포넌트를 작성하면 된다.
+
+<ConnectedComponent>
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<InteractiveButton>
+Click me
+</InteractiveButton>
+</ConnectedComponentItem>
+<div title="코드 보기">
+<RawSource src="/app/components/mdx/InteractiveButton.tsx" />
+</div>
+</ConnectedComponent>
+
+그 다음 `compileMDX`의 `components` 옵션에 커스텀 컴포넌트를 추가한다.
+```tsx {15}
+const { content, frontmatter } = await compileMDX<FrontMatter>({
+    source,
+    options: {
+    parseFrontmatter: true,
+    mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, autolinkHeadingsOptions],
+        [rehypePrettyCode, prettyCodeOptions],
+        ],
+    },
+    },
+    components: {
+      InteractiveButton,
+    },
+});
+```
+
+MDX 파일에서 커스텀 컴포넌트를 사용하는 방법은 다음과 같다.
+```mdx
+...
+<InteractiveButton>
+Click me
+</InteractiveButton>
+...
+```
+<div className="flex justify-center items-center m-4">
+<InteractiveButton>
+Click me
+</InteractiveButton>
+</div>
+
+## 직접 구현한 컴포넌트
+편의를 위해 여러가지 컴포넌트를 구현하여 사용하고 있는데 그 중 몇 가지를 소개한다.
+### PreviewWeb
+외부 웹 페이지를 미리보기 할 수 있는 컴포넌트이다.
+<ConnectedComponent enableTab>
+<div title="PreviewWeb">
+<PreviewWeb src="https://kamilereon.net" />
+</div>
+<div title="MDX 파일에서 사용하기">
+```mdx
+<PreviewWeb src="https://kamilereon.net" />
+```
+</div>
+<div title="코드 보기">
+<RawSource src="/app/components/mdx/PreviewWeb.tsx" />
+</div>
+</ConnectedComponent>
+
+### ConnectedComponent
+여러 컴포넌트를 하나의 컴포넌트로 묶어서 사용할 수 있는 컴포넌트이다.   
+
+<ConnectedComponent enableTab>
+<ConnectedComponent title="ConnectedComponent">
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border border-blue-200 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800/30">
+  <div className="text-xl font-bold text-blue-900 dark:text-blue-100">첫 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg border border-green-200 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-800/30">
+  <div className="text-xl font-bold text-green-900 dark:text-green-100">두 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg border border-purple-200 dark:from-purple-900/20 dark:to-violet-900/20 dark:border-purple-800/30">
+  <div className="text-xl font-bold text-purple-900 dark:text-purple-100">세 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+</ConnectedComponent>
+<div title="MDX 파일에서 사용하기">
+```mdx
+<ConnectedComponent title="ConnectedComponent">
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border border-blue-200 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800/30">
+  <div className="text-xl font-bold text-blue-900 dark:text-blue-100">첫 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg border border-green-200 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-800/30">
+  <div className="text-xl font-bold text-green-900 dark:text-green-100">두 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+<ConnectedComponentItem innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg border border-purple-200 dark:from-purple-900/20 dark:to-violet-900/20 dark:border-purple-800/30">
+  <div className="text-xl font-bold text-purple-900 dark:text-purple-100">세 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+</ConnectedComponent>
+```
+</div>
+<div title="코드 보기">
+<RawSource src="/app/components/mdx/ConnectedComponent.tsx" />
+</div>
+</ConnectedComponent>
+
+탭 기능을 활성화하여 각 컴포넌트를 탭으로 전환할 수도 있다:
+
+```mdx /enableTab/
+<ConnectedComponent enableTab>
+...
+</ConnectedComponent>
+```
+
+<br />
+
+<ConnectedComponent enableTab>
+<ConnectedComponentItem title="첫 번째 컴포넌트" innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border border-blue-200 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800/30">
+  <div className="text-xl font-bold text-blue-900 dark:text-blue-100">첫 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+<ConnectedComponentItem title="두 번째 컴포넌트" innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg border border-green-200 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-800/30">
+  <div className="text-xl font-bold text-green-900 dark:text-green-100">두 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+<ConnectedComponentItem title="세 번째 컴포넌트" innerClassName="flex justify-center items-center">
+<div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg border border-purple-200 dark:from-purple-900/20 dark:to-violet-900/20 dark:border-purple-800/30">
+  <div className="text-xl font-bold text-purple-900 dark:text-purple-100">세 번째 컴포넌트</div>
+</div>
+</ConnectedComponentItem>
+</ConnectedComponent>
+
+### RawSource
+특정 경로의 파일을 읽어와서 소스 코드를 보여주는 컴포넌트이다. 이 컴포넌트는 MDX 파일에 코드를 한번 더 작성해야하는 번거로움을 줄여준다.
+또한 파일 수정 시 자동으로 코드가 업데이트되는 편리한 기능을 제공한다.
+
+<ConnectedComponent enableTab>
+<div title="RawSource">
+<RawSource src="/app/components/mdx/RawSource.tsx" />
+</div>
+<div title="MDX 파일에서 사용하기">
+```mdx
+<RawSource src="/app/components/mdx/RawSource.tsx" />
+```
+</div>
+<div title="코드 보기">
+<RawSource src="/app/components/mdx/RawSource.tsx" />
+</div>
+</ConnectedComponent>
+
+### FolderStructure
+디렉토리의 구조를 시각화하여 보여주는 컴포넌트이다.
+
+<ConnectedComponent enableTab>
+<div title="FolderStructure">
+<FolderStructure folderStructure={[
+    {
+        name: "디렉토리1",
+        type: "directory",
+        children: [
+            {
+                name: "파일1",
+                type: "file",
+            }
+        ]
+    },
+    {
+        name: "디렉토리2",
+        type: "directory",
+        children: [
+            {
+                name: "내부 디렉토리1",
+                type: "directory",
+                description: "이렇게 하이라이트도 할 수 있다",
+                highlight: true,
+                children: [
+                    {
+                        name: "파일2",
+                        type: "file",
+                    },
+                    {
+                        name: "파일3",
+                        type: "file",
+                    }
+                ]
+            },
+            {
+                name: "",
+                type: "dots",
+            },
+            {
+                name: "파일4",
+                type: "file",
+            }
+        ]
+    },
+]} />
+</div>
+<div title="MDX 파일에서 사용하기">
+```mdx
+<FolderStructure folderStructure={[
+    {
+        name: "디렉토리1",
+        type: "directory",
+        children: [
+            {
+                name: "파일1",
+                type: "file",
+            }
+        ]
+    },
+    {
+        name: "디렉토리2",
+        type: "directory",
+        children: [
+            {
+                name: "내부 디렉토리1",
+                type: "directory",
+                description: "이렇게 하이라이트도 할 수 있다",
+                highlight: true,
+                children: [
+                    {
+                        name: "파일2",
+                        type: "file",
+                    },
+                    {
+                        name: "파일3",
+                        type: "file",
+                    }
+                ]
+            },
+            {
+                name: "",
+                type: "dots",
+            },
+            {
+                name: "파일4",
+                type: "file",
+            }
+        ]
+    },
+]} />
+```
+</div>
+<div title="코드 보기">
+<RawSource src="/app/components/mdx/FolderStructure.tsx" />
+</div>
+</ConnectedComponent>
+
+
+## 컴포넌트 파일 동적 임포트
+앞서 소개한 공통 컴포넌트 외에 해당 마크다운 내에서만 사용하는 컴포넌트를 작성할 수 있다.
+`fs` 모듈을 사용하여 파일을 읽어오고, 파일 이름을 키로 하여 컴포넌트를 임포트한다.
+```tsx {39} {3-12}
+// 커스텀 컴포넌트 파일 들 동적으로 임포트
+// 존재하는 경우만 임포트
+const checkCustomComponentDir = fs.existsSync(path.join(process.cwd(), "app/components/mdx", slug));
+let customComponents: Record<string, React.ComponentType<any>> = {};
+if (checkCustomComponentDir) {
+    const customComponentList = fs.readdirSync(path.join(process.cwd(), "app/components/mdx", slug));
+    customComponents = customComponentList.reduce((acc, file) => {
+    const component = require(`../components/mdx/${slug}/${file}`).default;
+    acc[file.replace(".tsx", "")] = component;
+    return acc;
+    }, {} as Record<string, React.ComponentType<any>>);
+}
+
+// MDX 컴파일
+const { content, frontmatter } = await compileMDX<FrontMatter>({
+    source,
+    options: {
+    parseFrontmatter: true,
+    mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, autolinkHeadingsOptions],
+        [rehypePrettyCode, prettyCodeOptions],
+        ],
+    },
+    },
+      components: {
+        img: CompiledMDXImage,
+        pre: CompiledMDXPre,
+        InteractiveButton,
+        PreviewWeb,
+        MDXComponentWrapper,
+        ConnectedComponent,
+        ConnectedComponentItem,
+        MDXToComponent,
+        FolderStructure,
+        RawSource,
+        ...customComponents,
+      },
+});
+```
+
+이 포스트의 id를 통해 파일 경로를 동적으로 작성할 수 있다. 현재 포스트의 id는 `using-custom-components-in-serverside-mdx`이다.
+
+`mdx` 디렉토리에 포스트의 id를 포함한 디렉토리를 생성하고, 그 안에 컴포넌트 파일을 생성하면 된다.
+
+<ConnectedComponent>
+<FolderStructure folderStructure={[
+    {
+        name: "app",
+        type: "directory",
+        children: [
+            {
+                name: "",
+                type: "dots",
+            },
+            {
+                name: "components",
+                type: "directory",
+                children: [
+                    {
+                        name: "mdx",
+                        type: "directory",
+                        children: [
+                            {
+                                name: "using-custom-components-in-serverside-mdx",
+                                type: "directory",
+                                children: [
+                                    {
+                                        name: "HelloWorld.tsx",
+                                        type: "file",
+                                        highlight: true,
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: "",
+                type: "dots",
+            },
+        ]
+    },
+]} />
+<RawSource src="/app/components/mdx/using-custom-components-in-serverside-mdx/HelloWorld.tsx" />
+</ConnectedComponent>
+
+MDX 파일에서 `HelloWorld` 컴포넌트를 사용할 수 있다.
+<ConnectedComponent>
+<ConnectedComponentItem enableDiagonalLine={false}>
+<div className="flex justify-center items-center">
+<HelloWorld />
+</div>
+</ConnectedComponentItem>
+<div title="MDX 파일에서 사용하기">
+```mdx
+<HelloWorld />
+```
+</div>
+</ConnectedComponent>

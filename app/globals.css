@@ -69,7 +69,7 @@ pre > code {
 
 /* 코드 블록 내부 토큰 스타일 */
 pre [data-highlighted-line] {
-  @apply bg-zinc-800/50 border-l-2 border-blue-500 pl-4;
+  @apply bg-indigo-800/50 border-l-2 border-indigo-500 pl-4;
 }
 
 pre [data-highlighted-chars] {

@@ -109,7 +109,8 @@ export default function CompiledMDXPre({ children, ...props }: CompiledMDXPrePro
           borderRadius: showExpandButton ? "0 0 0px 0px" : "0 0 12px 12px",
           margin: 0,
         }}
-        className="p-4 text-wrap bg-zinc-950/30 backdrop-blur-sm thin-scrollbar"
+        className="p-4 text-wrap bg-zinc-950/30 backdrop-blur-sm thin-scrollbar
+        "
       >
         {children}
       </pre>

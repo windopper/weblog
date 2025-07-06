@@ -20,6 +20,8 @@ import MDXComponentWrapper from "./mdx/MDXComponentWrapper";
 import ConnectedComponent, { ConnectedComponentItem } from "./mdx/ConnectedComponent";
 import MDXToComponent from "./mdx/MDXToComponent";
 import MoveToTopButton from "./common/MoveToTopButton";
+import FolderStructure from "./mdx/FolderStructure";
+import RawSource from "./mdx/RawSource";
 
 interface FrontMatter {
   title: string;
@@ -88,6 +90,8 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         ConnectedComponent,
         ConnectedComponentItem,
         MDXToComponent,
+        FolderStructure,
+        RawSource,
         ...customComponents,
       },
     });
@@ -103,12 +107,12 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         <ConditionalPostHeader title={frontmatter.title} />
         <TableOfContents toc={toc} />
         <PostTags tags={frontmatter.tags} />
-        <article
+        <div
           className="prose-zinc prose prose-sm md:prose-md lg:prose-lg prose-invert 
     max-w-none w-full px-4 lg:px-0 [&_figure]:m-0 [&_img]:m-0"
         >
           {content}
-        </article>
+        </div>
         {hasTakeoffTag && <TakeoffPostFlag />}
         <NextPrevPostButton nextPost={nextPost} prevPost={prevPost} />
         <MoveToTopButton />
