@@ -39,6 +39,11 @@ export const metadata: Metadata = {
   creator: "kamilereon",
   publisher: "kamilereon",
   keywords: ["web", "ai", "software", "architecture", "blog"],
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
+  appleWebApp: true,
 };
 
 export default function RootLayout({
