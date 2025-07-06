@@ -22,13 +22,13 @@ export default function TakeoffButton() {
         </div>
       </Link>
       <div className="flex flex-row items-center gap-4">
-        <Link href="/takeoff">
+        <Link href="/takeoff" title="프로젝트 소개">
           <BsStack className="w-8 h-8" />
         </Link>
-        <Link href="https://github.com/windopper/takeoff">
+        <Link href="https://github.com/windopper/takeoff" title="GitHub">
           <FaGithub className="w-8 h-8" />
         </Link>
-        <Link href="https://ai-takeoff.dev">
+        <Link href="https://ai-takeoff.dev" title="Takeoff. 바로가기">
           <FaArrowRight className="w-8 h-8 opacity-80" />
         </Link>
       </div>

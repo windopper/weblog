@@ -15,8 +15,8 @@ interface MDXImageProps {
 export default function MDXImage({
   src,
   alt,
-  width = 800,
-  height = 600,
+  width = 100,
+  height = 300,
   className = "",
   priority = false,
 }: MDXImageProps) {
@@ -104,6 +104,7 @@ export default function MDXImage({
         alt={alt}
         width={width}
         height={height}
+        layout="responsive"
         priority={priority}
         className={`transition-opacity duration-300 ${
           isLoading ? "opacity-0" : "opacity-100" 

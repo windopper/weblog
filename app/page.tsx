@@ -55,7 +55,7 @@ export default async function Home() {
       <div className="flex flex-col gap-5 items-center justify-center z-50">
         <h1 className="text-4xl font-bold">kamilereon</h1>
         <div className="flex flex-row items-center justify-center gap-4">
-          <Link href="https://github.com/windopper">
+          <Link href="https://github.com/windopper" title="GitHub">
             <FaGithub className="w-8 h-8" />
           </Link>
         </div>
@@ -69,7 +69,7 @@ export default async function Home() {
       <div className="flex flex-col z-50 w-full max-w-4xl">
         <div className="flex flex-row justify-between items-center text-sm ">
           <span className="font-bold py-4">최근 게시물</span>
-          <Link href="/posts">더보기</Link>
+          <Link href="/posts" title="최근 게시물">더보기</Link>
         </div>
         <PostsList markdownFiles={latest4PublicMarkdownFiles} type="small" />
       </div>

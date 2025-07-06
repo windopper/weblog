@@ -41,8 +41,8 @@ export default function CompiledMDXImage({
     <MDXImage
       src={src}
       alt={alt || ""}
-      width={width || 800}
-      height={height || 600}
+      width={width}
+      height={height}
       priority
       {...props}
     />

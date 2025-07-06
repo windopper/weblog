@@ -61,6 +61,7 @@ export default function MarkdownItemEffect({ children, file }: MarkdownItemProps
       href={file.path}
       className="group relative block p-6 w-full h-full backdrop-blur-sm"
       ref={containerRef}
+      title={file.name}
     >
       <motion.div
         className="absolute top-0 left-0 w-full h-full border border-zinc-700 rounded-lg 

@@ -15,17 +15,21 @@ export default function MarkdownItemContent({
     : `/api/post/thumbnail?title=${file.title}&tags=${file.tags.join(",")}`;
 
   return (
-    <div className="flex flex-col justify-start gap-2">
-      {!hideThumbnail && (
-        <Image
-        src={thumbnail}
-        alt={file.title}
-        width={1200}
-        height={630}
-        className="w-full rounded-lg"
-        priority
-        />
-      )}
+    <div className="relative flex flex-col justify-start gap-2">
+      <div className="relative w-full aspect-video">
+        {!hideThumbnail && (
+          <Image
+            src={thumbnail}
+            alt={file.title}
+            width={600}
+            height={300}
+            layout="responsive"
+            objectFit="cover"
+            className="rounded-lg"
+            priority
+          />
+        )}
+      </div>
       <h2 className="text-md font-semibold text-zinc-100 my-2">{file.title}</h2>
 
       {file.description && (

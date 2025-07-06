@@ -6,7 +6,7 @@ export default function Footer() {
       <p>© kamilereon 2025. All rights reserved.</p>
       <p className="border-r-[0.5px] border-zinc-400 mx-4 h-4" />
       <div className="flex flex-row gap-4">
-        <Link href="https://github.com/windopper">GitHub</Link>
+        <Link href="https://github.com/windopper" title="GitHub">GitHub</Link>
       </div>
     </footer>
   );

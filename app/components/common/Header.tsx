@@ -11,7 +11,7 @@ export default function Header() {
           kamilereon
         </Link>
         <span className="text-zinc-100 hover:text-zinc-200 transition-colors duration-200">
-          <Link href="/posts" className="hover:underline">
+          <Link href="/posts" title="Posts" className="hover:underline">
             Posts
           </Link>
         </span>

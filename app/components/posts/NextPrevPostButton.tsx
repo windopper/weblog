@@ -15,6 +15,7 @@ export default function NextPrevPostButton({
         <Link 
           href={`/posts/${prevPost?.name}`} 
           className="group flex-1 max-w-sm"
+          title={prevPost?.name}
         >
           <div className="relative p-6 rounded-xl bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/50 backdrop-blur-sm transition-all duration-300 hover:border-zinc-600/70 hover:bg-gradient-to-br hover:from-zinc-800/60 hover:to-zinc-700/40 hover:shadow-lg hover:shadow-zinc-900/25 hover:-translate-y-1">
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -44,6 +45,7 @@ export default function NextPrevPostButton({
         <Link 
           href={`/posts/${nextPost?.name}`} 
           className="group flex-1 max-w-sm"
+          title={nextPost?.name}
         >
           <div className="relative p-6 rounded-xl bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/50 backdrop-blur-sm transition-all duration-300 hover:border-zinc-600/70 hover:bg-gradient-to-br hover:from-zinc-800/60 hover:to-zinc-700/40 hover:shadow-lg hover:shadow-zinc-900/25 hover:-translate-y-1">
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

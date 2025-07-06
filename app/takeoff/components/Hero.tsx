@@ -33,6 +33,7 @@ export default function Hero() {
         <Link
           href="https://github.com/windopper/takeoff"
           className="flex items-center gap-2 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-md transition-colors"
+          title="GitHub"
         >
           <FaGithub size={20} />
           <span>GitHub</span>
@@ -40,6 +41,7 @@ export default function Hero() {
         <Link
           href="https://ai-takeoff.dev"
           className="flex items-center gap-2 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-md transition-colors"
+          title="바로가기"
         >
           <FaExternalLinkAlt size={16} />
           <span>바로가기</span>
