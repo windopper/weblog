@@ -41,6 +41,19 @@
     "slicedContent": "\r\n# 나만의 MCP 서버 만들기 (with. Smithery)\r\n\r\n2024년 11월 25일 Anthropic이 개발한 [MCP](https://modelcontextprotoc"
   },
   {
+    "name": "decorate-github-readme-with-jsx",
+    "title": "JSX로 깃허브 리드미 꾸미기 (with. Satori)",
+    "tags": [
+      "github",
+      "readme",
+      "satori",
+      "jsx"
+    ],
+    "createdAt": "2025-07-07T00:00:00.000Z",
+    "path": "/posts/decorate-github-readme-with-jsx",
+    "slicedContent": "\r\n# JSX로 깃허브 리드미 꾸미기 (with. Satori)\r\n[Satori](https://github.com/vercel/satori)를 통해 HTML과 CSS를 SVG로 "
+  },
+  {
     "name": "design-page-with-bento-grid",
     "title": "Bento Grid 스타일로 프로젝트 소개 페이지 꾸미기",
     "tags": [

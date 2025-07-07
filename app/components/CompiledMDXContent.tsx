@@ -22,6 +22,8 @@ import MDXToComponent from "./mdx/MDXToComponent";
 import MoveToTopButton from "./common/MoveToTopButton";
 import FolderStructure from "./mdx/FolderStructure";
 import RawSource from "./mdx/RawSource";
+import Callout from "./mdx/Callout";
+import Details from "./mdx/Details";
 
 interface FrontMatter {
   title: string;
@@ -92,7 +94,9 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         MDXToComponent,
         FolderStructure,
         RawSource,
-        ...customComponents,
+        Callout,
+        Details,
+        ...customComponents,  
       },
     });
 

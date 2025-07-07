@@ -12,8 +12,6 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>('');
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -30,7 +28,7 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
     );
 
     // 모든 헤딩 요소들을 관찰
-    const headings = document.querySelectorAll('article>h1, article>h2, article>h3');
+    const headings = document.querySelectorAll('div.prose>h1, div.prose>h2, div.prose>h3');
     headings.forEach((heading) => observer.observe(heading));
 
     return () => {

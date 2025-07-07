@@ -34,7 +34,7 @@ const extractMetadataFromMarkdown = (fileName, fileContent) => {
         isPrivate: data.isPrivate,
         description: data.description,
         thumbnail: data.thumbnail,
-        slicedContent: content.slice(0, 100),
+        slicedContent: content.slice(0, 200) + "...", 
     }
 }
 
