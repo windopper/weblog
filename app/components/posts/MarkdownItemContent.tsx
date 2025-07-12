@@ -21,10 +21,8 @@ export default function MarkdownItemContent({
           <Image
             src={thumbnail}
             alt={file.title}
-            width={600}
-            height={300}
-            layout="responsive"
-            objectFit="cover"
+            fill
+            style={{ objectFit: 'cover' }}
             className="rounded-lg"
             priority
           />

@@ -1,0 +1,257 @@
+---
+title: "Nuxt 입문과 Next.js와의 비교"
+tags: ["nuxt", "nextjs", "javascript", "typescript", "react", "vue"]
+date: "2025-01-12"
+---
+# Nuxt 입문과 Next.js와의 비교
+[plero](https://github.com/windopper/plero) 프로젝트를 진행하면서 Nuxt 프레임워크를 처음 사용해보았다. Vue 자체를 처음 사용해보는 것이기 때문에 
+[Vue](https://ko.vuejs.org/)의 기본 문법만 간단하게 훑고 [Nuxt](https://nuxt.com/)를 바로 프로젝트에 도입하였는데, Next.js와 닮은 부분이
+많아서 적응하는데 큰 어려움은 없었다.
+
+<Callout type="info">
+사용한 버전은 Nuxt3와 Next.js 15이다.
+</Callout>
+
+## 1. 기본 구조와 문법
+
+| 항목 | Nuxt 3 (Vue 기반) | Next.js 15 (React 기반) |
+| --- | --- | --- |
+| 언어/프레임워크 | Vue 3 + Composition API | React 18/19 + 최신 React 기능 |
+| 파일 확장자 | .vue (SFC 구조, template, script, style) | .js, .jsx, .ts, .tsx |
+| 디렉터리 구조 | pages, layouts, components, composables 등 | pages, app, components, hooks 등 |
+| 자동 임포트 | 컴포넌트, composable, plugin 자동 임포트 | 일부 자동, 대부분 명시적 import 필요 |
+| 라우팅 | 파일 기반, Vue Router 활용 | 파일 기반, 자체 App Router |
+
+<ConnectedComponent enableTab>
+<div title="Nuxt 3 기본 예제">
+```vue
+<template>
+  <div>
+    <h1>Hello, World! {{ count }}</h1>
+    <button @click="count++">Click me</button>
+  </div>
+</template>
+
+<script setup>
+const count = ref(0);
+</script>
+
+<style scoped>
+h1 {
+  color: red;
+}
+</style>
+```
+</div>
+<div title="Next.js 15 기본 예제">
+```tsx
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <h1>Hello, World! {count}</h1>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  );
+}
+```
+</div>
+</ConnectedComponent>
+
+Nuxt를 사용하면서 자동 임포트 기능이 매우 편리했다. `ref`, `reactive`, `computed` 같은 Vue 훅들과 커스텀 composable들에 대한 임포트가 자동으로 되어서 코드 작성 속도가 빨라졌다.
+
+## 2. 라우팅
+- Nuxt 3
+    - pages/ 폴더 구조가 URL 라우트로 자동 매핑됨.
+    - 동적 라우트: [id].vue, 중첩 라우트, 레이아웃 지원.
+    - `<NuxtLink>` 컴포넌트로 네비게이션, 프리패칭 지원.
+
+- Next.js 15
+    - pages/와 app/ 폴더 기반 라우팅.
+    - 동적 라우트: [id].js/tsx, 중첩·병렬·인터셉트 라우트(App Router).
+    - `<Link>` 컴포넌트, useRouter 훅, 프리패칭.
+
+라우팅 측면에서는 두 프레임워크 모두 파일 기반 라우팅을 사용하고 있어서 별도의 러닝커브가 없었다.
+
+## 3. 데이터 페칭 및 렌더링
+
+| 항목 | Nuxt 3 | Next.js 15 |
+| --- | --- | --- |
+| SSR/SSG/CSR | 모두 지원, 라우트별 전략 지정 | 모두 지원, 페이지/컴포넌트별 전략 지정 |
+| 데이터 패칭 | useAsyncData, useFetch 등 composable | Server Actions, getServerSideProps 등 |
+| 하이브리드 렌더링 | SSR+SSG+CSR 혼합, Edge Rendering 지원 | Partial Prerendering, ISR, Edge 지원 |
+| API 라우트 | server/api/ 폴더 | pages/api/, app/api/ 폴더 |
+
+데이터 페칭은 Nuxt와 Next.js 모두 기본적으로 캐싱 기능을 제공한다. ([Nuxt Data Fetching](https://nuxt.com/docs/getting-started/data-fetching), [Next.js Data Fetching](https://nextjs-ko.org/docs/app/building-your-application/data-fetching/fetching))
+
+Next.js는 서버 액션을 사용하여 함수의 파라미터와 반환값 타입을 TypeScript가 자동으로 추론하고,
+Nuxt는 프레임워크가 자동으로 서버 API 핸들러의 반환값 타입을 추론할 수 있다.
+
+Nuxt에서는 단일 페이지 내에 SSR과 CSR 코드를 한 곳에서 작성할 수 있었다. 
+```vue
+<template>
+  <div>
+    <h1>SSR 데이터: {{ ssrData }}</h1>
+    <h2>CSR 카운터: {{ count }}</h2>
+    <button @click="count++">카운트 증가</button>
+    <p v-if="mounted">이 문장은 CSR에서만 보입니다.</p>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+
+// SSR: 서버에서 데이터 패칭
+const { data: ssrData } = await useAsyncData('posts', () =>
+  $fetch('https://api.example.com/posts')
+)
+
+// CSR: 클라이언트 상태 및 이벤트
+const count = ref(0)
+const mounted = ref(false)
+onMounted(() => {
+  mounted.value = true // CSR에서만 true로 변경
+})
+</script>
+```
+
+## 4. 스타일링 및 컴포넌트
+- Nuxt 3
+    - SFC 내 `<style scoped>`, 글로벌 CSS, CSS Modules, Tailwind 등 지원.
+    - 컴포넌트 자동 임포트, 전역 등록 가능.
+    - MDC(Markdown Components) 등 확장 문법 지원.
+
+- Next.js 15
+    - CSS Modules, styled-jsx, CSS-in-JS, 글로벌 CSS 등 다양한 방식.
+    - 컴포넌트는 명시적 import.
+    - React 19 지원, 최신 훅/서버 컴포넌트 활용
+
+개인적으로 Tailwind CSS가 편리해서 Nuxt에서도 사용하였는데, [nuxt-tailwindcss](https://tailwindcss.nuxtjs.org/) 플러그인이 작동하지 않아서
+[Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)를 직접 설치하여 사용하였다.
+
+## 5. 폼, 미들웨어, 에러 처리
+| 항목 | Nuxt 3 | Next.js 15 |
+| --- | --- | --- |
+| 폼 처리 | 수동 처리, composable 활용 | `<Form>` 컴포넌트, Server Actions, useFormStatus 등 |
+| 미들웨어 | middleware/ 폴더, 라우트별 지정 | middleware.js, Edge Middleware |
+| 에러 처리 | 에러 페이지, 미들웨어 | Error boundaries, notFound(), 미들웨어 |
+
+폼 처리의 경우 Vue는 양방향 바인딩이 있기에 상태 관리가 매우 편리했다. React 특유의 번거로운 상태 관리를 하지 않아도 되어 매우 편리했다.
+<ConnectedComponent enableTab>
+<div title="Nuxt 3 상태관리">
+```vue
+<script setup>
+const message = ref('')
+</script>
+
+<template>
+  <p>Message is: {{ message }}</p>
+  <input v-model="message" placeholder="edit me" />
+</template>
+```
+</div>
+<div title="Next.js 15 상태관리">
+```tsx
+import { useState } from 'react';
+
+export default function Counter() {
+  const [message, setMessage] = useState('');
+
+  return (
+    <div>
+      <p>Message is: {message}</p>
+      <input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="edit me" />
+    </div>
+  );
+}
+```
+</div>
+</ConnectedComponent>
+
+
+미들웨어의 경우 Nuxt가 다양한 방식으로 미들웨어를 관리할 수 있었다. 페이지, 레이아웃, 라우트 단위로 미들웨어를 지정하여 인증, 권한, 리다이렉트 등의
+기능을 수행할 수 있었다.[^1]
+
+<ConnectedComponent enableTab>
+<div title="Nuxt3 페이지 미들웨어">
+```vue
+<!-- pages/index.vue -->
+<script setup lang="ts">
+definePageMeta({
+  middleware: [
+    function (to, from) {
+      // Custom inline middleware
+    },
+    'auth',
+  ],
+});
+</script>
+```
+</div>
+<div title="Nuxt3 라우트 미들웨어">
+```ts
+// middleware/auth.ts
+export default defineNuxtRouteMiddleware(to => {
+  // skip middleware on server
+  if (import.meta.server) return
+  // skip middleware on client side entirely
+  if (import.meta.client) return
+  // or only skip middleware on initial client load
+  const nuxtApp = useNuxtApp()
+  if (import.meta.client && nuxtApp.isHydrating && nuxtApp.payload.serverRendered) return
+})
+```
+</div>
+<div title="Nuxt3 서버 미들웨어">
+```ts
+// server/middleware/auth.ts
+export default defineEventHandler((event) => {
+  console.log('New request: ' + getRequestURL(event))
+})
+```
+</div>
+<div title="Next.js 15 미들웨어">
+```ts
+// middleware.ts
+import { NextResponse, NextRequest } from 'next/server'
+ 
+// 이 함수는 내부에서 `await`를 사용하는 경우 `async`로 표시할 수 있습니다.
+export function middleware(request: NextRequest) {
+  return NextResponse.redirect(new URL('/home', request.url))
+}
+ 
+export const config = {
+  matcher: '/about/:path*',
+}
+```
+</div>
+</ConnectedComponent>
+
+뿐만 아니라, Nuxt는 Next.js와 달리 서버와 클라이언트 미들웨어를 분리하여 관리할 수 있었다.[^2]
+
+## 6. 빌드 및 배포
+- Nuxt 3
+  - Vite가 기본 번들러이지만, Webpack/Rspack도 지원
+  - Nitro 엔진을 사용하며 Node.js, Edge Runtime, Serverless, Deno 등 다양한 환경 지원
+
+- Next.js 15
+  - Turbopack(개발 서버), webpack(프로덕션) 지원
+  - Vercel, Netlify, AWS 등 다양한 플랫폼 배포 지원
+  - 자체 호스팅 및 Docker 컨테이너 배포 가능
+
+## 7. 개발자 경험 (DX)
+Vue 생태계는 React 생태계와 달리 다양한 공식 라이브러리가 존재하기 때문에 라이브러리를 선택하기 위한 학습을 덜 해도 된다. 뿐만 아니라 Vue 자체에 대한 난이도가 높지 않고, 
+프레임워크 수준에서의 자동화와 관례 덕분에 빠른 프로토타입을 만들 수 있었다.
+
+그러나 React는 대규모 커뮤니티와 방대한 자료 덕분에 다양한 상황에서도 유연하게 대처할 수 있다는 점이 장점이다.
+
+### 성능 및 인기도
+npm 다운로드 수를 비교해보면 React가 압도적으로 높은 사용률을 보이고 있다. 하지만 Nuxt도 꾸준히 성장하고 있으며, Vue 생태계에서는 가장 인기 있는 프레임워크다.
+
+![nuxt-next-compare](/markdown/nuxt3-vs-nextjs-compare/0.png)
+
+[^1]: Nuxt Middleware: https://nuxt.com/docs/guide/going-further/middleware
+[^2]: Nuxt Server Middleware: https://nuxt.com/docs/guide/directory-structure/server#server-middleware
