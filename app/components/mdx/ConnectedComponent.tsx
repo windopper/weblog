@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from "@/app/libs/utils";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 
 export default function ConnectedComponent({
   children,
@@ -11,23 +12,42 @@ export default function ConnectedComponent({
   enableTab?: boolean;
 }) {
   const [tabIndex, setTabIndex] = useState(0);
+  const [rendered, setRendered] = useState(false);  
+  const buttonRefs = useRef<HTMLButtonElement[]>([]);
   const childrenArray = React.Children.toArray(children);
+
+  useEffect(() => {
+    setRendered(true);
+  }, []);
 
   if (enableTab) {
     return (
-      <div>
+      <div className="relative">
         {/* Tabs */}
-        <div className="flex flex-row gap-1 bg-zinc-900/50 rounded-t-lg p-1">
+        <div className="flex flex-row gap-1 top-0 left-0 bg-zinc-900/50 rounded-t-lg p-1">
+          <motion.div
+            className="absolute bg-zinc-700/50 shadow-sm rounded-md -z-10 transition-all duration-200 ease-in-out"
+            style={{
+              x: buttonRefs.current[tabIndex]?.offsetLeft - 4,
+              width: buttonRefs.current[tabIndex]?.offsetWidth,
+              height: buttonRefs.current[tabIndex]?.offsetHeight,
+            }}
+          ></motion.div>
           {childrenArray.map((child: any, index: number) => (
             <button
               key={index}
+              ref={(el) => {
+                if (el) {
+                  buttonRefs.current[index] = el;
+                }
+              }}
               onClick={() => setTabIndex(index)}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ease-in-out",
-                "hover:bg-zinc-700/50 hover:text-zinc-200",
-                tabIndex === index 
-                  ? "bg-zinc-700 text-zinc-100 shadow-sm" 
-                  : "text-zinc-400 hover:text-zinc-200"
+                "px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ease-in-out cursor-pointer"
+                // "hover:bg-zinc-700/50 hover:text-zinc-200"
+                // tabIndex === index
+                //   ? "bg-zinc-700 text-zinc-100 shadow-sm"
+                //   : "text-zinc-400 hover:text-zinc-200"
               )}
             >
               {child.props.title || `Tab ${index + 1}`}
