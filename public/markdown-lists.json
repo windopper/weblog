@@ -103,9 +103,23 @@
       "react",
       "vue"
     ],
-    "createdAt": "2025-01-12T00:00:00.000Z",
+    "createdAt": "2025-07-12T00:00:00.000Z",
     "path": "/posts/nuxt3-vs-nextjs-compare",
     "slicedContent": "# Nuxt 입문과 Next.js와의 비교\r\n[plero](https://github.com/windopper/plero) 프로젝트를 진행하면서 Nuxt 프레임워크를 처음 사용해보았다. Vue 자체를 처음 사용해보는 것이기 때문에 \r\n[Vue](https://ko.vuejs.org/)의 기본 문법만 간단하게 훑고 [Nuxt](https://nuxt.com/..."
+  },
+  {
+    "name": "rust-ownership",
+    "title": "러스트의 소유권 이해하기",
+    "tags": [
+      "rust",
+      "ownership",
+      "memory",
+      "borrowing",
+      "lifetimes"
+    ],
+    "createdAt": "2025-07-20T00:00:00.000Z",
+    "path": "/posts/rust-ownership",
+    "slicedContent": "\r\n# 러스트의 소유권 이해하기\r\n\r\n소유권 개념은 러스트를 특별하게 만드는 방식 중 하나이다. 자바, 자바스크립트, 파이썬 같은 언어는 가비지 컬렉션을 통해 사용하지 않는 객체들을 \r\n정기적으로 제거하는 방식을 선택했고, C++ 같은 언어들은 개발자가 직접 수동으로 메모리를 할당하고 해제하도록 하였다.\r\n\r\nC++는 높은 수준의 제어권을 보장하지만, 메모..."
   },
   {
     "name": "using-custom-components-in-serverside-mdx",

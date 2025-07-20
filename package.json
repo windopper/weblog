@@ -5,11 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prebuild": "npm run generate-markdown-lists",
+    "prebuild": "npm run gml",
     "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "next lint",
-    "generate-markdown-lists": "node scripts/generate-markdown-lists.js"
+    "gml": "node scripts/generate-markdown-lists.js"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
