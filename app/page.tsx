@@ -8,6 +8,7 @@ import Preferences from "./components/main/Preferences";
 import { FaGithub } from "react-icons/fa";
 import TakeoffButton from "./components/main/TakeoffButton";
 import { Blog, WithContext } from "schema-dts";
+import PleroButton from "./components/main/PleroButton";
 
 const jsonLdData: WithContext<Blog> = {
   "@context": "https://schema.org",
@@ -79,7 +80,10 @@ export default async function Home() {
         <div className="flex flex-row justify-between items-center text-sm ">
           <span className="font-bold py-4">토이 프로젝트</span>
         </div>
-        <TakeoffButton />
+        <div className="flex flex-col gap-4">
+          <TakeoffButton />
+          <PleroButton />
+        </div>
       </div>
 
       {/* Preferences */}
