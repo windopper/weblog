@@ -1,0 +1,128 @@
+---
+title: "러스트로 웹어셈블리 써보기"
+tags: ["wasm", "rust", "nextjs"]
+date: "2025-08-05"
+---
+
+# 러스트로 웹어셈블리 써보기
+웹어셈블리는 최신 웹 브라우저에서 실행할 수 있는 코드로 이진 명령어 형식의 저수준 언어이다.
+
+C, C++, Rust와 같은 고성능 프로그레밍 언어로 작성된 코드를
+웹에서 네이티브에 가까운 속도로 실행할 수 있게 해준다.
+
+다음은 웹어셈블리를 사용하여 자바스크립트 `alert` 함수를 호출하는 예제이다.
+<ConnectedComponent>
+<ConnectedComponentItem innerClassName="flex items-center justify-center">
+  <WasmAlert />
+</ConnectedComponentItem>
+</ConnectedComponent>
+
+## 러스트를 사용하여 웹어셈블리를 작성하는 방법
+### 1. 러스트 프로젝트 생성
+
+```bash
+cargo new wasm
+cd wasm
+```
+
+<FolderStructure folderStructure={[
+    {
+        name: "wasm",
+        type: "directory",
+        children: [
+            {
+                name: "src",
+                type: "directory",
+                children: [
+                    {
+                        name: "main.rs",
+                    }
+                ]
+            },
+            {
+                name: "Cargo.toml",
+            },
+            {
+                name: "Cargo.lock",
+            }
+        ]
+    }
+]} />
+
+### 2. 필수 라이브러리 설치
+
+[wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen)와 [wasm-pack](https://github.com/drager/wasm-pack)을 설치한다.
+- wasm-bindgen: 러스트와 자바스크립트사이의 상호작용을 원활하게 해주는 라이브러리
+- wasm-pack: 러스트 코드로 작성된 웹 어셈블리 프로젝트를 빌드하고 패키징하는 워크플로우 도구
+
+```bash
+cargo add wasm-bindgen
+cargo install wasm-pack
+```
+
+### 3. `Cargo.toml` 파일 수정
+
+```toml
+...
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2.100"
+```
+
+<Callout>
+`cdylib`은 러스트 프로젝트를 다른 프로젝트 언어에서 호출 할 수 있는 동적 라이브러리로 컴파일할 때 사용되는 크레이트 타입이다.
+</Callout>
+
+### 4. 러스트 코드 작성
+`main.rs` 파일을 `lib.rs`로 변경 한 후, 러스트 코드를 작성한다.
+```rust
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str); // alert 함수를 외부에서 사용할 수 있도록 선언
+}
+
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    alert(&format!("Hello, {}!", name)); // alert 함수를 호출
+}
+```
+### 5. 러스트 코드 빌드
+```bash
+wasm-pack build .
+```
+빌드 결과로 `pkg` 디렉토리가 생성된다.
+
+![wasm-pack build](/markdown/use-wasm-with-rust/0.png)
+
+### 6. 웹 어셈블리 파일 사용
+컴포넌트 파일에서 웹 어셈블리 파일을 사용하기 위해서는 변환된 js 파일을 임포트 해야 한다.
+
+<ConnectedComponent>
+<RawSource src="app/components/mdx/use-wasm-with-rust/WasmAlert.tsx" />
+<ConnectedComponentItem innerClassName="flex items-center justify-center">
+<WasmAlert />
+</ConnectedComponentItem>
+</ConnectedComponent>
+
+## wasm vs js 성능 비교
+<WasmVsJs />
+
+특이하게도 문자열 처리 성능은 자바스크립트가 더 빠르다. 그 이유는 러스트에서 매 루프 반복마다 `format!` 매크로로 새로운 문자열을 생성하는데,
+이는 내부적으로 자바스크립트와의 상호작용을 위해 문자열을 생성하는 과정에서 발생하는 오버헤드가 있기 때문이다.
+
+또한 최신 자바스크립트 엔진은 문자열 처리와 같은 특정한 작업에서 매우 빠른 실행 속도를 보여준다.
+
+Web Assembly는 3D 렌더링, 비디오 및 오디오 처리, 암호화 및 복잡한 수학적 계산등 cpu-intensive한 작업에서 자바스크립트보다 더 빠른 성능을 보여준다. 
+
+## 웹 어셈블리로 작성한 콘웨이의 생명 게임
+웹 어셈블리를 사용하여 콘웨이의 생명 게임을 작성한 예제이다.
+
+[코드 보기](https://github.com/windopper/conway-wasm)
+
+<PreviewWeb src="https://conway.kamilereon.net" width={1000} height={700} />
+
+

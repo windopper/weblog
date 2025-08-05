@@ -15,6 +15,28 @@ const nextConfig = {
   experimental: {
     useCache: true,
   },
+  webpack: (config, { isServer, dev, webpack }) => {
+    config.output.webassemblyModuleFilename =
+            isServer && !dev
+                ? '../static/wasm/pkg/[modulehash].wasm'
+                : 'static/wasm/pkg/[modulehash].wasm'
+
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+      layers: true,
+    };
+
+    // 브라우저 환경에서 발생하는 불필요한 경고를 수정합니다.
+    if (!isServer) {
+      config.output.environment = {
+        ...config.output.environment,
+        asyncFunction: true, // 브라우저 환경이 비동기 함수를 지원함을 명시합니다.
+      };
+    }
+
+    return config;
+  },
 }
 
 /** @type {import('rehype-pretty-code').Options} */
