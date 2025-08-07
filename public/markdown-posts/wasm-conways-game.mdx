@@ -1,0 +1,360 @@
+---
+title: "웹어셈블리로 콘웨이의 생명 게임 만들기 (with Rust)"
+tags: ["wasm", "rust", "nextjs", "conway's life game"]
+date: "2025-08-08"
+---
+
+# 웹어셈블리로 콘웨이의 생명 게임 만들기 (with Rust)
+## 콘웨이의 생명 게임이란
+영국의 수학자 [존 호른 콘웨이](https://en.wikipedia.org/wiki/John_Horton_Conway)가 고안해낸 [세포자동자](https://en.wikipedia.org/wiki/Cellular_automaton)
+의 일종이다.
+
+게임은 처음 입력된 초기값에 따라 진행이 완전히 결정되며, 각 세포 주위에 인접해있는 8개의 이웃 세포에 따라 다음 세대의 세포 상태를 결정하게 된다.
+### 게임의 규칙
+1. 죽은 세포의 이웃 중 정확히 3개가 살아있으면 그 세포는 다음 세대에 살아난다.
+2. 살아있는 세포의 이웃 중 2개 또는 3개가 살아있으면 그 세포는 다음 세대에도 살아있게 된다.
+3. 이외의 경우, 그 세포는 다음 세대에 죽게 된다.
+
+## 웹 어셈블리로 구현하기
+러스트를 사용하여 코드를 구현 후 이를 웹어셈블리로 컴파일하여 웹 브라우저에서 실행할 수 있도록 한다.
+
+[wasm-bindgen](https://github.com/wasm-bindgen/wasm-bindgen)과 [wasm-pack](https://github.com/drager/wasm-pack)을 사용하였다.
+
+### 코드 작성
+1. 먼저 게임의 셀과 게임 화면을 정의한다.
+```rust
+#[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cell {
+    Dead = 0,
+    Alive = 1,
+}
+
+#[wasm_bindgen]
+pub struct Universe {
+    width: u32,
+    height: u32,
+    cells: Vec<Cell>,
+}
+```
+
+2. `Universe` 구조체를 구현한다.
+
+먼저 게임 셀의 `getter/setter` 함수를 구현한다.
+```rust
+#[wasm_bindgen]
+impl Universe {
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
+    }
+
+    fn get_index(&self, row: u32, column: u32) -> usize {
+        (row * self.width + column) as usize
+    }
+
+    pub fn set_cell(&mut self, row: u32, column: u32, cell: Cell) {
+        let idx = self.get_index(row, column);
+        self.cells[idx] = cell;
+    }
+
+    // ...
+}
+```
+
+그 다음 이웃 세포의 개수를 세는 함수를 구현한다.
+```rust
+#[wasm_bindgen]
+impl Universe {
+    // ...
+    fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
+        let mut count = 0;
+        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
+            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
+                if delta_row == 0 && delta_col == 0 {
+                    continue;
+                }
+
+                let neighbor_row = (row + delta_row) % self.height;
+                let neighbor_col = (column + delta_col) % self.width;
+                let idx = self.get_index(neighbor_row, neighbor_col);
+                count += self.cells[idx] as u8;
+            }
+        }
+        count
+    }
+    // ...
+}
+```
+
+이제 매 세대마다 세포의 상태를 업데이트하는 함수를 구현한다. 앞서 언급한 규칙을 적용하여 다음 세대의 세포 상태를 결정한다.
+```rust
+#[wasm_bindgen]
+impl Universe {
+    // ...
+    pub fn tick(&mut self) {
+        let mut next = self.cells.clone();
+
+        for row in 0..self.height {
+            for col in 0..self.width {
+                let idx = self.get_index(row, col);
+                let cell = self.cells[idx];
+                let live_neighbors = self.live_neighbor_count(row, col);
+
+                let next_cell = match (cell, live_neighbors) {
+                    // 규칙 1: 살아있는 세포의 이웃 중 2개 미만이면 죽는다.
+                    (Cell::Alive, x) if x < 2 => Cell::Dead,
+                    // 규칙 2: 살아있는 세포의 이웃 중 2개 또는 3개가 살아있으면 다음 세대에도 살아있게 된다.
+                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+                    // 규칙 3: 살아있는 세포의 이웃 중 3개 초과이면 죽는다.
+                    (Cell::Alive, x) if x > 3 => Cell::Dead,
+                    // 규칙 4: 죽은 세포의 이웃 중 정확히 3개가 살아있으면 다음 세대에 살아난다.
+                    (Cell::Dead, 3) => Cell::Alive,
+                    // 이외의 경우, 그 세포는 다음 세대에 죽게 된다.
+                    (otherwise, _) => otherwise,
+                };
+
+                next[idx] = next_cell;
+            }
+        }
+
+        self.cells = next;
+    }
+    // ...
+}
+```
+
+마지막으로 게임 초기값을 설정하는 함수를 구현한다.
+```rust
+#[wasm_bindgen]
+impl Universe {
+    // ...
+    pub fn new(width: u32, height: u32) -> Universe {
+        let cells = (0..width * height)
+            .map(|i| Cell::Dead)
+            .collect();
+
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+}
+```
+
+### 웹 어셈블리로 컴파일하기
+먼저 프로젝트 루트 디렉토리에서 다음 명령어를 실행하여 웹 어셈블리로 컴파일한다.
+```bash
+wasm-pack build .
+```
+<p />
+```bash
+[INFO]: Installing wasm-bindgen...
+[INFO]: Optimizing wasm binaries with `wasm-opt`...
+[INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended
+[INFO]: :-) Done in 11.49s
+[INFO]: :-) Your wasm pkg is ready to publish at pkg.
+```
+
+컴파일 후 생성된 파일은 `pkg` 디렉토리에 생성된다.
+<FolderStructure folderStructure={[{
+    name: "conway-wasm",
+    type: "directory",
+    children: [
+        {
+            name: "pkg",
+            type: "directory",
+            highlight: true,
+            children: [
+                {
+                    name: "conway_wasm_bg.js",
+                    type: "file",
+                    highlight: true,
+                },
+                {
+                    name: "conway_wasm_bg.wasm",
+                    type: "file",
+                    highlight: true,
+                },
+                {
+                    name: "conway_wasm_bg.wasm.d.ts",
+                    type: "file",
+                    highlight: true,
+                },
+                {
+                    name: "conway_wasm.d.ts",
+                    type: "file",
+                    highlight: true,
+                },
+                {
+                    name: "conway_wasm.js",
+                    type: "file",
+                    highlight: true,
+                },
+                {
+                    name: "package.json",
+                    type: "file",
+                    highlight: true,
+                },
+            ]
+        },
+        {
+            name: "src",
+            type: "directory",
+            children: [
+                {
+                    name: "lib.rs",
+                }
+            ]
+        },
+        {
+            name: "Cargo.toml",
+            type: "file",
+        },
+        {
+            name: "Cargo.lock",
+            type: "file",
+        }
+    ]
+}]} />
+
+## Next.js에서 웹어셈블리 사용하기
+
+### 웹어셈블리 모듈 로딩
+
+Next.js 환경에서 웹어셈블리를 사용하기 위해서는 클라이언트 사이드에서만 실행되도록 해야 한다. `dynamic` import를 사용하여 SSR을 비활성화한다.
+
+```typescript
+import dynamic from "next/dynamic";
+
+const WasmConwaysGame = dynamic(() => Promise.resolve(WasmConwaysGameComponent), {
+    ssr: false,
+});
+```
+
+### 웹어셈블리 메모리 관리
+
+웹어셈블리의 가장 중요한 특징 중 하나는 **메모리 공유**이다. 러스트에서 생성된 데이터는 웹어셈블리의 선형 메모리에 저장되며, 이를 자바스크립트에서 직접 접근할 수 있다.
+
+#### 1. 메모리 객체 가져오기
+
+```typescript
+const [memory, setMemory] = useState<any | null>(null);
+
+// 웹어셈블리 모듈과 메모리 로딩
+const loadWasm = async () => {
+    const wasmModule = await import("@/examples/conway-wasm/pkg/conway_wasm");
+    const wasmMemoryModule = await import("@/examples/conway-wasm/pkg/conway_wasm_bg.wasm");
+    
+    setMemory(wasmMemoryModule.memory);
+    // ...
+};
+```
+
+#### 2. 메모리에서 데이터 직접 읽기
+
+웹어셈블리의 선형 메모리에서 데이터를 직접 읽어오는 것이 핵심이다.
+
+```typescript
+// 러스트에서 셀 데이터의 포인터 가져오기
+const cellsPtr = universe.cells();
+
+// 메모리에서 직접 데이터 읽기 (포인터 기반)
+const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+```
+
+이 방식의 장점:
+- **성능**: 자바스크립트와 웹어셈블리 간 데이터 복사 없음
+- **메모리 효율성**: 동일한 메모리 공간을 공유
+- **실시간 동기화**: 웹어셈블리에서 데이터가 변경되면 자바스크립트에서 즉시 반영
+
+#### 3. 메모리 레이아웃 이해
+
+러스트의 `Vec<Cell>`은 웹어셈블리 메모리에서 다음과 같이 배치된다:
+
+```rust
+// 러스트 코드
+pub struct Universe {
+    width: u32,      // 4바이트
+    height: u32,     // 4바이트  
+    cells: Vec<Cell> // 포인터 + 길이 (8바이트 + 8바이트)
+}
+```
+
+자바스크립트에서는 이 구조를 다음과 같이 해석한다:
+
+```typescript
+// 메모리에서 직접 구조체 데이터 읽기
+const cellsPtr = universe.cells(); // Vec의 포인터
+const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+```
+
+#### 4. 실시간 렌더링
+
+메모리 공유를 통해 실시간으로 게임 상태를 렌더링할 수 있다:
+
+```typescript
+useEffect(() => {
+    if (!universe || !canvasRef.current || !Cell || !memory) return;
+    
+    const width = universe.width();
+    const height = universe.height();
+    const cellsPtr = universe.cells();
+    const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+    
+    // 캔버스에 직접 렌더링
+    for (let row = 0; row < height; row++) {
+        for (let col = 0; col < width; col++) {
+            const idx = row * width + col;
+            ctx.fillStyle = cells[idx] === Cell.Alive ? ALIVE_COLOR : DEAD_COLOR;
+            ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+    }
+}, [universe, generation, Cell, memory]);
+```
+
+#### 5. 메모리 안전성 주의사항
+
+웹어셈블리 메모리를 직접 조작할 때는 다음 사항을 주의해야 한다:
+
+- **포인터 유효성**: 메모리 해제 후 포인터 사용 금지
+- **경계 검사**: 배열 범위를 벗어나는 접근 방지
+- **동기화**: 메모리 변경 시 적절한 상태 업데이트
+
+```typescript
+// 안전한 메모리 접근 예시
+const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!universe || !canvasRef.current || !Cell || !memory) return;
+    
+    // 좌표 검증
+    const x = Math.floor((e.clientX - rect.left) * scaleX / CELL_SIZE);
+    const y = Math.floor((e.clientY - rect.top) * scaleY / CELL_SIZE);
+    
+    if (x < 0 || y < 0 || x >= universe.width() || y >= universe.height()) return;
+    
+    // 메모리에서 안전하게 데이터 읽기
+    const cellsPtr = universe.cells();
+    const cells = new Uint8Array(memory.buffer, cellsPtr, universe.width() * universe.height());
+    const idx = y * universe.width() + x;
+    
+    // 상태 변경
+    const current = cells[idx];
+    universe.set_cell(y, x, current === Cell.Alive ? Cell.Dead : Cell.Alive);
+};
+```
+
+## 완성본
+
+<WasmConwaysGame />
+
+## UI 컴포넌트 코드
+<RawSource src="/app/components/mdx/wasm-conways-game/WasmConwaysGame.tsx" />
