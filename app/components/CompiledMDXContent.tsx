@@ -24,6 +24,7 @@ import FolderStructure from "./mdx/FolderStructure";
 import RawSource from "./mdx/RawSource";
 import Callout from "./mdx/Callout";
 import Details from "./mdx/Details";
+import Terminal from "./mdx/Terminal";
 
 interface FrontMatter {
   title: string;
@@ -96,6 +97,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         RawSource,
         Callout,
         Details,
+        Terminal,
         ...customComponents,  
       },
     });

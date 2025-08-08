@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface TagFilterProps {
   allTags: string[];
@@ -11,6 +11,8 @@ interface TagFilterProps {
 
 export default function TagFilter({ allTags, tagCounts, selectedTags, onTagFilter }: TagFilterProps) {
   const [localSelectedTags, setLocalSelectedTags] = useState<string[]>(selectedTags);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const maxVisibleTags = 10;
 
   // 부모에서 전달받은 selectedTags가 변경되면 로컬 상태 업데이트
   useEffect(() => {
@@ -31,6 +33,25 @@ export default function TagFilter({ allTags, tagCounts, selectedTags, onTagFilte
     onTagFilter([]);
   };
 
+  // 태그를 사용량 기준으로 내림차순 정렬 (동일하면 사전순)
+  const sortedTags = useMemo(() => {
+    return [...allTags].sort((a, b) => {
+      const diff = (tagCounts[b] ?? 0) - (tagCounts[a] ?? 0);
+      if (diff !== 0) return diff;
+      return a.localeCompare(b);
+    });
+  }, [allTags, tagCounts]);
+
+  // 접힘 상태에서는 상위 N개 + 선택된 태그는 항상 보이도록
+  const visibleTags = useMemo(() => {
+    if (isExpanded) return sortedTags;
+    const top = sortedTags.slice(0, maxVisibleTags);
+    const ensureSelected = localSelectedTags.filter(t => !top.includes(t));
+    return Array.from(new Set([...top, ...ensureSelected]));
+  }, [isExpanded, sortedTags, maxVisibleTags, localSelectedTags]);
+
+  const hiddenCount = Math.max(sortedTags.length - maxVisibleTags, 0);
+
   if (allTags.length === 0) return null;
 
   return (
@@ -48,7 +69,7 @@ export default function TagFilter({ allTags, tagCounts, selectedTags, onTagFilte
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {allTags.map((tag) => {
+        {visibleTags.map((tag) => {
           const isSelected = localSelectedTags.includes(tag);
           return (
             <button
@@ -65,6 +86,20 @@ export default function TagFilter({ allTags, tagCounts, selectedTags, onTagFilte
           );
         })}
       </div>
+
+      {sortedTags.length > maxVisibleTags && (
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <span className="text-zinc-500">
+            상위 {maxVisibleTags}개 표시 중{!isExpanded && hiddenCount > 0 ? ` · +${hiddenCount} 더 보기` : ""}
+          </span>
+          <button
+            onClick={() => setIsExpanded(v => !v)}
+            className="text-zinc-400 hover:text-zinc-200 underline underline-offset-4"
+          >
+            {isExpanded ? "접기" : "더 보기"}
+          </button>
+        </div>
+      )}
       
       {localSelectedTags.length > 0 && (
         <div className="mt-3 text-sm text-zinc-400">

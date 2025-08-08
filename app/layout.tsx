@@ -25,6 +25,21 @@ const seoulAlrimTTFHeavy = localFont({
   variable: "--font-seoul-alrim-ttf-heavy",
 });
 
+const sbAggroB = localFont({
+  src: "../public/fonts/SB-aggro-B.ttf",
+  variable: "--font-sb-aggro-b",
+});
+
+const sbAggroL = localFont({
+  src: "../public/fonts/SB-aggro-L.ttf",
+  variable: "--font-sb-aggro-l",
+});
+
+const sbAggroM = localFont({
+  src: "../public/fonts/SB-aggro-M.ttf",
+  variable: "--font-sb-aggro-m",
+});
+
 export const metadata: Metadata = {
   title: "kamilereon",
   applicationName: "kamilereon",
@@ -56,7 +71,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} 
-        ${seoulAlrimTTFMedium.variable} ${seoulAlrimTTFHeavy.variable} antialiased`}
+        ${seoulAlrimTTFMedium.variable} ${seoulAlrimTTFHeavy.variable} ${sbAggroB.variable} ${sbAggroL.variable} ${sbAggroM.variable} antialiased`}
       >
         {children}
         <Footer />

@@ -31,7 +31,7 @@ export default function PostsList({ markdownFiles, type = "large" }: PostsListPr
 
   if (type === "only-content") {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl gap-4">
+      <div className="grid grid-cols-1 max-w-4xl gap-3">
         {markdownFiles.filter((file) => !file.isPrivate).map((file) => (
           <MarkdownItem key={file.name} file={file} hideThumbnail={true} />
         ))}

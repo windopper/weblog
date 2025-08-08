@@ -154,7 +154,7 @@
       "nextjs",
       "conway's life game"
     ],
-    "createdAt": "2025-08-07T00:00:00.000Z",
+    "createdAt": "2025-08-08T00:00:00.000Z",
     "path": "/posts/wasm-conways-game",
     "slicedContent": "\r\n# 웹어셈블리로 콘웨이의 생명 게임 만들기 (with Rust)\r\n## 콘웨이의 생명 게임이란\r\n영국의 수학자 [존 호른 콘웨이](https://en.wikipedia.org/wiki/John_Horton_Conway)가 고안해낸 [세포자동자](https://en.wikipedia.org/wiki/Cellular_automaton)\r\n의 일종이다.\r\n\r..."
   }

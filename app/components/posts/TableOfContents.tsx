@@ -55,14 +55,14 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
       {/* 모바일 토글 버튼 */}
       {!isOpen && <button
         onClick={() => setIsOpen(!isOpen)}
-        className="xl:hidden fixed top-20 right-4 z-50 bg-zinc-900/80 backdrop-blur-sm border border-zinc-700 rounded-lg p-2 text-zinc-300 hover:text-white transition-colors"
+        className="xl:hidden fixed top-32 right-4 z-50 bg-zinc-900/80 backdrop-blur-sm border border-zinc-700 rounded-lg p-2 text-zinc-300 hover:text-white transition-colors"
         aria-label="목차 토글"
       >
         <Menu size={20} />
       </button>}
 
       {/* 데스크톱 TOC */}
-      <div className="hidden xl:block fixed top-24 right-4 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-50">
+      <div className="hidden xl:block fixed top-52 right-4 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-50">
         <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-lg p-4">
           <h3 className="text-md font-semibold text-zinc-300 my-2 uppercase tracking-wider">
             목차

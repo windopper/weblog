@@ -16,8 +16,8 @@ export default function MarkdownItemContent({
 
   return (
     <div className="relative flex flex-col justify-start gap-2">
-      <div className="relative w-full aspect-video">
-        {!hideThumbnail && (
+      {!hideThumbnail && (
+        <div className="relative w-full aspect-video">
           <Image
             src={thumbnail}
             alt={file.title}
@@ -26,8 +26,8 @@ export default function MarkdownItemContent({
             className="rounded-lg"
             priority
           />
-        )}
-      </div>
+        </div>
+      )}
       <h2 className="text-md font-semibold text-zinc-100 my-2">{file.title}</h2>
 
       {file.description && (
