@@ -25,7 +25,7 @@
     ],
     "createdAt": "2025-06-25T00:00:00.000Z",
     "path": "/posts/canvas-scatter-feat-visx",
-    "slicedContent": "\n# canvas로 scatterplot 그리기 (feat. visx)\n\n![완성결과](/markdown/canvas-scatter-feat-visx/0.png)\n\n완성결과\n\nLLM 벤치마크 페이지 구현을 위해 날짜, 점수 축을 위한 scatterplot을 만들어보려고 한다. \n\n페이지 스타일링 일관성을 위해 `visx`와 캔버스로 직접 구현하였다.\n\nsv..."
+    "slicedContent": "\r\n# canvas로 scatterplot 그리기 (feat. visx)\r\n\r\n![완성결과](/markdown/canvas-scatter-feat-visx/0.png)\r\n\r\n완성결과\r\n\r\nLLM 벤치마크 페이지 구현을 위해 날짜, 점수 축을 위한 scatterplot을 만들어보려고 한다. \r\n\r\n페이지 스타일링 일관성을 위해 `visx`와 캔버스로 직접 구..."
   },
   {
     "name": "create-mcp-server-with-smithery",

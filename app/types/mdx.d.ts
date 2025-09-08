@@ -1,18 +1,29 @@
-declare module '*.mdx' {
-  import { ComponentType } from 'react'
-  const MDXComponent: ComponentType<any>
-  export default MDXComponent
+declare module "*.mdx" {
+  import { ComponentType } from "react";
+  const MDXComponent: ComponentType<any>;
+  export default MDXComponent;
 }
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      img: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> & {
-        src: string
-        alt?: string
-        width?: number | string
-        height?: number | string
-      }
+      img: React.DetailedHTMLProps<
+        React.ImgHTMLAttributes<HTMLImageElement>,
+        HTMLImageElement
+      > & {
+        src: string;
+        alt?: string;
+        width?: number | string;
+        height?: number | string;
+      };
+      "ueb-blueprint": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement>,
+        HTMLElement
+      >;
+      template: React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLTemplateElement>,
+        HTMLTemplateElement
+      >;
     }
   }
-} 
+}
