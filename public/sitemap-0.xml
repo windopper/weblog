@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://kamilereon.net/opengraph-image.png</loc><lastmod>2025-08-08T09:52:46.131Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/takeoff</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/canvas-scatter-feat-visx</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/create-mcp-server-with-smithery</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/decorate-github-readme-with-jsx</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/design-page-with-bento-grid</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/dynamic-generate-opengraph-image-with-nextjs-15</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/implementing-i18n-takeoff</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/nuxt3-vs-nextjs-compare</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/rust-ownership</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/use-wasm-with-rust</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/using-custom-components-in-serverside-mdx</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
-<url><loc>https://kamilereon.net/posts/wasm-conways-game</loc><lastmod>2025-08-08T09:52:46.132Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/opengraph-image.png</loc><lastmod>2025-09-08T07:19:38.756Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/dev/ueblueprint</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/takeoff</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/canvas-scatter-feat-visx</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/create-mcp-server-with-smithery</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/decorate-github-readme-with-jsx</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/design-page-with-bento-grid</loc><lastmod>2025-09-08T07:19:38.757Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/dynamic-generate-opengraph-image-with-nextjs-15</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/implementing-i18n-takeoff</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/nuxt3-vs-nextjs-compare</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/rust-ownership</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/use-wasm-with-rust</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/using-custom-components-in-serverside-mdx</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
+<url><loc>https://kamilereon.net/posts/wasm-conways-game</loc><lastmod>2025-09-08T07:19:38.758Z</lastmod><changefreq>daily</changefreq><priority>1</priority></url>
 </urlset>

@@ -13,5 +13,8 @@
   "sideEffects": [
     "./conway_wasm.js",
     "./snippets/*"
-  ]
+  ],
+  "dependencies": {
+    "conway-wasm": "file:"
+  }
 }

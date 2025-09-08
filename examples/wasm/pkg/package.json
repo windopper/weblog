@@ -11,5 +11,8 @@
   "types": "wasm.d.ts",
   "sideEffects": [
     "./snippets/*"
-  ]
+  ],
+  "dependencies": {
+    "wasm": "file:"
+  }
 }

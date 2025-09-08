@@ -17,7 +17,9 @@ import ConditionalPostHeader from "./posts/ConditionalPostHeader";
 import PreviewWeb from "./mdx/PreviewWeb";
 import TakeoffPostFlag from "./takeoff/TakeoffPostFlag";
 import MDXComponentWrapper from "./mdx/MDXComponentWrapper";
-import ConnectedComponent, { ConnectedComponentItem } from "./mdx/ConnectedComponent";
+import ConnectedComponent, {
+  ConnectedComponentItem,
+} from "./mdx/ConnectedComponent";
 import MDXToComponent from "./mdx/MDXToComponent";
 import MoveToTopButton from "./common/MoveToTopButton";
 import FolderStructure from "./mdx/FolderStructure";
@@ -25,6 +27,7 @@ import RawSource from "./mdx/RawSource";
 import Callout from "./mdx/Callout";
 import Details from "./mdx/Details";
 import Terminal from "./mdx/Terminal";
+import UEBlueprintMDX from "./mdx/UEBlueprintMDX";
 
 interface FrontMatter {
   title: string;
@@ -51,7 +54,10 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
 
   try {
     // MDX 파일 읽기
-    const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`),
+      "utf8"
+    );
     const markdownLists = await getMarkdownFiles();
     const currentIndex = markdownLists.findIndex((file) => file.name === slug);
     const nextPost = markdownLists[currentIndex - 1];
@@ -59,10 +65,14 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
 
     // 커스텀 컴포넌트 파일 들 동적으로 임포트
     // 존재하는 경우만 임포트
-    const checkCustomComponentDir = fs.existsSync(path.join(process.cwd(), "app/components/mdx", slug));
+    const checkCustomComponentDir = fs.existsSync(
+      path.join(process.cwd(), "app/components/mdx", slug)
+    );
     let customComponents: Record<string, React.ComponentType<any>> = {};
     if (checkCustomComponentDir) {
-      const customComponentList = fs.readdirSync(path.join(process.cwd(), "app/components/mdx", slug));
+      const customComponentList = fs.readdirSync(
+        path.join(process.cwd(), "app/components/mdx", slug)
+      );
       customComponents = customComponentList.reduce((acc, file) => {
         const component = require(`../components/mdx/${slug}/${file}`).default;
         acc[file.replace(".tsx", "")] = component;
@@ -89,6 +99,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         pre: CompiledMDXPre,
         InteractiveButton,
         PreviewWeb,
+        UEBlueprint: UEBlueprintMDX,
         MDXComponentWrapper,
         ConnectedComponent,
         ConnectedComponentItem,
@@ -98,7 +109,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
         Callout,
         Details,
         Terminal,
-        ...customComponents,  
+        ...customComponents,
       },
     });
 
