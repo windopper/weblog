@@ -7,7 +7,17 @@ interface MarkdownItemProps {
   hideThumbnail?: boolean;
 }
 
-export default function MarkdownItem({ file, hideThumbnail = false }: MarkdownItemProps) {
+/**
+ * MarkdownItemEffect와 MarkdownItemContent를 감싸는 컴포넌트.
+ *
+ * @param file
+ * @param hideThumbnail
+ * @returns
+ */
+export default function MarkdownItem({
+  file,
+  hideThumbnail = false,
+}: MarkdownItemProps) {
   return (
     <MarkdownItemEffect file={file}>
       <MarkdownItemContent file={file} hideThumbnail={hideThumbnail} />

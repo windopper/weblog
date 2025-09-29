@@ -10,7 +10,8 @@
     ],
     "createdAt": "2025-06-29T00:00:00.000Z",
     "path": "/posts/automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts",
-    "slicedContent": "\r\n# 특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기\r\n\r\n어찌보면 [Takeoff.](https://ai-takeoff.dev) 서비스를 만들게 된 핵심 구현 목표이다.\r\n\r\n개인적으로 Reddit, Hackernews에서 AI 관련 게시물을 자주 챙겨보는데, 이런 해외 커뮤니티에서 원하는 주제에 대한 글을 가져와서\r\n게시하는 서비스를 만들..."
+    "slicedContent": "\r\n# 특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기\r\n\r\n어찌보면 [Takeoff.](https://ai-takeoff.dev) 서비스를 만들게 된 핵심 구현 목표이다.\r\n\r\n개인적으로 Reddit, Hackernews에서 AI 관련 게시물을 자주 챙겨보는데, 이런 해외 커뮤니티에서 원하는 주제에 대한 글을 가져와서\r\n게시하는 서비스를 만들...",
+    "readingMinutes": 18
   },
   {
     "name": "canvas-scatter-feat-visx",
@@ -25,7 +26,8 @@
     ],
     "createdAt": "2025-06-25T00:00:00.000Z",
     "path": "/posts/canvas-scatter-feat-visx",
-    "slicedContent": "\r\n# canvas로 scatterplot 그리기 (feat. visx)\r\n\r\n![완성결과](/markdown/canvas-scatter-feat-visx/0.png)\r\n\r\n완성결과\r\n\r\nLLM 벤치마크 페이지 구현을 위해 날짜, 점수 축을 위한 scatterplot을 만들어보려고 한다. \r\n\r\n페이지 스타일링 일관성을 위해 `visx`와 캔버스로 직접 구..."
+    "slicedContent": "\r\n# canvas로 scatterplot 그리기 (feat. visx)\r\n\r\n![완성결과](/markdown/canvas-scatter-feat-visx/0.png)\r\n\r\n완성결과\r\n\r\nLLM 벤치마크 페이지 구현을 위해 날짜, 점수 축을 위한 scatterplot을 만들어보려고 한다. \r\n\r\n페이지 스타일링 일관성을 위해 `visx`와 캔버스로 직접 구...",
+    "readingMinutes": 5
   },
   {
     "name": "create-mcp-server-with-smithery",
@@ -38,7 +40,8 @@
     ],
     "createdAt": "2025-07-06T00:00:00.000Z",
     "path": "/posts/create-mcp-server-with-smithery",
-    "slicedContent": "\r\n# 나만의 MCP 서버 만들기 (with. Smithery)\r\n\r\n2024년 11월 25일 Anthropic이 개발한 [MCP](https://modelcontextprotocol.io/introduction) (Model Context Protocol)은 AI 모델과 외부 데이터 소스 또는 도구를 연결해주는\r\n개방형 표준 프로토콜이다.\r\n\r\nMCP는 ..."
+    "slicedContent": "\r\n# 나만의 MCP 서버 만들기 (with. Smithery)\r\n\r\n2024년 11월 25일 Anthropic이 개발한 [MCP](https://modelcontextprotocol.io/introduction) (Model Context Protocol)은 AI 모델과 외부 데이터 소스 또는 도구를 연결해주는\r\n개방형 표준 프로토콜이다.\r\n\r\nMCP는 ...",
+    "readingMinutes": 7
   },
   {
     "name": "decorate-github-readme-with-jsx",
@@ -51,7 +54,8 @@
     ],
     "createdAt": "2025-07-07T00:00:00.000Z",
     "path": "/posts/decorate-github-readme-with-jsx",
-    "slicedContent": "\r\n# JSX로 깃허브 리드미 꾸미기 (with. Satori)\r\n[Satori](https://github.com/vercel/satori)를 통해 HTML과 CSS를 SVG로 변환할 수 있다는 것을 발견하고,\r\n이를 활용해 JSX 컴포넌트로 깃허브 리드미를 꾸미는 방법을 소개하려고 한다.\r\n\r\n먼저 완성본이다.\r\n- Preferred Tech와 Toy ..."
+    "slicedContent": "\r\n# JSX로 깃허브 리드미 꾸미기 (with. Satori)\r\n[Satori](https://github.com/vercel/satori)를 통해 HTML과 CSS를 SVG로 변환할 수 있다는 것을 발견하고,\r\n이를 활용해 JSX 컴포넌트로 깃허브 리드미를 꾸미는 방법을 소개하려고 한다.\r\n\r\n먼저 완성본이다.\r\n- Preferred Tech와 Toy ...",
+    "readingMinutes": 9
   },
   {
     "name": "design-page-with-bento-grid",
@@ -66,7 +70,8 @@
     "createdAt": "2025-07-03T00:00:00.000Z",
     "path": "/posts/design-page-with-bento-grid",
     "thumbnail": "/markdown/design-page-with-bento-grid/0.png",
-    "slicedContent": "# Bento Grid 스타일로 프로젝트 소개 페이지 꾸미기\r\n\r\n프로젝트의 기능을 한 눈에 볼 수 있는 페이지를 작성하려고 몇 가지 디자인 레퍼런스를 둘러보던 중 눈에 들어온 디자인이 있었다.\r\n\r\n애플의 프로젝트 소개 페이지. 이런 형식의 디자인을 벤토 그리드 디자인이라고 한다.\r\n<MDXComponentWrapper topDescription=\"애플의..."
+    "slicedContent": "# Bento Grid 스타일로 프로젝트 소개 페이지 꾸미기\r\n\r\n프로젝트의 기능을 한 눈에 볼 수 있는 페이지를 작성하려고 몇 가지 디자인 레퍼런스를 둘러보던 중 눈에 들어온 디자인이 있었다.\r\n\r\n애플의 프로젝트 소개 페이지. 이런 형식의 디자인을 벤토 그리드 디자인이라고 한다.\r\n<MDXComponentWrapper topDescription=\"애플의...",
+    "readingMinutes": 6
   },
   {
     "name": "dynamic-generate-opengraph-image-with-nextjs-15",
@@ -78,7 +83,8 @@
     ],
     "createdAt": "2025-06-30T00:00:00.000Z",
     "path": "/posts/dynamic-generate-opengraph-image-with-nextjs-15",
-    "slicedContent": "\r\n# Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기\r\n\r\n소셜 미디어에서 링크를 공유할 때 보이는 이미지, 즉 오픈그래프(Open Graph) 이미지는 사용자의 클릭률을 크게 좌우하는 중요한 요소이다.\r\n\r\n블로그나 콘텐츠 사이트에서 각 포스트마다 고유한 오픈그래프 이미지를 일일이 제작하는 것은 현실적이지 않기 때문에 동적으로 오픈그래프 이..."
+    "slicedContent": "\r\n# Next.js 15에서 동적으로 오픈그래프 이미지 생성 하기\r\n\r\n소셜 미디어에서 링크를 공유할 때 보이는 이미지, 즉 오픈그래프(Open Graph) 이미지는 사용자의 클릭률을 크게 좌우하는 중요한 요소이다.\r\n\r\n블로그나 콘텐츠 사이트에서 각 포스트마다 고유한 오픈그래프 이미지를 일일이 제작하는 것은 현실적이지 않기 때문에 동적으로 오픈그래프 이...",
+    "readingMinutes": 9
   },
   {
     "name": "implementing-i18n-takeoff",
@@ -90,7 +96,8 @@
     ],
     "createdAt": "2025-07-01T00:00:00.000Z",
     "path": "/posts/implementing-i18n-takeoff",
-    "slicedContent": "\r\n# Takeoff. 서비스 다국어 지원하기 (feat. Next.js 15)\r\n\r\nTakeoff. 서비스 다국어 지원하기 (feat. Next.js 15)\r\n\r\n서비스 언어를 한국어만 지원하도록 설정하기에는 아쉬움이 남아서 영어를 추가로 지원하기로 했다.\r\n\r\n현재 상황에서 다국어 지원을 하기 위해 필요한 것은 다음과 같다.\r\n1. 하드코딩된 한국어 문..."
+    "slicedContent": "\r\n# Takeoff. 서비스 다국어 지원하기 (feat. Next.js 15)\r\n\r\nTakeoff. 서비스 다국어 지원하기 (feat. Next.js 15)\r\n\r\n서비스 언어를 한국어만 지원하도록 설정하기에는 아쉬움이 남아서 영어를 추가로 지원하기로 했다.\r\n\r\n현재 상황에서 다국어 지원을 하기 위해 필요한 것은 다음과 같다.\r\n1. 하드코딩된 한국어 문...",
+    "readingMinutes": 13
   },
   {
     "name": "nuxt3-vs-nextjs-compare",
@@ -105,7 +112,8 @@
     ],
     "createdAt": "2025-07-12T00:00:00.000Z",
     "path": "/posts/nuxt3-vs-nextjs-compare",
-    "slicedContent": "# Nuxt 입문과 Next.js와의 비교\r\n[plero](https://github.com/windopper/plero) 프로젝트를 진행하면서 Nuxt 프레임워크를 처음 사용해보았다. Vue 자체를 처음 사용해보는 것이기 때문에 \r\n[Vue](https://ko.vuejs.org/)의 기본 문법만 간단하게 훑고 [Nuxt](https://nuxt.com/..."
+    "slicedContent": "# Nuxt 입문과 Next.js와의 비교\r\n[plero](https://github.com/windopper/plero) 프로젝트를 진행하면서 Nuxt 프레임워크를 처음 사용해보았다. Vue 자체를 처음 사용해보는 것이기 때문에 \r\n[Vue](https://ko.vuejs.org/)의 기본 문법만 간단하게 훑고 [Nuxt](https://nuxt.com/...",
+    "readingMinutes": 6
   },
   {
     "name": "rust-ownership",
@@ -119,7 +127,8 @@
     ],
     "createdAt": "2025-07-20T00:00:00.000Z",
     "path": "/posts/rust-ownership",
-    "slicedContent": "\r\n# 러스트의 소유권 이해하기\r\n\r\n소유권 개념은 러스트를 특별하게 만드는 방식 중 하나이다. 자바, 자바스크립트, 파이썬 같은 언어는 가비지 컬렉션을 통해 사용하지 않는 객체들을 \r\n정기적으로 제거하는 방식을 선택했고, C++ 같은 언어들은 개발자가 직접 수동으로 메모리를 할당하고 해제하도록 하였다.\r\n\r\nC++는 높은 수준의 제어권을 보장하지만, 메모..."
+    "slicedContent": "\r\n# 러스트의 소유권 이해하기\r\n\r\n소유권 개념은 러스트를 특별하게 만드는 방식 중 하나이다. 자바, 자바스크립트, 파이썬 같은 언어는 가비지 컬렉션을 통해 사용하지 않는 객체들을 \r\n정기적으로 제거하는 방식을 선택했고, C++ 같은 언어들은 개발자가 직접 수동으로 메모리를 할당하고 해제하도록 하였다.\r\n\r\nC++는 높은 수준의 제어권을 보장하지만, 메모...",
+    "readingMinutes": 5
   },
   {
     "name": "use-wasm-with-rust",
@@ -131,7 +140,8 @@
     ],
     "createdAt": "2025-08-05T00:00:00.000Z",
     "path": "/posts/use-wasm-with-rust",
-    "slicedContent": "\r\n# 러스트로 웹어셈블리 써보기\r\n웹어셈블리는 최신 웹 브라우저에서 실행할 수 있는 코드로 이진 명령어 형식의 저수준 언어이다.\r\n\r\nC, C++, Rust와 같은 고성능 프로그레밍 언어로 작성된 코드를\r\n웹에서 네이티브에 가까운 속도로 실행할 수 있게 해준다.\r\n\r\n다음은 웹어셈블리를 사용하여 자바스크립트 `alert` 함수를 호출하는 예제이다.\r\n<C..."
+    "slicedContent": "\r\n# 러스트로 웹어셈블리 써보기\r\n웹어셈블리는 최신 웹 브라우저에서 실행할 수 있는 코드로 이진 명령어 형식의 저수준 언어이다.\r\n\r\nC, C++, Rust와 같은 고성능 프로그레밍 언어로 작성된 코드를\r\n웹에서 네이티브에 가까운 속도로 실행할 수 있게 해준다.\r\n\r\n다음은 웹어셈블리를 사용하여 자바스크립트 `alert` 함수를 호출하는 예제이다.\r\n<C...",
+    "readingMinutes": 3
   },
   {
     "name": "using-custom-components-in-serverside-mdx",
@@ -143,7 +153,8 @@
     ],
     "createdAt": "2025-07-06T00:00:00.000Z",
     "path": "/posts/using-custom-components-in-serverside-mdx",
-    "slicedContent": "\r\n# 서버사이드 MDX에서 커스텀 컴포넌트 사용하기\r\n현재 이 블로그에서는 `next-mdx-remote`의 `compileMDX`를 사용하여 MDX 파일을 서버사이드에서 컴파일하고 있다.\r\n\r\n그러나 서버사이드에서 컴파일하는 방식은 MDX 내부에서 클라이언트 사이드에서만 동작하는 코드를 사용할 수 없는 문제가 있다.\r\n\r\n<MDXComponentWrap..."
+    "slicedContent": "\r\n# 서버사이드 MDX에서 커스텀 컴포넌트 사용하기\r\n현재 이 블로그에서는 `next-mdx-remote`의 `compileMDX`를 사용하여 MDX 파일을 서버사이드에서 컴파일하고 있다.\r\n\r\n그러나 서버사이드에서 컴파일하는 방식은 MDX 내부에서 클라이언트 사이드에서만 동작하는 코드를 사용할 수 없는 문제가 있다.\r\n\r\n<MDXComponentWrap...",
+    "readingMinutes": 5
   },
   {
     "name": "wasm-conways-game",
@@ -156,6 +167,7 @@
     ],
     "createdAt": "2025-08-08T00:00:00.000Z",
     "path": "/posts/wasm-conways-game",
-    "slicedContent": "\r\n# 웹어셈블리로 콘웨이의 생명 게임 만들기 (with Rust)\r\n## 콘웨이의 생명 게임이란\r\n영국의 수학자 [존 호른 콘웨이](https://en.wikipedia.org/wiki/John_Horton_Conway)가 고안해낸 [세포자동자](https://en.wikipedia.org/wiki/Cellular_automaton)\r\n의 일종이다.\r\n\r..."
+    "slicedContent": "\r\n# 웹어셈블리로 콘웨이의 생명 게임 만들기 (with Rust)\r\n## 콘웨이의 생명 게임이란\r\n영국의 수학자 [존 호른 콘웨이](https://en.wikipedia.org/wiki/John_Horton_Conway)가 고안해낸 [세포자동자](https://en.wikipedia.org/wiki/Cellular_automaton)\r\n의 일종이다.\r\n\r...",
+    "readingMinutes": 11
   }
 ]

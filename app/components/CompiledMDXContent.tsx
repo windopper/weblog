@@ -63,16 +63,18 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
     const nextPost = markdownLists[currentIndex - 1];
     const prevPost = markdownLists[currentIndex + 1];
 
-    // 커스텀 컴포넌트 파일 들 동적으로 임포트
-    // 존재하는 경우만 임포트
+    // 포스트마다 특화된 컴포넌트가 있는 경우 동적으로 임포트
     const checkCustomComponentDir = fs.existsSync(
       path.join(process.cwd(), "app/components/mdx", slug)
     );
+
     let customComponents: Record<string, React.ComponentType<any>> = {};
     if (checkCustomComponentDir) {
+      // ex) [/app/components/mdx/using-custom-components-in-serverside-mdx]
       const customComponentList = fs.readdirSync(
         path.join(process.cwd(), "app/components/mdx", slug)
       );
+
       customComponents = customComponentList.reduce((acc, file) => {
         const component = require(`../components/mdx/${slug}/${file}`).default;
         acc[file.replace(".tsx", "")] = component;

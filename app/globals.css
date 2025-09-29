@@ -197,6 +197,10 @@ pre::-webkit-scrollbar-thumb:hover {
   @apply text-orange-400;
 }
 
+.prose h1 {
+  @apply mt-[1em];
+}
+
 
 /* ue blueprint */
 ueb-blueprint {

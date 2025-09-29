@@ -6,6 +6,13 @@ interface MarkdownItemContentProps {
   hideThumbnail?: boolean;
 }
 
+/**
+ * 포스트 아이템 컴포넌트에서 렌더링하는 썸네일, 제목, 설명, 태그 컴포넌트.
+ *
+ * @param file
+ * @param hideThumbnail
+ * @returns
+ */
 export default function MarkdownItemContent({
   file,
   hideThumbnail = false,
@@ -22,7 +29,7 @@ export default function MarkdownItemContent({
             src={thumbnail}
             alt={file.title}
             fill
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: "cover" }}
             className="rounded-lg"
             priority
           />
@@ -49,6 +56,7 @@ export default function MarkdownItemContent({
 
       <div className="flex items-center justify-between text-zinc-400 text-xs">
         <span>작성일: {file.createdAt.toLocaleDateString()}</span>
+        <span>읽는 시간: 약 {file.readingMinutes}분</span>
       </div>
     </div>
   );

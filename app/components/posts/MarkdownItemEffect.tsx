@@ -12,7 +12,17 @@ interface MarkdownItemProps {
   children: React.ReactNode;
 }
 
-export default function MarkdownItemEffect({ children, file }: MarkdownItemProps) {
+/**
+ * 포스트 아이템 컴포넌트에서 마우스 커서 이벤트를 처리하는 컴포넌트.
+ *
+ * @param children
+ * @param file
+ * @returns
+ */
+export default function MarkdownItemEffect({
+  children,
+  file,
+}: MarkdownItemProps) {
   const containerRef = useRef<HTMLAnchorElement>(null);
   const translateX = useSpring(0, { stiffness: 2000, damping: 60 });
   const translateY = useSpring(0, { stiffness: 2000, damping: 60 });

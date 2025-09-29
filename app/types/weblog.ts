@@ -8,4 +8,5 @@ export interface MarkdownFile {
   isPrivate: boolean;
   thumbnail: string;
   slicedContent: string;
+  readingMinutes: number;
 }

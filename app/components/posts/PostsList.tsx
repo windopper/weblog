@@ -8,13 +8,25 @@ interface PostsListProps {
   type: PostListViewType;
 }
 
-export default function PostsList({ markdownFiles, type = "large" }: PostsListProps) {
+/**
+ * 포스트 리스트 컴포넌트.
+ *
+ * @param markdownFiles
+ * @param type
+ * @returns
+ */
+export default function PostsList({
+  markdownFiles,
+  type = "large",
+}: PostsListProps) {
   if (type === "small") {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl gap-4">
-        {markdownFiles.filter((file) => !file.isPrivate).map((file) => (
-          <MarkdownItem key={file.name} file={file} />
-        ))}
+        {markdownFiles
+          .filter((file) => !file.isPrivate)
+          .map((file) => (
+            <MarkdownItem key={file.name} file={file} />
+          ))}
       </div>
     );
   }
@@ -22,9 +34,11 @@ export default function PostsList({ markdownFiles, type = "large" }: PostsListPr
   if (type === "large") {
     return (
       <div className="grid grid-cols-1 max-w-4xl gap-4">
-        {markdownFiles.filter((file) => !file.isPrivate).map((file) => (
-          <MarkdownItem key={file.name} file={file} />
-        ))}
+        {markdownFiles
+          .filter((file) => !file.isPrivate)
+          .map((file) => (
+            <MarkdownItem key={file.name} file={file} />
+          ))}
       </div>
     );
   }
@@ -32,9 +46,11 @@ export default function PostsList({ markdownFiles, type = "large" }: PostsListPr
   if (type === "only-content") {
     return (
       <div className="grid grid-cols-1 max-w-4xl gap-3">
-        {markdownFiles.filter((file) => !file.isPrivate).map((file) => (
-          <MarkdownItem key={file.name} file={file} hideThumbnail={true} />
-        ))}
+        {markdownFiles
+          .filter((file) => !file.isPrivate)
+          .map((file) => (
+            <MarkdownItem key={file.name} file={file} hideThumbnail={true} />
+          ))}
       </div>
     );
   }
