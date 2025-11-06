@@ -17,6 +17,7 @@ import RawSource from "../components/mdx/RawSource";
 import Callout from "../components/mdx/Callout";
 import Details from "../components/mdx/Details";
 import Terminal from "../components/mdx/Terminal";
+import UEBlueprintMDX from "../components/mdx/UEBlueprintMDX";
 
 /** @type {import('rehype-pretty-code').Options} */
 export const prettyCodeOptions = {
@@ -62,6 +63,7 @@ export const defaultComponents = {
   Callout,
   Details,
   Terminal,
+  UEBlueprint: UEBlueprintMDX,
 };
 
 /**
