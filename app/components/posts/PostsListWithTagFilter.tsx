@@ -11,7 +11,15 @@ interface PostsListProps {
   markdownFiles: MarkdownFile[];
 }
 
-export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps) {
+/**
+ * 포스트 리스트 컴포넌트.
+ *
+ * @param markdownFiles
+ * @returns
+ */
+export default function PostsListWithTagFilter({
+  markdownFiles,
+}: PostsListProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [viewType, setViewType] = useState<PostListViewType>("small");
   const router = useRouter();
@@ -19,21 +27,25 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
 
   // 페이지 로드 시 URL에서 태그 정보 읽어오기
   useEffect(() => {
-    const tagsParam = searchParams.get('tags');
+    const tagsParam = searchParams.get("tags");
     if (tagsParam) {
-      const tags = decodeURIComponent(tagsParam).split(',').filter(tag => tag.trim());
+      const tags = decodeURIComponent(tagsParam)
+        .split(",")
+        .filter((tag) => tag.trim());
       setSelectedTags(tags);
     }
   }, [searchParams]);
 
   // 모든 태그와 각 태그별 포스트 개수 계산
   const { allTags, tagCounts } = useMemo(() => {
-    const tags = Array.from(new Set(markdownFiles.flatMap(file => file.tags))).sort();
+    const tags = Array.from(
+      new Set(markdownFiles.flatMap((file) => file.tags))
+    ).sort();
     const counts = tags.reduce((acc, tag) => {
-      acc[tag] = markdownFiles.filter(file => file.tags.includes(tag)).length;
+      acc[tag] = markdownFiles.filter((file) => file.tags.includes(tag)).length;
       return acc;
     }, {} as Record<string, number>);
-    
+
     return { allTags: tags, tagCounts: counts };
   }, [markdownFiles]);
 
@@ -42,29 +54,31 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
     if (selectedTags.length === 0) {
       return markdownFiles;
     }
-    
-    return markdownFiles.filter(file => 
-      selectedTags.some(tag => file.tags.includes(tag))
+
+    return markdownFiles.filter((file) =>
+      selectedTags.some((tag) => file.tags.includes(tag))
     );
   }, [markdownFiles, selectedTags]);
 
   // 최신순으로 정렬
   const sortedPosts = useMemo(() => {
-    return [...filteredPosts].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return [...filteredPosts].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
   }, [filteredPosts]);
 
   const handleTagFilter = (tags: string[]) => {
     setSelectedTags(tags);
-    
+
     // URL 매개변수 업데이트
     const params = new URLSearchParams(searchParams);
-    
+
     if (tags.length > 0) {
-      params.set('tags', encodeURIComponent(tags.join(',')));
+      params.set("tags", encodeURIComponent(tags.join(",")));
     } else {
-      params.delete('tags');
+      params.delete("tags");
     }
-    
+
     // URL 업데이트 (페이지 새로고침 없이)
     router.replace(`?${params.toString()}`, { scroll: false });
   };
@@ -72,12 +86,14 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
   // 모든 필터 초기화
   const clearAllFilters = () => {
     setSelectedTags([]);
-    
+
     // URL에서 tags 매개변수 제거
     const params = new URLSearchParams(searchParams);
-    params.delete('tags');
-    
-    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    params.delete("tags");
+
+    const newUrl = params.toString()
+      ? `?${params.toString()}`
+      : window.location.pathname;
     router.replace(newUrl, { scroll: false });
   };
 
@@ -114,7 +130,7 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <div className="text-sm text-zinc-400">
-              {selectedTags.length > 0 &&(
+              {selectedTags.length > 0 && (
                 <>
                   {sortedPosts.length}개의 포스트가 선택된 태그와 일치합니다.
                   <button
@@ -127,13 +143,22 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
               )}
             </div>
             <div className="flex gap-2">
-              <ViewTypeButton onClick={() => setViewType("large")} isActive={viewType === "large"}>
+              <ViewTypeButton
+                onClick={() => setViewType("large")}
+                isActive={viewType === "large"}
+              >
                 <Square className="w-4 h-4" />
               </ViewTypeButton>
-              <ViewTypeButton onClick={() => setViewType("small")} isActive={viewType === "small"}>
+              <ViewTypeButton
+                onClick={() => setViewType("small")}
+                isActive={viewType === "small"}
+              >
                 <LayoutGrid className="w-4 h-4" />
               </ViewTypeButton>
-              <ViewTypeButton onClick={() => setViewType("only-content")} isActive={viewType === "only-content"}>
+              <ViewTypeButton
+                onClick={() => setViewType("only-content")}
+                isActive={viewType === "only-content"}
+              >
                 <FileText className="w-4 h-4" />
               </ViewTypeButton>
             </div>
@@ -146,9 +171,13 @@ export default function PostsListWithTagFilter({ markdownFiles }: PostsListProps
       )}
     </div>
   );
-} 
+}
 
-function ViewTypeButton({ children, isActive, ...params }: ButtonHTMLAttributes<HTMLButtonElement> & { isActive: boolean }) {
+function ViewTypeButton({
+  children,
+  isActive,
+  ...params
+}: ButtonHTMLAttributes<HTMLButtonElement> & { isActive: boolean }) {
   return (
     <button
       {...params}

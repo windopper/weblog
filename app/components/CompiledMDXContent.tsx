@@ -20,7 +20,10 @@ interface FrontMatter {
 export default async function CompiledMDXContent({ slug }: { slug: string }) {
   try {
     // MDX 파일 읽기
-    const source = fs.readFileSync(path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`), "utf8");
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`),
+      "utf8"
+    );
     const markdownLists = await getMarkdownFiles();
     
     const currentIndex = markdownLists.findIndex((file) => file.name === slug);

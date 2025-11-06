@@ -43,7 +43,9 @@
     "shiki": "^3.7.0",
     "simple-icons": "^15.4.0",
     "tailwind-merge": "^3.3.1",
-    "three": "^0.177.0"
+    "three": "^0.177.0",
+    "ueblueprint": "^2.0.0",
+    "weblog": "file:"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

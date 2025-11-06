@@ -196,3 +196,14 @@ pre::-webkit-scrollbar-thumb:hover {
 .prose pre code .token.variable {
   @apply text-orange-400;
 }
+
+.prose h1 {
+  @apply mt-[1em];
+}
+
+
+/* ue blueprint */
+ueb-blueprint {
+  --ueb-height: 500px;
+  height: 500px;
+}
