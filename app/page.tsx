@@ -60,11 +60,6 @@ export default async function Home() {
             <FaGithub className="w-8 h-8" />
           </Link>
         </div>
-        <p className="text-sm text-center">
-          love to code and build things ✨
-          <br />
-          proficient in React and Next.js
-        </p>
       </div>
       {/* Content */}
       <div className="flex flex-col z-50 w-full max-w-4xl">

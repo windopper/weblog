@@ -10,12 +10,19 @@ export default function Header() {
         >
           kamilereon
         </Link>
-        <span className="text-zinc-100 hover:text-zinc-200 transition-colors duration-200">
-          <Link href="/posts" title="Posts" className="hover:underline">
-            Posts
-          </Link>
-        </span>
+        <HeaderItem href="/posts" title="Posts" />
+        <HeaderItem href="/memos" title="Memos" />
       </div>
     </div>
+  );
+}
+
+function HeaderItem({ href, title }: { href: string; title: string }) {
+  return (
+    <span className="text-zinc-100 hover:text-zinc-200 transition-colors duration-200">
+      <Link href={href} title={title} className="hover:underline">
+        {title}
+      </Link>
+    </span>
   );
 }
