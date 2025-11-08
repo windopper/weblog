@@ -9,3 +9,9 @@ export interface Memo {
   path?: string;
   thumbnail?: string;
 }
+
+export interface MemoTreeMenu {
+  name: string;
+  subTreeMenus: MemoTreeMenu[];
+  fileName?: string;
+}

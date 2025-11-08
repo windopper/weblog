@@ -1,0 +1,99 @@
+---
+title: "스마트 포인터"
+tags: ["c++", "smart pointer"]
+date: "2025-11-07"
+thumbnail: "/image/weblog.png"
+description: "스마트 포인터"
+---
+# 스마트 포인터
+스마트 포인터는 포인터가 가리키는 메모리를 자동으로 해제하는 역할을 함.
+
+RAII(Resource Acquisition Is Initialization) 기법을 사용하여 메모리 관리를 자동으로 해제하는데 RAII는
+객체의 수명이 그 객체가 소유한 자원의 수명과 동일하게 만드는 기법.
+
+## std::unique_ptr
+`std::unique_ptr`는 하나의 포인터만 소유할 수 있는 스마트 포인터임. 동일한 메모리를 가리키는 두 개의 std::unique_ptr 인스턴스가 존재할 수 없음.
+
+```cpp
+std::unique_ptr<int> ptr1(new int(10));
+std::unique_ptr<int> ptr2 = ptr1; // 컴파일 에러
+```
+
+이동이라는 개념을 사용하여 소유권을 이동시킬 수 있음.
+```cpp
+std::unique_ptr<int> ptr1(new int(10));
+std::unique_ptr<int> ptr2 = std::move(ptr1); // 소유권 이동
+```
+## std::shared_ptr
+`std::shared_ptr`는 여러 개의 포인터가 소유할 수 있는 스마트 포인터임. 동일한 메모리를 가리키는 여러 개의 std::shared_ptr 인스턴스가 존재할 수 있음.
+
+```cpp
+std::shared_ptr<int> ptr1(new int(10));
+std::shared_ptr<int> ptr2 = ptr1; // 가능
+```
+## std::weak_ptr
+`std::weak_ptr`는 참조 카운트를 증가시키지 않는 스마트 포인터임. `shared_ptr`과 함께 사용되며, 순환 참조(circular reference) 문제를 해결하는 데 주로 사용됨.
+
+### 주요 특징
+- 참조 카운트를 증가시키지 않아 객체의 수명에 영향을 주지 않음
+- `shared_ptr`이 관리하는 객체를 관찰(observe)하는 용도로 사용
+- 객체가 이미 해제되었는지 확인 가능
+- `lock()` 메서드를 통해 `shared_ptr`로 변환하여 사용
+
+### 기본 사용법
+```cpp
+std::shared_ptr<int> shared = std::make_shared<int>(10);
+std::weak_ptr<int> weak = shared; // 참조 카운트 증가 안 함
+
+// weak_ptr을 사용하려면 lock()으로 shared_ptr로 변환
+if (auto locked = weak.lock()) {
+    std::cout << *locked << std::endl; // 10 출력
+} else {
+    std::cout << "객체가 이미 해제됨" << std::endl;
+}
+```
+
+### 순환 참조 해결 예제
+```cpp
+struct Parent;
+struct Child;
+
+struct Parent {
+    std::shared_ptr<Child> child;
+    ~Parent() { std::cout << "Parent 소멸" << std::endl; }
+};
+
+struct Child {
+    std::weak_ptr<Parent> parent; // weak_ptr 사용으로 순환 참조 방지
+    ~Child() { std::cout << "Child 소멸" << std::endl; }
+};
+
+int main() {
+    auto parent = std::make_shared<Parent>();
+    auto child = std::make_shared<Child>();
+    
+    parent->child = child;
+    child->parent = parent; // weak_ptr이므로 참조 카운트 증가 안 함
+    
+    // parent와 child가 정상적으로 소멸됨
+    return 0;
+}
+```
+
+### 유효성 확인
+```cpp
+std::weak_ptr<int> weak;
+
+{
+    auto shared = std::make_shared<int>(42);
+    weak = shared;
+    
+    if (!weak.expired()) {
+        std::cout << "객체가 아직 유효함" << std::endl;
+    }
+} // shared가 여기서 소멸됨
+
+if (weak.expired()) {
+    std::cout << "객체가 이미 해제됨" << std::endl;
+}
+```

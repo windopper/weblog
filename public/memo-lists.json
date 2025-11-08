@@ -1,5 +1,19 @@
 [
   {
+    "name": "smart-pointer",
+    "title": "스마트 포인터",
+    "tags": [
+      "c++",
+      "smart pointer"
+    ],
+    "createdAt": "2025-11-07T00:00:00.000Z",
+    "updatedAt": "2025-11-07T00:00:00.000Z",
+    "path": "/memos/smart-pointer",
+    "description": "스마트 포인터",
+    "thumbnail": "/image/weblog.png",
+    "slicedContent": "..."
+  },
+  {
     "name": "welcome",
     "title": "환영합니다",
     "tags": [

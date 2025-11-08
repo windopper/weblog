@@ -3,6 +3,7 @@ import { getMdxOptions, getMdxComponents } from "../../libs/mdx";
 import fs from "fs";
 import path from "path";
 import { Memo } from "@/app/types/memo";
+import { extractTOC } from "@/app/libs/toc";
 
 interface FrontMatter {
   title: string;
@@ -39,9 +40,12 @@ export default async function CompiledMemoContent({ slug }: { slug: string }) {
       thumbnail: frontmatter.thumbnail || "/image/weblog.png",
     };
 
+    const toc = extractTOC(source);
+
     return {
       memo,
       content,
+      toc,
     };
   } catch (error) {
     console.error(`Memo MDX 로드 오류 - ${slug}:`, error);

@@ -1,6 +1,6 @@
 "use server";
 
-import { Memo } from "../types/memo";
+import { Memo, MemoTreeMenu } from "../types/memo";
 import { prefixUrl } from "../libs/constants";
 import fs from "fs";
 import path from "path";
@@ -64,6 +64,19 @@ export const getMemoFileWithFetch = async (file: string) => {
   } catch (error) {
     console.error(`메타데이터 추출 오류 - ${file}:`, error);
     return null;
+  }
+};
+
+export const getMemoTree = async (): Promise<MemoTreeMenu[]> => {
+  "use cache";
+
+  try {
+    const jsonFile = fs.readFileSync(path.join(process.cwd(), "public", "memo-tree.json"), "utf8");
+    const memoTree = JSON.parse(jsonFile);
+    return memoTree;
+  } catch (error) {
+    console.error("메모 트리 읽기 오류:", error);
+    return [];
   }
 };
 
