@@ -45,6 +45,17 @@ function TreeMenuItem({ menu, level }: TreeMenuItemProps) {
   const currentSlug = pathname?.replace("/memos/", "") || "";
   const isActive = hasFileName && menu.fileName === currentSlug;
 
+  // 메뉴에 포함된 파일 개수를 재귀적으로 계산
+  const getFileCount = (menuItem: MemoTreeMenu): number => {
+    let count = menuItem.fileName ? 1 : 0;
+    menuItem.subTreeMenus.forEach((subMenu) => {
+      count += getFileCount(subMenu);
+    });
+    return count;
+  };
+
+  const fileCount = getFileCount(menu);
+
   useEffect(() => {
     // 하위 메뉴 중에 활성화된 항목이 있는지 재귀적으로 확인
     // 파일은 항상 리프 노드에 있으므로, 이 함수가 현재 메뉴와 하위 메뉴 모두 확인
@@ -116,6 +127,22 @@ function TreeMenuItem({ menu, level }: TreeMenuItemProps) {
       >
         {menu.name}
       </span>
+
+      {/* 파일 개수 표시 - 리프 노드가 아닌 경우에만 표시 */}
+      {hasChildren && fileCount > 0 && (
+        <span
+          className={`
+            ml-auto px-2 py-0.5 text-xs rounded-full
+            ${
+              isActive
+                ? "bg-zinc-700/50 text-zinc-300"
+                : "bg-zinc-800/50 text-zinc-500"
+            }
+          `}
+        >
+          {fileCount}
+        </span>
+      )}
     </div>
   );
 
