@@ -1,5 +1,20 @@
 [
   {
+    "name": "gas-blueprintnativeevent",
+    "title": "GameplayAbility 서브클래싱 후 BlueprintNativeEvent, BlueprintImplementableEvent 함수 호출이 안되는 문제",
+    "tags": [
+      "Unreal Engine",
+      "GAS",
+      "BlueprintNativeEvent"
+    ],
+    "createdAt": "2025-11-11T00:00:00.000Z",
+    "updatedAt": "2025-11-11T00:00:00.000Z",
+    "path": "/memos/gas-blueprintnativeevent",
+    "description": "GameplayAbility 서브클래싱 후 BlueprintNativeEvent, BlueprintImplementableEvent 함수 호출이 안되는 문제",
+    "thumbnail": "/image/weblog.png",
+    "slicedContent": "\r\nGamplayAbility 서브클래싱 후 사용자 지정 메서드에 `BlueprintNativeEvent`또는 `BlueprintImplementableEvent` 매크로 적용 후 블루프린트에서 오버라이드하여 실행하면 블루프린트 오버라이드 부분 코드가 실행되지 않는 문제\r\n\r\n해결 방법은 인스턴스 정책을 InstancedPerActor로 바꾸는 것.\r\n\r\n..."
+  },
+  {
     "name": "smart-pointer",
     "title": "스마트 포인터",
     "tags": [
@@ -11,7 +26,7 @@
     "path": "/memos/smart-pointer",
     "description": "스마트 포인터",
     "thumbnail": "/image/weblog.png",
-    "slicedContent": "..."
+    "slicedContent": "# 스마트 포인터\r\n스마트 포인터는 포인터가 가리키는 메모리를 자동으로 해제하는 역할을 함.\r\n\r\nRAII(Resource Acquisition Is Initialization) 기법을 사용하여 메모리 관리를 자동으로 해제하는데 RAII는\r\n객체의 수명이 그 객체가 소유한 자원의 수명과 동일하게 만드는 기법.\r\n\r\n## std::unique_ptr\r\n`st..."
   },
   {
     "name": "welcome",

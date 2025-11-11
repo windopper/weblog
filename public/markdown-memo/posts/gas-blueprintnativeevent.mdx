@@ -1,0 +1,36 @@
+---
+title: "GameplayAbility 서브클래싱 후 BlueprintNativeEvent, BlueprintImplementableEvent 함수 호출이 안되는 문제"
+tags: ["Unreal Engine", "GAS", "BlueprintNativeEvent"]
+date: "2025-11-11"
+thumbnail: "/image/weblog.png"
+description: "GameplayAbility 서브클래싱 후 BlueprintNativeEvent, BlueprintImplementableEvent 함수 호출이 안되는 문제"
+---
+
+GamplayAbility 서브클래싱 후 사용자 지정 메서드에 `BlueprintNativeEvent`또는 `BlueprintImplementableEvent` 매크로 적용 후 블루프린트에서 오버라이드하여 실행하면 블루프린트 오버라이드 부분 코드가 실행되지 않는 문제
+
+해결 방법은 인스턴스 정책을 InstancedPerActor로 바꾸는 것.
+
+AbilitySystemComponent_Abilities.cpp 코드 중 일부
+
+```cpp
+// If it's an instanced one, the instanced ability will be set, otherwise it will be null
+UGameplayAbility* InstancedAbility = Spec->GetPrimaryInstance();
+UGameplayAbility* AbilitySource = InstancedAbility ? InstancedAbility : Ability;
+```
+
+Ability는 `Spec→Ability`로 CDO (Class Default Object) 임.
+
+**GameplayAbilitySpec.h**
+
+```cpp
+/** Ability of the spec (Always the CDO. This should be const but too many things modify it currently) */
+UPROPERTY()
+TObjectPtr<UGameplayAbility> Ability;
+```
+
+`GetPrimaryInstance`를 통해 인스턴스를 가져올 수 있지만 InstnacedPerActor에만 유효하다는 주석이 달려있다.
+
+```cpp
+/** Returns the primary instance, only valid on InstancedPerActor abilities (returns nullptr otherwise) */
+	UE_API UGameplayAbility* GetPrimaryInstance() const;
+```

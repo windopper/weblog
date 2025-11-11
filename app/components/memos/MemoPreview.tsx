@@ -33,7 +33,9 @@ export default function MemoPreview({ memo }: MemoPreviewProps) {
   const tags = memo.tags ? memo.tags : [];
   const displayContent = memo.slicedContent || memo.description || "";
   const hasContent = displayContent.length > 0;
-  const isUpdated = memo.updatedAt && memo.createdAt && 
+  const isUpdated =
+    memo.updatedAt &&
+    memo.createdAt &&
     memo.updatedAt.getTime() !== memo.createdAt.getTime();
 
   return (
@@ -86,9 +88,7 @@ export default function MemoPreview({ memo }: MemoPreviewProps) {
                 </span>
               )}
               {isUpdated && memo.updatedAt && (
-                <span className="text-zinc-600">
-                  수정됨
-                </span>
+                <span className="text-zinc-600">수정됨</span>
               )}
             </div>
             {(memo.createdAt || memo.updatedAt) && (

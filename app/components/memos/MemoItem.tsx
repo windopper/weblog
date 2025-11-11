@@ -49,7 +49,9 @@ export default function MemoItem({ memo }: MemoItemProps) {
             />
           </div>
 
-          <h3 className="title text-lg font-bold text-zinc-100">{memo.title}</h3>
+          <h3 className="title text-lg font-bold text-zinc-100 line-clamp-2">
+            {memo.title}
+          </h3>
           <p className="text-sm text-zinc-400">
             {memo.description ? memo.description : "No description"}
           </p>
