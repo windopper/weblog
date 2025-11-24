@@ -100,6 +100,19 @@
     "readingMinutes": 13
   },
   {
+    "name": "improve-cifar-10-classification-performance",
+    "title": "CIFAR-10 분류모델 개선하기",
+    "tags": [
+      "cifar-10",
+      "machine-learning",
+      "deep-learning"
+    ],
+    "createdAt": "2025-11-24T00:00:00.000Z",
+    "path": "/posts/improve-cifar-10-classification-performance",
+    "slicedContent": "\r\n# CIFAR-10 분류모델 개선하기\r\n본 실험은 CIFAR-10 데이터셋을 이용한 이미지 분류 태스크에서 모델의 일반화 성능을 극대화하기 위한 단계별 최적화 과정을 기술한다. LeNet-5 기반의 베이스라인 모델(정확도 약 61.25%)에서 출발하여, 모델의 표현력을 높이기 위해 ResNet, WideResNet, PyramidNet 등 다양한 심층 ...",
+    "readingMinutes": 20
+  },
+  {
     "name": "nuxt3-vs-nextjs-compare",
     "title": "Nuxt 입문과 Next.js와의 비교",
     "tags": [
