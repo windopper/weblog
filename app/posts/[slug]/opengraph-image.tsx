@@ -37,7 +37,7 @@ export default async function OpengraphImage({
   const file = await getMarkdownFileWithFetch(slug);
   const { title, tags } = file || { title: "", tags: [] };
   const image = await fetch(
-    `${prefixUrl}/api/post/thumbnail?title=${title}&tags=${tags.join(",")}`
+    `${prefixUrl}/api/post/thumbnail?title=${encodeURIComponent(title)}&tags=${tags.map(encodeURIComponent).join(",")}`
   );
 
   return image;
