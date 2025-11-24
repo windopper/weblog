@@ -207,3 +207,19 @@ ueb-blueprint {
   --ueb-height: 500px;
   height: 500px;
 }
+
+
+/* toc */
+/* scrollbar */
+.toc::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.toc::-webkit-scrollbar-thumb {
+  @apply bg-zinc-700 rounded-full;
+}
+
+.toc::-webkit-scrollbar-corner {
+  @apply bg-transparent;
+}

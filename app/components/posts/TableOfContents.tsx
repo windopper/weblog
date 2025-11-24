@@ -44,6 +44,16 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
     };
   }, []);
 
+  // scroll to active id
+  useEffect(() => {
+    if (activeId) {
+      const element = document.querySelector(`[data-toc-id="${activeId}"]`);
+      if (element) {
+        (element as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [activeId, isOpen]);
+
   if (toc.length === 0) {
     return null;
   }
@@ -72,7 +82,7 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
       )}
 
       {/* 데스크톱 TOC */}
-      <div className="hidden xl:block fixed top-52 right-4 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-50">
+      <div className="hidden xl:block fixed top-52 right-4 w-64 max-h-[calc(100vh-24rem)] overflow-y-auto z-50 toc">
         <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-lg p-4">
           <h3 className="text-md font-semibold text-zinc-300 my-2 uppercase tracking-wider">
             목차
@@ -83,6 +93,7 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
                 <li key={item.id} className="pt-2">
                   <button
                     onClick={() => handleClick(item.id)}
+                    data-toc-id={item.id}
                     className={`
                       block w-full text-left text-sm transition-colors duration-200
                       hover:text-blue-400 cursor-pointer
