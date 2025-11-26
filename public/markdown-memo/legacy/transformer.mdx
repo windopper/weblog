@@ -1,0 +1,372 @@
+---
+title: "Transformer"
+description: ""
+tags: ["ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/5aa184ab-ce63-4cab-831c-21337f54f2d8.png"
+---
+
+<!-- Table of Contents -->
+
+
+# Transformer
+
+트랜스포머(Transformer)는 2017년 구글이 발표한 논문인 **Attention is all you need**에서 나온 모델로 기존의 seq2seq의 구조인 인코더-디코더를 따르면서도, 논문의 이름처럼 어텐션(Attention)만으로 구현한 모델이다. 이 모델은 RNN을 사용하지 않고, 인코더-디코더 구조를 설계하였음에도 번역성능에서도 RNN보다 우수한 성능을 보여주었다.
+
+
+![트랜스포머의 모델 아키텍처](/markdown-memo/legacy/images/5aa184ab-ce63-4cab-831c-21337f54f2d8.png)
+
+# 기존 seq2seq 모델의 한계?
+
+인코더가 입력 시퀀스를 하나의 벡터로 압축하는 과정에서 입력 시퀀스의 정보가 일부 손실된다는 단점이 있다.
+
+
+# Positional Encoding
+
+트랜스포머는 RNN과 달리 단어 입력을 순차적으로 받는 방식이 아니므로 다른 방식으로 단어의 위치 정보를 알릴 필요가 있다. 따라서 트랜스포머는 해당 정보를 얻기 위하여 각 단어의 임베딩 벡터에 위치 정보들을 더하여 모델의 입력으로 사용, 이를 positional encoding 이라고 한다.
+
+<!-- Unknown block type: column_list -->
+
+# Positional Encoding 구현하기
+
+# Attention
+
+> Attention은 인지심리학에서의 주의를 모방하여 고안된 기술. Attention은 입력 데이터 중 일부의 효과를 증강시키며, 다른 일부를 감소시킨다. 이는 네트워크가 데이터 중 비중이 적지만 중요한 데이터에 더 집중하게 하기 위해서이다. 데이터 중 어느 부분을 학습하는 것이 다른 부분을 학습하는 것보다 더 중요한지는 문맥에 따라 결정되며, 이는 [경사하강법](/7a15a8ee2694466db2f635d257381fc2)으로 학습된다.
+
+Attention은 기계 번역 task를 더 잘 풀기 위해 고안되었으며, RNN에 기반한 seq2seq 모델의 고질적인 문제인 **정보 압축으로 인한 정보 손실** 그리고 **기울기 소실**에 의한 번역 정확도 감소를 보정해주기 위하여 등장한 기법이다.
+
+
+어텐션 함수는 **쿼리(Query)와 Key-Value 집합 쌍**을 쿼리(Query), 키(Keys), 값(Values) 그리고 결과(Output)가 모두 벡터인 **Output**에 매핑하는 것으로 설명 할 수 있다. 
+
+결과(Output)은 values의 가중 합으로 계산되며, 여기서 각 value에 할당된 가중값은 Query와 해당 Key의 compatibility function으로 계산된 값이다.
+
+
+Q : 영향을 받는 벡터
+
+K : 영향을 주는 벡터
+
+V : 주는 영향의 가중치 벡터
+
+![](/markdown-memo/legacy/images/48d9e97a-b506-430e-b127-538e71b3f9ea.png)
+
+## Different Use for multi-head attention
+
+Transformer 모델은 multi-head attention을 세 가지 방식으로 나누어 사용한다.
+
+### encoder-decoder attention
+
+### self-attention in encoder
+
+### self-attention in decoder
+
+
+---
+
+
+# Encoder
+
+
+# self-attention in encoder
+
+seq2seq에서 어텐션을 수행하는 경우 Q, K, V의 정의를 다시 생각해 본다면,
+
+> 💡 Q = Query : t 시점의 디코더 셀에서의 은닉 상태
+K = Keys : 모든 시점의 인코더 셀에서의 은닉 상태들
+V = Values : 모든 시점의 인코더 셀의 은닉 상태들
+
+
+그러나 self-attention 에서는 Q, K, V 가 모두 동일하므로,
+
+> 💡 Q : 입력 문장의 모든 단어 벡터들
+K : 입력 문장의 모든 단어 벡터들
+V : 입력 문장의 모든 단어 벡터들
+
+## Q, K, V 벡터 구하기
+
+self-attention은 입력 문장의 단어 벡터들을 가지고 계산을 수행한다고 했으나, self-attention은 encoder의 초기 입력인 $d_{model}$의 차원을 가지는 단어 벡터들을 사용하여 셀프 어텐션을 수행하는 것이 아닌 **각 단어 벡터들로부터 ****$Q, K, V$****벡터들을 얻는 작업을 거쳤다.**
+
+논문에서는 $d_{model}=512$의 차원을 가졌던 각 단어 벡터들을 $64$의 차원을 가지는 $Q, K, V $로 변환하였다.
+
+$64$라는 값은 트랜스포머의 또 다른 하이퍼파라미터인 $h$에 의하여 결정되는데, 트랜스포머는 $d_{model}$을 $h$로 나눈 값을 각 $Q, K, V$의 차원을 결정하였다.
+
+논문에서는 $h = 8$로 정하였다.
+
+
+![](/markdown-memo/legacy/images/6432cee6-8517-43be-9b3c-f3ac2a109858.png)
+
+입력 문장의 단어 벡터들 보다 더 작은 벡터들은 가중치 행렬 $W^Q, W^K, W^V$를 곱하여 완성된다.
+
+각 가중치 행렬은 $d_{model}\times{({d_{model}/{h}})}$의 크기를 가지고, 해당 행렬들은 훈련 과정에서 학습된다.
+
+## Scaled dot-product Attention
+
+<!-- Unknown block type: column_list -->
+
+attention 함수에서 주로 사용되는 것은 **dot-product attention**과** additive attention**이다. dot-product attention은 scaling factor인 $\sqrt{d_k}$을 제외하면 상단의 알고리즘과 동일하며, additive attention은 단일 hidden layer에서 FFN(feed-forward network)을 사용하여 compatibility function을 계산한다.
+
+두 방법은 이론적으로 복잡도가 비슷하지만, **dot-product attention**은 matrix를 통하여 최적화된 연산을 구현 할 수 있기 때문에 훨씬 빠르고 공간적으로 효율적이다.
+
+$d_k$의 값이 작다면 두 매커니즘들은 비슷한 속도로 작동하지만 $d_k$의 값이 클 때 $1\over{\sqrt{d_k}}$로 스케일링을 하지 않으면 **additive attention**보다 성능이 떨어진다. 스케일링을 하지 않으면 dot product 값이 매우 커서 softmax 함수를 통과하였을때의 gradient가 매우 작은 이유로 학습이 잘 되지 않아 이러한 부작용을 방지하기 위하여 dot product 값을 $1\over\sqrt{d_k}$로 스케일링 하였다.
+
+
+$$
+Attention(Q, K, V) = softmax({QK^T\over\sqrt{d_k}})V
+$$
+
+해당 수식을 NLP 모델로 사용했다고 가정한 후 다시 보자.
+
+Nice to meet you 라는 문장에** attention** 을 적용한다면,
+
+**Query**를 한 단어( ex: Nice ) 그리고 **Key**를 모든 단어들의 **stacked matrix**라고 한다.
+
+$QK^T$는 **한 단어( ex: Nice )**와 **모든 단어( ex: Nice, to , meet, you )**들의 **dot product**를 해주어 어떠한 **relation vector**를 만들어 낸다. 이 과정은 모든 단어들이 **Query**로 사용될 때 까지 반복한다.
+
+> 💡 실제로는** Query를 Key와 같이 stack**하여 matrix간 dot product를 통하여 relation matrix를 만든다.
+
+그 후, $1\over\sqrt{d_k}$로 스케일링 후, $softmax$함수를 통하여 **Query 단어가 모든 단어 들과 어느 정도의 correlation (상관관계)**가 있는지를 확률 분포로 만든 후, 이를 Value matrix와 dot product를 해주어, 기존 Vector에 **Query**와 **Key**간의 correlation** **정보를 더한 Vector를 만든다. 
+
+여기서 완성된 $Attention(Q, K, V)$의 값을 **Attention Value (어텐션 값)** 이라고 부른다.
+
+
+해당 행렬 연산에 사용된 행렬의 크기를 모두 정리해보자.
+
+입력 문장의 길이 **seq_len **라고 가정한다.
+
+문장 행렬의 길이는 $(seq\_len, d_{model})$이다. 여기에 3개의 가중치 행렬을 곱하여 $Q, K, V $행렬을 만들어야 한다.
+
+$Q, K$의 차원을 $d_k$라고 하고, $V$벡터의 차원을 $d_v$라고 하면. $Q, K$행렬의 크기는 $(seq\_len, d_k)$가 되고 $V$행렬의 크기는 $(seq\_len, d_v)$가 된다.
+
+따라서 문장 행렬과 Q, K, V행렬의 크기로 부터 가중치 행렬의 크기 추정이 가능해 진다.
+
+$W^Q, W^K$는 $(d_{model}, d_k)$의 크기를 가지며,  $W^V$는 $(d_{model}, d_v)$의 크기를 가진다.
+
+논문에서는 $d_k$와 $d_v$의 차원은 $d_{model}/h$와 같으므로, 즉, $d_{model}/h = d_k = d_v$ 이다.
+
+결과적으로 $softmax({QK^T\over\sqrt{d_k}})V$ 식을 적용하여 나오는 attention 값 행렬은 $(seq\_len, d_v)$ 이다.
+
+
+### Padding Mask
+
+Scaled dot-product attention 함수 내부를 보면 mask 값을 옵션을 설정 할 수 있는 부분이 있다.
+
+Mask Layer는 참조하고 싶지 않은 correlation을 masking할 때 사용하는 층으로 실질적인 의미를 가지고 있지 않거나 참조하고자 하는 데이터들의 접근 여부를 설정할 수 있다.
+
+예를 들어 <PAD>가 포함된 입력 문장의 self-attention의 예제를 보자.
+
+![](/markdown-memo/legacy/images/b8f09ea8-b4df-4c7f-a817-97b417efb73a.png)
+
+
+단어 <PAD>는 실질적인 의미를 가진 단어가 아니므로 트랜스포머에게 이에 대한 유사도를 구하지 않도록 하기 위하여 Masking을 해준다.
+
+Masking이란 Attention 과정에서 제외하기 위한 값을 가린다는 의미다.
+
+Masking을 하는 방법은 Attention Score Matrix의 Masking 위치에 매우 작은 음수값을 넣어 주는 것이다 ( ex : -1000000000와 같은 음수무한대에 가까운 수 ).
+
+Masking을 마친 Attention Score Matrix는 다음 연산으로 softmax 함수를 지나게 되는데, 현재 마스킹 위치에 매우 작은 음수 값이 들어가 있으므로 softmax 함수를 지난 후의 위치는 0이 되어 단어간 유사도를 구하는 일에 <PAD> 토큰이 반영되지 않게 한다.
+
+![](/markdown-memo/legacy/images/7c34fda4-7900-46b0-8df5-8b9cc473e0a4.png)
+
+### Padding Mask 구현하기
+
+## scaled dot-product attention 구현하기
+
+## Multi-Head Attention
+
+${d_{model}}$차원의 K, V, Q을 single attention function에 넣는 것 보다, 각각 $d_k, d_k, d_v$의 차원에 대해 학습된 서로 다른 linear projections를 사용하여 Q, K, V를 $h$회 linearly project하는 것이 훨씬 유익하다는 사실을 알게되었다.
+
+이러한 Q, K, V의 projected versions을 병렬적으로 attention function (여기서는 Scaled Dot-Product Attention) 에서 계산하여 $d_v$차원의 결과 값을 도출하였다.
+
+도출된 값을 concatenated 한 후, 다시 projecting 하여 최종 값을 얻었다.
+
+Multi-head attention을 통하여 모델은 서로 다른 표현의 정보에 공통으로 주의를 기울일 수 있다.
+
+**정리하자면, 병렬적인 어텐션을 통하여 다양한 어텐션 헤드의 시각으로 연관도를 효과적으로 판단할 수 있도록 한다.**
+
+<!-- Unknown block type: column_list -->
+
+$d_{model}$을 512이라고 하고 $h$가 8이라고 하면, Query, Key, Value의 dimension은 $d_k = d_v = d_{model}/h = 64$로 $h$의 개수로 나누어주어 dimension이 줄어들기 때문에 single-head attention을 했을 때와 비교해서 비슷한 computational cost를 가진다.
+
+
+$Concat(head_1,...,head_h)$의 크기는 $(seq\_len, h\times{d_v})$
+
+$W^O$의 크기는 $(hd_v, d_{model})$ 이므로
+
+$MultiHead(Q, K, V)$를 모두 수행하였다면 크기는 $(seq\_len, d_{model})$가 된다.
+
+
+## Multi-head Attention 구현하기
+
+# Position-Wise FFNN
+
+포지션 와이즈 FFNN (Fully-connected FFNN) 은 인코더와 디코더에서 공통적으로 가지고 있는 서브층이다.
+
+$FFNN(x) = MAX(0, xW_1 + b_1)W_2+b _2$
+
+$x$는 앞서 multi-head attention 의 결과로 나온 $(num\_len, d_{model})$의 크기를 가지는 행렬이다.
+
+가중치 행렬 $W_1$은 $(d_{model}, d_{ff})$의 크기를 가지고, 가중치 행렬 $W_2$은 $(d_{ff}, d_{model})$의 크기를 가진다.
+
+$MAX(0, xW_1 + b_1)$는 $xW_1 + b_1$를 활성화 함수인 ReLU에 통과한 것이다.
+
+해당 논문에서 은닉층의 크기는 $d_{ff}$는 2048로 정의하였다.
+
+
+# Position-Wise FFNN 구현하기
+
+```python
+outputs = tf.keras.layers.Dense(units=dff, activation='relu')
+outputs = tf.keras.layers.Dense(units=d_model)(outputs)
+```
+
+
+# Residual connection and Layer normalization
+
+## 잔차 연결 (Residual connection)
+
+<!-- Unknown block type: link_to_page -->
+
+서브층이 멀티 헤드 어텐션이므로 잔차 연결 연산은 다음과 같다.
+
+$H(x) = x+Multi\_Head\_Attention(x)$
+
+## 층 정규화 (Layer normalization)
+
+<!-- Unknown block type: link_to_page -->
+
+층 정규화는 **텐서의 마지막 차원**에 대해서 평균과 분산을 구한 후 값을 정규화한다.
+
+여기서 텐서의 마지막 차원이라는 것은 트랜스포머에서는 $d_{model}$차원을 의미한다.
+
+![](/markdown-memo/legacy/images/8dbf5f5d-9e00-449c-9dec-56bbaf8c678d.png)
+
+층 정규화를 위하여 화살표 방향으로 각각 평균 $\mu$과 분산 $\sigma^2$을 구한다. 각 화살표 방향의 벡터를 $x_i$라고 명명한다.
+
+층 정규화를 수행한 후에는 벡터$x_i$는 $ln_i$라는 벡터로 정규화가 된다.
+
+$ln_i=LayerNorm(x_i)$
+
+잔차 연결 후 정규화 과정을 거친 연산을 수식으로 표현하자면,
+
+$LN = LayerNorm(x+Multi\_Head\_Attention(x))$
+
+
+# Encoder 구현하기
+
+```python
+def encoder_layer(dff, d_model, h, dropout, name="encoder_layer"):
+  inputs = tf.keras.Input(shape=(None, d_model), name="inputs")
+
+  """
+    인코더의 입력으로 들어가는 문자에는 <PAD> 토큰 즉, 패딩이 있을 수 있으므로
+    어텐션 시 패딩 토큰을 제외하도록 패딩 마스크를 사용.
+  """
+  padding_mask = tf.keras.Input(shape=(1, 1, None), name='padding_mask')
+
+  # 멀티 헤드 어텐션 ( 첫번째 어텐션 / 셀프 어텐션 )
+  attention = MultiHeadAttention(
+      d_model, h, name='attention'
+  )({
+      'query': inputs, 'key': inputs, 'value': inputs,
+      'mask': padding_mask
+  })
+
+  # 드롭아웃 + 잔차 연결과 층 정규화
+  attention = tf.keras.layers.Dropout(rate=dropout)(attention)
+  attention = tf.keras.layers.LayerNormalization(epsilon=1e-6)(inputs + attention)
+
+  # 포지션 와이즈 피드 포워드 신경망 ( 두번째 신경망 )
+  outputs = tf.keras.layers.Dense(units=dff, activation='relu')(attention)
+  outputs = tf.keras.layers.Dense(units=d_model)(outputs)
+
+  # 드롭아웃 + 잔차 연결과 층 정규화
+  outputs = tf.keras.layers.Dropout(rate=dropout)(outputs)
+  outputs = tf.keras.layers.LayerNormalization(epsilon=1e-6)(attention+outputs)
+
+  return tf.keras.Model(
+      inputs=[inputs, padding_mask], outputs=outputs, name=name
+  )
+```
+
+트랜스포머는 h 개수 만큼 인코더 층을 사용하므로 이를 여러번 쌓는 코드를 별도로 구현해 주어야 한다.
+
+
+# Encoder 쌓기
+
+```python
+def encoder(seq_len, num_layers, dff, d_model, h, dropout, name='encoder'):
+  inputs = tf.keras.Input(shape=(None, ), name='inputs')
+
+  # 인코더는 패딩 마스크 사용
+  padding_mask = tf.keras.Input(shape=(1, 1, None), name='padding_mask')
+
+  embeddings = tf.keras.layers.Embedding(seq_len, d_model)
+  embeddings *= tf.math.sqrt(tf.cast(d_model, tf.float32))
+  embeddings = PositionalEncoding(seq_len, d_model)(embeddings)
+  outputs = tf.keras.layers.Dropout(rate=dropout)(embeddings)
+
+  # 인코더를 num_layer개 쌓기
+  for i in range(num_layers):
+    outputs = encoder_layer(dff=dff, d_model=d_model, h=h, dropout=dropout,
+                            name="encoder_layer_{}".format(i))([outputs, padding_mask])
+
+  return tf.keras.Model(
+      inputs=[inputs, padding_mask], outputs=outputs, name=name)   
+  )
+```
+
+# Decoder
+
+# 디코더의 첫번째 서브층 : self-attention and look-ahead mask
+
+![](/markdown-memo/legacy/images/966e87c0-f4a8-4fc5-a75f-c16d8887b2b3.png)
+
+decoder도 encoder와 동일한데 임베딩 층과 포지셔널 인코딩을 거친 후의 문장 행렬이 입력된다.
+
+다만 여기서 문제가 있는데, seq2seq2의 디코더에 사용되는 RNN 계열의 신경망은 입력 단어를 매 시점마다 순차적으로 입력받으므로 다음 단어 예측에 현재 시점을 포함한 이전 시점에 입력된 단어들만 참고할 수 있다. 반면, 트랜스포머는 문장 행렬을 한번에 입력받으므로 현재 시점의 단어를 예측하고자 할 때, 입력 문장 행렬로부터 미래 시점의 단어까지도 참고할 수 있는 현상이 발생한다.
+
+이를 방지하기 위해 트랜스포머의 디코더에서는 현재 시점의 예측에서 현재 시점보다 미래에 있는 단어들을 참고하지 못하도록 look-ahead mask를 도입하였다.
+
+
+![](/markdown-memo/legacy/images/013ba882-88dc-4858-89f6-409ff2ca5791.png)
+
+look-ahead mask는 디코더의 첫번째 서브층에서 이루어진다. 디코더의 첫 번째 서브층인 Multi-head self-attention 층은 인코더의 첫번째 서브층인 멀티 헤드 셀프 어텐션 층과 동일한 연산을 수행한다. 오직 다른 점은 Attention Score Matrix에서 마스킹을 적용한다는 점만 다르다.
+
+![](/markdown-memo/legacy/images/1ed9ff8b-7197-45a0-aef3-d2810840477e.png)
+
+이제 자기 자신보다 미래에 있는 단어들은 참고하지 못하도록 마스킹 되었다.
+
+마스킹 된 후의 Attention Score Matrix의 각 행을 보면 자기 자신과 그 이전 단어들만을 참고할 수 있음을 볼 수 있다.
+
+# 디코더의 두번째 서브층 : encoder-decoder attention
+
+디코더의 두번째 서브층은 Multi-head attention을 수행한다는 점에서는 이전의 어텐션들과는 공통점이 있으나 self-attention이 아니다.
+
+self-attention은 Query, Key, Value가 같은 경우를 말하지만 encoder-decoder attention은 Query가 decoder인 행렬인 반면, Key와 Value는 인코더 행렬이기 때문이다.
+
+![](/markdown-memo/legacy/images/420c80b5-9993-4f7b-a8ae-afab24d72141.png)
+
+# References
+
+[https://arxiv.org/pdf/1706.03762.pdf](https://arxiv.org/pdf/1706.03762.pdf)
+
+[https://wikidocs.net/22893](https://wikidocs.net/22893)
+
+[https://ko.wikipedia.org/wiki/주의_기제](https://ko.wikipedia.org/wiki/%EC%A3%BC%EC%9D%98_%EA%B8%B0%EC%A0%9C)
+
+[https://velog.io/@yuns_u/단위벡터-기저벡터-span-rank-linear-projections](https://velog.io/@yuns_u/%EB%8B%A8%EC%9C%84%EB%B2%A1%ED%84%B0-%EA%B8%B0%EC%A0%80%EB%B2%A1%ED%84%B0-span-rank-linear-projections)
+
+[https://aistudy9314.tistory.com/63](https://aistudy9314.tistory.com/63)
+
+[https://wikidocs.net/31379](https://wikidocs.net/31379)
+
+[https://silhyeonha-git.tistory.com/16](https://silhyeonha-git.tistory.com/16)
+
+[https://skyjwoo.tistory.com/entry/positional-encoding이란-무엇인가](https://skyjwoo.tistory.com/entry/positional-encoding%EC%9D%B4%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80)
+
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: child_page -->
+

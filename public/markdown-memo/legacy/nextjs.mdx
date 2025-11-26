@@ -1,0 +1,161 @@
+---
+title: "Next.js"
+description: ""
+tags: ["Next.js","React"]
+date: "2024-02-04"
+thumbnail: ""
+---
+
+<!-- Unknown block type: link_preview -->
+
+> The React Framework
+
+
+<!-- Table of Contents -->
+
+# 특징
+
+- Pre-Rendering - 각 페이지들을 사전에 미리 HTML 문서로 가지고 있음
+- Server Side Rendering (SSR) - 페이지를 서버에서 렌더링하여 초기 로딩 속도를 향상
+- Static Site Generation (SSG) - 빌드 시점에 페이지를 사전 렌더링하여 성능을 향상
+- Incremental Static Regenration (ISR) - 동적으로 사전 렌더링할 수 있는 중간 솔루션을 제공
+- SEO Optimization - 검색 엔진 최적화를 위한 메타태그, 제목 태그들을 손쉽게 설정
+- Navigation based on File - 폴더의 경로에 따라 페이지의 경로가 설정되어 구축이 빠르고 관리가 편
+# 기능(v13 이전)
+
+## Data Fetching
+
+### getStaticProps
+
+정적 페이지 생성을 위한 데이터를 가져오는 사전 렌더링 함수. 런타임이 아닌 빌드 타임에서만 실행이 되므로, 변동이 거의 없는 데이터 대상으로만 적용하는게 좋음. *(개발 모드에서는 항상 호출됨)*
+
+`revalidate` 값 설정 시 ISR(Incremental Static Generation) 설정이 가능해짐
+
+### getStaticPaths
+
+동적 경로를 위한 정적 경로를 생성하는 사전 렌더링 함수. 예를 들어, 하나의 FAQ 데이터(id: 1)가 존재한다고 했을 때, `faqs/1` 라는 경로를 빌드 타임에 사전 렌더링 할 수 있음. (개발 모드에서는 항상 호출됨)
+
+### getServerSideProps
+
+서버 사이드 렌더링을 위한 데이터 가져오기 함수. 매 요청마다 데이터를 서버에서 가져옴.
+
+<!-- Unknown block type: child_page -->
+
+## Routing
+
+## next/script
+
+- 서버 및 클라이언트 모두에서 JavaScript 코드를 실행하고 데이터를 초기화하는 데 사용되는 컴포넌트 (SSR, CSR 모두 적용 가능함)
+- 서버에서 데이터를 미리 가져와 클라이언트로 전달하거나, 클라이언트 측에서 라우팅 또는 페이지 진입시 특정 작업을 수행할 수 있음
+- **서버 사이드 데이터 로딩**: 페이지가 서버에서 처음 렌더링 될 때 데이터 초기화하는데 사용
+- **클라이언트 사이드 데이터 로딩: **페이지가 클라이언트에서 로딩될 때 특정 작업 수행하도록 설정
+<!-- Unknown block type: child_page -->
+
+> 참고:
+[https://velog.io/@hwisaac/NextJS-API-nextscript](https://velog.io/@hwisaac/NextJS-API-nextscript)
+[https://nextjs.org/docs/pages/building-your-application/optimizing/scripts](https://nextjs.org/docs/pages/building-your-application/optimizing/scripts)
+
+## API Routes
+
+- Next.js 에서 제공하는 백엔드 기능. 서버 사이드 코드를 작성하지 않고도 서버리스 백엔드 엔드포인트를 만들 수 있게 해주는 기능.
+- `pages/api` 디렉토리 안에 파일을 생성하여 API 엔드포인트를 정의. 이를 통해 데이터를 조회, 생성, 수정, 삭제할 수 있는 서버리스 API를 구축
+## next/auth
+
+- Next.js 애플리케이션에서 간단하고 확장 가능한 사용자 인증을 구현하기 위한 라이브러리
+- 다양한 인증 공급자를 통한 손쉬운 로그인 (Google, Facebook, GitHub, 이메일 및 기타)
+- 세션과 JWT를 사용한 사용자 인증 관리
+- 사용자 데이터베이스 통합 및 사용자 정의 프로필 필드 관리
+- 보안적으로 안전한 사용자 인증을 위한 설정 및 옵션
+예제:
+
+<!-- Unknown block type: link_to_page -->
+
+
+# Next.js v13 업데이트
+
+- app/Directory : 더 쉽고, 더 빠르고, 더 적은 client JS
+- Turbopack : Rust기반 Webpack 대체제, 최대 700배 속도가 빨라짐
+- New next/image : 네이티브 브라우저 Lazy Loading으로 더 빨라짐
+- New @next/font : 레이아웃 이동이 없는 자동 자체 호스트 글꼴 추가
+- Improved next/link : 자동 <a> 태그로 API를 단순화
+## app/ Directory
+
+- 기존의 Pages 폴더 기반 파일 시스템 라우터를 `app` 디렉토리로 변경하여 라우팅 및 라이아웃 개선
+- Layout: 리렌더링 방지를 위한 레이아웃 제공
+- Server Component: app 디렉토리 내 파일은 기본으로 서버 컴포넌트로 동작. 클라이언트 컴포넌트는 “use client” 지시자를 사용하여 변경가능
+- Streaming: app 디렉토리는 렌더링되는 UI 단위를 점진적으로 렌더링 & 스트리밍 할 수 있는 기능 제공
+- Data Fetching 지원: `fetch()` Web API를 사용할 수 있게 되어, 컴포넌트 레벨에서도 SSR 적용가능
+## Layout
+
+- app/ 파일 구조에서는 기본 레이아웃을 정의할 수 있음 (필수)
+- 복잡한 상태를 더 쉽게 관리할 수 있고, 리렌더링을 방지하면서 경로간 공통 UI를 쉽게 공유할 수 있음
+- 또한, 레이아웃을 중첩하거나 라우트, 컴포넌트, 테스트 및 스타일과 함께 앱 코드를 배치할 수 있음
+- 여러 페이지들이 동일한 UI를 공유할 때 레이아웃 기능 사용
+## React Server Components
+
+- app/ 디렉토리에서는 Server Components 아키텍처를 지원
+- 서버 컴포넌트를 사용하면 클라이언트로 전송되는 JS 양을 줄여 초기 페이지 로드 속도를 줄일 수 있음
+- 성능 최적화 : 렌더링하는 데 필요한 데이터만 서버에서 가져오고, 이를 브라우저로 전달 (로딩 속도 개선)
+- SSR 및 SEO : 서버에서 초기 페이지 렌더링을 수행하므로 검색 엔진 최적화(SEO)와 성능 향상
+- 실시간 업데이트 : 클라이언트 측 JS가 필요하지 않으므로, 실시간 업데이트와 같은 기능을 구현하기 쉬움
+- 서버측 데이터 흐름 관리 : 데이터 흐름을 더욱 효율적으로 관리
+## Streaming
+
+- app/ 파일 구조는 렌더링 단위 별 UI를 클라이언트에 점진적으로 렌더링하고 스트리밍할 수 있는 기능을 제공
+- loading.js 파일을 생성하면 React Suspense와 함께 코딩 UI를 생성할 수 있음
+## Data Fetching
+
+- `fetch()` Web API를 사용할 수 있게 되면서, 컴포넌트 레벨에서도 SSR 적용 가능
+```typescript
+export default async function Page() {
+  // This request should be cached until manually invalidated.
+  // Similar to `getStaticProps`.
+  // `force-cache` is the default and can be omitted.
+  const staticData = await fetch(`https://...`, { cache: 'force-cache' })
+ 
+  // This request should be refetched on every request.
+  // Similar to `getServerSideProps`.
+  const dynamicData = await fetch(`https://...`, { cache: 'no-store' })
+ 
+  // This request should be cached with a lifetime of 10 seconds.
+  // Similar to `getStaticProps` with the `revalidate` option.
+  const revalidatedData = await fetch(`https://...`, {
+    next: { revalidate: 10 },
+  })
+ 
+  return <div>...</div>
+}
+```
+
+## New next/image
+
+- 레이아웃 변경 없이 이미지를 쉽게 표시하고, on-demand 방식으로 파일을 최적화하여 성능을 향상 시킬 수 있는 강력한 next/image 컴포넌트를 제공
+- 클라이언트 측 JS가 더 적게 포함됨
+- 스타일링 및 구성이 용이함
+- 기본적으로 alt 태그를 내장하여 접근성을 향상
+- 네이티브 LazyLoading을 사용하기 때문에 더 빠름 (hydration이 필요하지 않음)
+## New next/font
+
+- 라이아웃 이동이 필요없는 자동 자체 호스팅 폰트 제공
+- 커스텀 폰트를 포함하여 모든 폰트를 자동으로 최적화
+- 개인 정보 보호 및 성능 향상을 위한 외부 네트워크 요청 제거
+- 모든 폰트 파일에 대한 자동 self-hosting 내장
+- CSS의 size-adjust 속성을 자동으로 적용
+## app router 구조
+
+### Colocation
+
+- 꼭 라우팅 되는 페이지가 아니어도, app 디렉토리 안에 커스텀 파일을 배치할 수 있음
+- 폴더가 라우팅을 정의하지만, page.js 또는 route.js에서 반환된 내용만이 공개적으로 접근 가능
+### 페이지와 레이아웃
+
+- page.js 유일하게 UI를 보여줄 수 있는 페이지
+- layout.js: 여러 pages간에 공유되는 UI
+- layout.js와 page.js 파일은 같은 폴더에 정의 가능하며, layout.js 는 항상 page.js를 감싸는 구조
+- Root Layout (필수): app 디렉토리 루트에 필수로 루트 레이아웃을 정의해야함.
+- 중첩 레이아웃: 기본적으로 레이아웃은 중첩됨
+- Templates: 템플릿은 레이아웃과 비슷하게 layout, page를 감싸지만, 상태 유지 X. (새로운 인스턴스 생성)
+## 라우트 그룹
+
+- 폴더를 Route 그룹으로 표시하여 해당 폴더가 경로의 URL 경로에 포함되지 않도록 할 수 있음
+- 컨벤션: 폴더 이름을 괄호로 묶음으로써 생성 (name)

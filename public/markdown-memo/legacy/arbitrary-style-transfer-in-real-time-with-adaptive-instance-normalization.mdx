@@ -1,0 +1,239 @@
+---
+title: "Arbitrary Style Transfer in Real-time with Adaptive Instance Normalization"
+description: ""
+tags: ["Style Transfer","Paper Review","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/a7532056-e9de-4df5-9b69-754709be926e.png"
+---
+
+
+<!-- Table of Contents -->
+
+# 개요
+
+해당 논문은 *Gatys*등이 소개한 스타일 트랜스퍼 기법을 통하여 생성하는 과정이 매우 느리기 때문에 이를 개선하기 위해 만들어 졌다.
+
+논문의 저자는 피드포워드 신경망을 이용하여 빠른 근사치를 구하는 것은 뉴럴 스타일 트랜스퍼의 속도를 올리는데 목적을 가지고 있지만 속도의 향상은 신경망이 새로운 스타일에 적응하지 못하고 고정된 스타일만을 반환한다는 점을 알리며 본인의 팀은 AdaIN 이라는 새로운 레이어를 적용하여 스타일의 제한없이 빠른 속도로 스타일 트랜스퍼를 할 수 있는 효과적인 접근 방식을 알아냈다고 밝혔다.
+
+논문의 핵심 내용은 AdaIN 으로 피드포워드 방식의 Instance Normalization, Conditional Instance Normalization 등과 비교했을 때 더 다양한 스타일을 생성할 수 있다는 것을 보여준다는 것이다.
+
+![](/markdown-memo/legacy/images/a7532056-e9de-4df5-9b69-754709be926e.png)
+
+이는 스타일 트랜스퍼 모델 별 이미지가 생성되는 시간이자 스타일의 개수를 나타내는 것으로 무한한 스타일을 생성시킬 수 있는 것에 비해서 소요 시간이 매우 작다는 것을 알려준다.
+
+
+# Batch Normalization
+
+일반적인 배치 정규화로 $\gamma, \beta$는 각각 아핀 파라미터들로 데이터로부터 학습되어지는 값이다.
+
+$$
+x\in\mathbb{R}^{N\times C\times H \times W},\quad \gamma, \beta,\mu(x), \sigma(x)\in\mathbb{R}^C
+$$
+
+$$
+
+\mathrm{BN}(x)=\gamma\left(\frac{x-\mu(x)}{\sigma(x)}\right)+\beta
+$$
+
+$$
+\mu_{c}(x)=\frac{1}{N H W} \sum_{n=1}^{N} \sum_{h=1}^{H} \sum_{w=1}^{W} x_{n c h w}
+$$
+
+$$
+\sigma_{c}(x)=\sqrt{\frac{1}{N H W} \sum_{n=1}^{N} \sum_{h=1}^{H} \sum_{w=1}^{W}\left(x_{n c h w}-\mu_{c}(x)\right)^{2}+\epsilon}
+$$
+
+# Instance Normalization
+
+기존의 피드포워드 스타일 트랜스퍼 방법에서는 각 합성곱 신경층 뒤에 BN 레이어가 포함되어 있다.
+
+*Ulyanov*등은 BN 레이어를 IN 레이어로 바꾸었을 때 성능이 굉장히 향상되는 것을 찾아냈다.
+
+IN층과 BN층이 다른 이유는 BN층은 테스트 단계 즉, 추론 시에 미니 배치의 statistics가population statistics 로 바뀌는 반면에 IN 층은 바뀌지 않는다는 것이다.
+
+<!-- Unknown block type: unsupported -->
+
+$$
+
+\mathrm{IN}(x)=\gamma\left(\frac{x-\mu(x)}{\sigma(x)}\right)+\beta
+$$
+
+$$
+\mu_{n c}(x)=\frac{1}{H W} \sum_{h=1}^{H} \sum_{w=1}^{W} x_{n c h w}
+$$
+
+$$
+\sigma_{c}(x)=\sqrt{\frac{1}{H W}  \sum_{h=1}^{H} \sum_{w=1}^{W}\left(x_{n c h w}-\mu_{nc}(x)\right)^{2}+\epsilon}
+$$
+
+# Conditional Instance Normalization
+
+$$
+CIN(x;s)=\gamma^s{({x-\mu(x)}\over{\sigma(x)}}+\beta^s
+$$
+
+매개변수로 $\gamma$와 $\beta$를 사용하는 대신에 *CIN*레이어에서는 각각의 스타일 *s*에 대한 매개변수인 $\gamma^s$와 $\beta^s$의 세트를 학습시킨다.
+
+인덱스 $s$로 묶인 스타일 이미지는 학습 과정간에 스타일 $s\in{1,2,...,S}$ 의 고정된 세트가 임의로 선택되어 진다.
+
+컨텐트 이미지는 CIN 레이어에서 사용되는 $\gamma^s$와 $\beta^s$를 포함하여 스타일 트랜스퍼 신경망에 의하여 변환된다.
+
+놀랍게도 신경망은 같은 합성곱 신경망 파라미터를 사용하지만 IN 레이어에서 다른 아핀 파라미터들을 사용함으로써 완전히 다른 이미지를 생성할 수 있다.
+
+이러한 normalization 층을 사용하지 않는 신경망과 비교하였을때 CIN 층을 포함한 신경망은 $2FS$ 추가적인 파라미터가 더 필요하였다.
+
+> 💡  $F$는 신경망에서의 특징 맵의 총 개수이다
+
+스타일의 수가 선형적으로 증가하기 때문에 모델에 많은 수의 스타일을 추가하는 것은 어렵다.
+
+또한 해당 접근 방식은 신경망을 재 학습 시키지 않고 임의의 새로운 스타일을 적용시킬 수 없다.
+
+
+# Interpreting Instance Normalization
+
+인스턴스 정규화가 스타일 트랜스퍼에서 왜 잘 작동하는지는 여전히 알 수 없지만 Ulyanov 등은 컨텐츠 이미지의 대비에 영향을 받지 않는다는 점을 꼽았다.
+
+저자는 여러 스타일 트랜스퍼 모델에서 이미지의 스타일을 구하기 위해서 합성곱 신경망의 feature statistics를 사용했다는 점과 channel-wise 한 평균과 분산을 포함한 다른 statistics들도 스타일 트랜스퍼에 효과적이라는 것을 보여준 논문을 예로 들며 인스턴스 정규화를 이용하여 feature statistics를 정규화하는 것은 일종의 *style normalization*을 수행한다고 주장하였다.
+
+또한 저자는 IN과 BN레이어를 사용하여 싱글 스타일 트랜스퍼 신경망을 실행했는데 IN이 포함된 모델이 BN이 포함된 모델보다 더 빠르게 수렴했다고 한다.
+
+![스타일 트랜스퍼에서의 IN 레이어의 효과에 대한 이유를 이해하기 위하여, 우리는 (a) MS-COCO의 이미지, (b) contrast normalized 이미지, (c) pre-trained 스타일 트랜스퍼 신경망을 사용하여 style normalized를 진행한 이미지를 IN 모델과 BN 모델에 훈련시켰다.  IN 레이어에 의한 성능 향상은 같은 constrast로 정규화한 모든 훈련 데이터에 대해서도 상당하게 나타났다. 그러나 같은 스타일로 정규화한 모든 이미지에 대해서는 더 적은 성능 향상이 나타났다. 우리의 결과는 IN 레이어가 일종의 스타일 정규화를 수행하다는 것을 주장한다.](/markdown-memo/legacy/images/86b86fd7-61a3-4149-b7b6-e0d829344cd9.png)
+
+BN 레이어가 하나의 샘플의 feature statistics를 정규화하는 것보다 배치 샘플의 feature statistics를 정규화하기 때문에 배치 샘플을 정규화하는 것은 하나의 샘플을 배치 샘플의 feature statistics에 centered 되는 것이라고 직관적으로 이해할 수 있다. 
+
+# Adaptive Instance Normalization
+
+만약 IN 레이어가 단일 스타일, 특히 아핀 파라미터에 입력 데이터가 정규화 된다면, adaptive 아핀 변환을 사용하여 임의의 주어진 스타일에 적응하는 것이 가능할까?
+
+여기에 저자는 AdaIN 이라고 부르는 IN의 간단한 인스텐션을 소개한다.
+
+AdaIN은 이미지 $x$와 스타일 이미지 $y$을 받은 후, $y$에 맞도록 channel-wise하게 평균과 분산을 간단히 align 한다.
+
+
+$$
+\operatorname{AdaIN}(x, y)=\sigma(y)\left(\frac{x-\mu(x)}{\sigma(x)}\right)+\mu(y)
+$$
+
+저자가 소개한 AdaIN은 BN, IN 또는 CIN 레이어와 다르게 학습 가능한 어떠한 아핀 파라미터들도 존재하지 않는 대신에 스타일 이미지로부터 아핀 파라미터들을 adaptively 하게 계산한다.
+
+직관적으로 특정 스타일의 그림체를 감지하는 피쳐 채널에 대해 생각해보자.
+
+*여기서는 직관적인 이해를 위하여 brushstrokes를 그림체라고 번역했습니다.*
+
+해당 그림체를 가진 스타일 이미지는 이러한 피쳐에 대해 high average activation을 만들어 낼 것이다. AdaIN에 대해 만들어진 결과물은 컨텐트 이미지의 공간적 구조를 보존하는 피쳐와 같은 high average activation을 가질 것이다.
+
+그림체 피쳐는 피드포워드 디코더를 통하여 간단히 이미지 공간으로 바뀔 수 있다.
+
+피쳐 채널의 분산은 조금 더 미묘한 스타일 정보를 인코딩 할 수 있고 이것 또한 AdaIN의 출력과 최종 출력 이미지로 전달된다.
+
+간단히 말해서, AdaIN은 feature statistics, 특히 channel-wise 평균과 분산을 전달함으로써 feature space에서 스타일 트랜스퍼를 수행할 수 있다.
+
+AdaIN 층은 [해당 모델](https://arxiv.org/abs/1612.04337)에서의 style swap layer와 비슷한 역할을 수행한다.
+
+style swap layer 연산은 매우 시간이 오래걸리고 메모리를 많이 소비하는 반면에 AdaIN 층은 IN 레이어 만큼 간단하고 거의 추가적인 컴퓨팅 비용이 필요하지 않다.
+
+
+# Architecture
+
+![스타일 트랜스퍼 알고리즘의 구조. 우리는 컨텐트와 스타일 이미지를 인코딩하기 위하여 고정된 VGG-19 신경망의 첫번째 몇몇 층만을 사용했다. AdaIN 레이어는 피쳐 공간에서의 스타일 트랜스퍼를 수행하기 위하여 사용되었다. 디코더는 AdaIN 출력 값을 이미지 공간으로 바꾸기 위해서 학습된다. 우리는 컨텐트 손실 Lc와 스타일 손실 Ls을 계산하기 위하여 같은 VGG 인코더를 사용한다.](/markdown-memo/legacy/images/99fb715d-d447-431b-90e1-9118aad3b7d2.png)
+
+스타일 트랜스퍼 신경망은 $T$는 컨텐트 이미지로 $c$ 와 임의의 스타일 이미지 $s$를 입력으로 받고, 전자로 컨텐츠를 후자로 스타일을 재결합하여 출력 이미지를 합성한다.
+
+우리는 고정된 pre-trained VGG-19의 첫번째 몇몇 층 (relu4_1 까지)을 encoder $f$로 사용한 인코더-디코더 아키텍쳐를 만들었다.
+
+컨텐츠와 스타일 이미지를 피쳐 공간으로 인코딩 한 후, 우리는 두 피쳐 맵을 AdaIN 층으로 보내 컨텐츠 피쳐 맵의 평균과 분산들을 스타일 피쳐 맵의 평균과 분산으로 align 시켜 타겟 피쳐 맵인 $t$를 만들어냈다.
+
+$$
+t=AdaIN(f(c),f(s))
+$$
+
+임의로 초기화된 디코더 $g$는 이미지 공간으로 돌아간 피쳐 맵 $t$에 의하여 학습되어서, stylized 이미지 $T(c,s)$를 생성한다.
+
+$$
+T(c,s)=g(t)
+$$
+
+디코더는 모든 풀링 레이어가 checkerboard effect를 줄이기 위하여 nearest up-sampling구조로 대체된 것을 제외하면 대부분 인코더의 반대 구조이다. 
+
+border artifacts를 피하기 위해서 $f$와 $g$에 reflection padding을 사용했다.
+
+또 다른 중요한 아키텍쳐적 선택은 instance, batch와 같은 어떠한 normalization 레이어를 사용하지 않았다는 것이다.
+
+
+# Training
+
+논문에서는 [해당 논문](https://arxiv.org/abs/1612.04337)의 세팅을 따르며 스타일 이미지로 WikiArt에서 수집된 데이터 셋을 사용했고 컨텐츠 이미지로 *MS-COCO*를 사용하여 신경망을 훈련시켰다.
+
+옵티마이저로 Adam을 사용하였고 8개의 content-style 이미지 페어를 한 배치로 사용하였다.
+
+훈련 간에, 각 이미지를 종횡비를 유지하며 가장 작은 차원을 512로 크기를 변경한 후 임의로 256 x 256 크기로 구역을 잘라냈다.
+
+신경망이 fully convolutional 하기 때문에 테스트 과정에 어떤 크기의 이미지에 적용될 수 있다.
+
+디코더를 훈련시키기 위한 손실 함수를 계산하기 위해서 pre-trained VGG-19 를 사용하였다.
+
+$$
+L=L_c+\lambda{L_s}
+$$
+
+컨텐츠 손실은 타겟 피쳐와 출력 이미지의 피쳐사이의 **유클리드 거리**이다.
+
+우리는 대개 컨텐츠 이미지의 피쳐 값 대신에 컨텐츠 타겟으로서 AdaIN 출력 값인 $t$를 사용했다.
+
+$$
+L_c=||f(g(t))-t||_2
+$$
+
+AdaIN 레이어가 스타일 피쳐의 평균과 표준 편차만 전달한다고 말했듯이 스타일 로스는 오직 이러한 statistics에 맞춘다.
+
+우리는 [그람 행렬](/f5300935747e41719f47d83f256f8c8d)이 비슷한 결과를 내는데 대개 사용된다는 것을 찾았음에도 불구하고 이것이 개념적으로 더 명확하기 때문에 IN statistics에 맞추었다.
+
+$$
+L_s=\sum^L_{i=1}\lVert \mu(\phi_i(g(t))))-\mu(\phi_i(s))\rVert_2+\sum^L_{i=1}\lVert\sigma(\phi_i(g(t)))-\sigma(\phi_i(s))\rVert_2
+$$
+
+각 $\phi_i$는 스타일 손실을 구하기 위해 사용되는 VGG-19에서의 레이어들을 의미한다.
+
+해당 실험에서는 **relu1_1, relu2_1, relu3_1, relu4_1** 층을 같은 가중치로 사용하였다.
+
+
+# Results
+
+![Figure 3. 스타일과 컨텐츠 손실면에서 다양한 방법의 양적 비교. 테스트 세트에서 평균적으로 10개의 스타일 이미지와 50개의 컨텐츠 이미지가 선택되었다.](/markdown-memo/legacy/images/3862468a-0bdd-4eb3-aefc-6b5459436947.png)
+
+![](/markdown-memo/legacy/images/49ac73df-c7f6-4961-887b-2e5d100a37e7.png)
+
+## Comparison with other methods
+
+해당 섹션에서는 세 가지의 스타일 트랜스퍼에 대한 우리의 접근을 비교한다:
+
+따로 언급하지 않았다면 비교한 방법의 결과는 기본 설정으로 실행한 코드로 얻어진 것들이다.
+
+우리는 저자들에 의해 제공된 미리 학습된 inverse network를 사용했으며 모든 테스트 이미지는 512X512 크기이다.
+
+## Qualitative Examples
+
+
+
+# Implementation
+
+<!-- Unknown block type: link_to_page -->
+
+# 매듭짓기
+
+- Instance Normalization의 아이디어 확장인 Adaptive Instance Normalization 레이어를 제시하였다.
+- AdaIN는 간단히 말해서 정규화된 컨텐트 이미지를 스타일의 이미지의 분산으로 scale 하고 평균으로 shift한다. 이는 컨텐트 이미지가 스타일 이미지와 **“닮도록”** 한다.
+- [Gatys등이 제시한 스타일 트랜스퍼](/0f32e731847d4ca0808804267747475a)의 가장 큰 문제인 속도를 크게 향상시켰으며 스타일 트랜스퍼 모델의 속도와 trade-off 로 알려진** 제한된 스타일 수**를 해결하였다.
+# Related
+
+<!-- Unknown block type: link_to_page -->
+
+# References
+
+[https://arxiv.org/pdf/1703.06868.pdf](https://arxiv.org/pdf/1703.06868.pdf)
+
+[https://arxiv.org/abs/1612.04337](https://arxiv.org/abs/1612.04337)
+
+[https://www.notion.so/Arbitrary-Style-Transfer-in-Real-Time-With-Adaptive-Instance-Normalization-5f8d9aba82ea4a83a797a48371f6cecb#5f753b322f5b44d8bf5cac2094d9d20e](https://www.notion.so/Arbitrary-Style-Transfer-in-Real-Time-With-Adaptive-Instance-Normalization-5f8d9aba82ea4a83a797a48371f6cecb#5f753b322f5b44d8bf5cac2094d9d20e)
+
+

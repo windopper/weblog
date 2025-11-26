@@ -1,0 +1,190 @@
+---
+title: "유량 문제"
+description: ""
+tags: ["Algorithm","Graph"]
+date: "2023-04-14"
+thumbnail: "/markdown-memo/legacy/images/d6044a00-ad1d-4055-b796-a1c52baaf252.png"
+---
+
+# 개요
+
+간선마다 용량이 있고 그 용량을 준수하는 유량이 있을 때 간선을 따라 흐를 수 있는 최대 유량을 구하는 문제로 전혀 관계없어 보이는 문제도 그래프 모델링을 통하여 유량 문제로 변환하여 풀곤 한다.
+
+# 코드
+
+## 에드몬드-카프
+
+```c++
+#include <bits/stdc++.h>
+
+using namespace std;
+const int INF = 987654321;
+int V;
+
+const int MAX_V = numeric_limits<int>::max();
+
+int capacity[MAX_V][MAX_V], flow[MAX_V][MAX_V];
+
+int networkflow(int source, int sink) {
+    memset(flow, 0, sizeof(flow));
+    int totalFlow = 0;
+    while(1) {
+        vector<int> parent(MAX_V, -1);
+        queue<int> q;
+        q.push(source);
+        while(!q.empty() && parent[sink] == -1) {
+            int here = q.front(); q.pop();
+            for(int there=0; there<V; ++there) {
+                if(capacity[here][there] - flow[here][there] > 0 &&
+                    parent[there] == -1) {
+                        q.push(there);
+                        parent[there] = here;
+                }
+            }
+        }
+        if(parent[sink] == -1) break;
+        int amount = INF;
+        for(int p = sink; p != source; p = parent[p])
+            amount = min(amount, capacity[parent[p]][p] - flow[parent[p]][p]);
+        for(int p = sink; p != source; p = parent[p]) {
+            flow[parent[p]][p] += amount;
+            flow[p][parent[p]] -= amount;
+        }
+        totalFlow += amount;
+    }
+    return totalFlow;
+}
+```
+
+
+## MCMF 최소 비용 최대 유량
+
+SPFA 알고리즘을 통하여 MCMF를 구현한다.
+
+> 💡 최대 유량 문제를 해결할 때 역방향 유량을 통하여 유량을 상쇄시키고는 했는데 MCMF 문제에서도 역방향 간선으로 음의 비용을 부여해야지 최소 비용 최대 유량을 구할 수 있다.
+
+→ SPFA 구현 코드
+
+```c++
+#include <bits/stdc++.h>
+
+using namespace std;
+const int MAXN = 100000;
+vector<vector<pair<int, int>>> adj;
+int N;
+const int INF = 987654321;
+int spfa(int start) {
+    vector<int> dist(MAXN, INF);
+    vector<int> cycle(MAXN, 0);
+    vector<bool> inQ(MAXN, false);
+    queue<int> q;
+    q.push(start);
+    inQ[start] = true;
+    dist[start] = 0;
+
+    while(!q.empty()) {
+        int cur = q.front();
+        q.pop();
+        inQ[cur] = false;
+        for(pair<int, int> p : adj[cur]) {
+            int next = p.first;
+            int cost = p.second;
+            int alt = cost + dist[cur];
+            if(dist[next] > alt) {
+                dist[next] = alt;
+                if(!inQ[next]) {
+                    cycle[next]++;
+                    if(cycle[next] >= N) {
+                        return -1; // find cycle
+                    }
+                    q.push(next);
+                    inQ[next] = true;
+                }
+            }
+        }
+    }
+}
+```
+
+# 주의할 점
+
+u → v 간선을 구현할 떄 v → u 로 향하는 간선 또한 구현해야 한다. 이는 역간선의 유량을 흘려줌으로 써 최대 유량을 구할 수 있도록 한다.
+
+# 응용 테크닉
+
+## 정점 분할
+
+- 증가 경로를 찾을 때 노드가 겹치지 않아야 할 때 사용할 수 있는 기법으로 정점을 in 노드와 out 노드를 구분하여 사용할 수 있다.
+서로 다른 노드끼리 연결하는 경우는 OUT → IN
+
+내부 정점에서는 IN → OUT으로 이동하게 하고 용량으로 1을 부여함으로써 구현가능하다.
+
+
+![](/markdown-memo/legacy/images/d6044a00-ad1d-4055-b796-a1c52baaf252.png)
+
+# 예제
+
+[https://www.acmicpc.net/problem/17412](https://www.acmicpc.net/problem/17412)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+문제 지문에 제시된** “ 한 경로에 포함된 길이 다른 경로에 포함되면 안된다 “ **를 유량 문제로 변환하여** “ 경로의 용량은 1이다 “ **로 변환하면 해결 할 수 있다.
+
+
+[https://www.acmicpc.net/problem/11377](https://www.acmicpc.net/problem/11377)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+![](/markdown-memo/legacy/images/1efd8a3f-89b8-43f1-a789-bd92dce442ee.png)
+
+SOURCE → 사람 → 일 → SINK로 향하는 적절한 그래프를 모델링 후, 포드-풀커슨 알고리즘을 이용하여 해결할 수 있다.
+
+
+[https://www.acmicpc.net/problem/2316](https://www.acmicpc.net/problem/2316)
+
+정점 분할 기법을 이용하여 동일 정점에 대해 한번만 방문하도록 하면 된다.
+
+![](/markdown-memo/legacy/images/b7bc5978-a44e-400a-937b-11cb7ab03847.png)
+
+
+[https://www.acmicpc.net/problem/11378](https://www.acmicpc.net/problem/11378)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+용량 K를 가진 간선을 임의의 정점 B에 이어서 정점 B와 Source로 부터 사람에게 유량이 공급되도록 그래프를 설계하면 해결 할 수 있다.
+
+
+[https://www.acmicpc.net/problem/11405](https://www.acmicpc.net/problem/11405)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+MCMF 기본 문제 중 하나이다. 주의할 점은 최대 유량을 구하기 위하여 역방향 간선으로 유량을 흘러 보냈듯이 최소 비용 최대 유량을 구하기 위해서는 역방향 간선으로 음의 비용을 부여해야 한다.
+
+
+[https://www.acmicpc.net/problem/3640](https://www.acmicpc.net/problem/3640)
+
+정점 분할 + mcmf 문제이다. 역방향 간선에 비용을 줄 때 현재IN → 이전OUT 으로 음의 비용을 줘야 한다.
+
+
+[https://www.acmicpc.net/problem/5651](https://www.acmicpc.net/problem/5651)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+유량 알고리즘을 통해 최대 유량을 구해놓은 후, 입력 받은 간선의 시작점과 끝점을 소스와 싱크로 설정하여 플로우를 흘려줘본다. 이때 플로우가 진행되면 이 간선은 완전 중요한 간선이 아니다.
+
+

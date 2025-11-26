@@ -1,0 +1,58 @@
+---
+title: "DataFrame 문자열 칼럼 분할하기"
+description: ""
+tags: ["Pandas","Knowledge"]
+date: "2023-01-04"
+thumbnail: "/markdown-memo/legacy/images/9e2a201e-38ef-4dd5-8f60-89608364368a.png"
+---
+
+캐글의 *Spaceship Titanic* 실습 과정 중 칼럼 ‘Cabin’을 분할해야 할 필요성을 느꼈다.
+
+```python
+data = pd.read_csv('../input/spaceship-titanic/train.csv')
+data.head()
+```
+
+![](/markdown-memo/legacy/images/9e2a201e-38ef-4dd5-8f60-89608364368a.png)
+
+
+구글링 결과 해당 코드로 쉽게 분할이 가능했다.
+
+```python
+data.Cabin.str.split('/')
+
+0          [B, 0, P]
+1          [F, 0, S]
+2          [A, 0, S]
+3          [A, 0, S]
+4          [F, 1, S]
+            ...     
+8688      [A, 98, P]
+8689    [G, 1499, S]
+8690    [G, 1500, S]
+8691     [E, 608, S]
+8692     [E, 608, S]
+Name: Cabin, Length: 8693, dtype: object
+```
+
+```python
+data.Cabin.str.split('/').str[0]
+"""
+str를 통하여 접근해야 한다.
+그냥 [0]로 접근하면 [B, 0, P]가 출력된다.
+"""
+
+0       B
+1       F
+2       A
+3       A
+4       F
+       ..
+8688    A
+8689    G
+8690    G
+8691    E
+8692    E
+Name: Cabin, Length: 8693, dtype: object
+```
+

@@ -1,0 +1,46 @@
+---
+title: "Prisma"
+description: ""
+tags: ["Prisma","ORM"]
+date: "2024-02-05"
+thumbnail: ""
+---
+
+[https://github.com/prisma](https://github.com/prisma)
+
+> Next-generation Node.js and TypeScript ORM
+
+# 특징
+
+- SQL문을 직접 작성하지 않아도, 데이터베이스와 상호작용할 수 있는 ORM
+- 타 ORM과 달리, 자체적인 스키마 문법을 제공하여 직접 DB 마이그레이션, 클라이언트 코드 생성 등 작업 가능
+- 간편한 CLI, Prisma Studio 등 편리한 GUI 도구 제공하여 생산성 향상.
+# Prisma Schema
+
+# Prisma 예제
+
+## Setting
+
+1. 프로젝트에 prisma CLI 설치
+1. Prisma CLI로 Prisma 세팅 (설정 파일 생성)
+1. schema.prisma 파일 생성 확인
+1. schema.prisma 파일 내용 확인 (기본 DB는 postgresql로 설정됨)
+1. `.env` 파일에서 `DATABASE_URL` 추가
+1. prisma/client 설치 후, 쿼리 작성
+1. `npx prisma studio` 로 로컬에서 데이터베이스 접근 가능
+## CRUD
+
+
+
+## Seed
+
+데이터 베이스에 초기값을 넣는 행위
+
+1. `prisma/` 디렉토리에 `seed.ts` 작성
+1. `ts-node`를 `devDependency` 환경으로 설치
+1. `package.json` 에 `prisma.seed` 필드 작성 (상단 링크 참고)
+1. `npx prisma db seed` CLI 커맨드 작성
+## Migration
+
+1. Prisma.schema 모델링
+1. 마이그레이션 명령어 입력

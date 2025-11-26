@@ -40,5 +40,1193 @@
     "description": "블로그에 오신 것을 환영합니다",
     "thumbnail": "/image/weblog.png",
     "slicedContent": "\r\n# 환영합니다\r\n\r\n블로그에 오신 것을 환영합니다! \r\n\r\n여기서 다양한 기술 이야기와 개발 경험을 공유합니다.\r\n..."
+  },
+  {
+    "name": "2-sat",
+    "title": "2-SAT",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-04-02T00:00:00.000Z",
+    "updatedAt": "2023-04-02T00:00:00.000Z",
+    "path": "/memos/2-sat",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/9ea03bc0-d685-4210-b62f-9d5f7bf0bf6f.png",
+    "slicedContent": "\n# SAT\n\n참이냐, 거짓이냐의 결정을 여러 번 해야 하는 문제들을 불린 값 만족성 문제 (Boolean satisfiability problem) 이라고 부릅니다.\n\nSAT문제는 굉장히 강력한 문제로 다항 시간에 풀 수 있는 모든 문제는 모두 SAT로 바꿔서 풀 수 있습니다. \n\n그러나 이를 바꿔서 풀지 않는 이유는 SAT 문제를 푸는 방법이 모두 지수..."
+  },
+  {
+    "name": "an-image-is-worth-16x16-words-transformers-for-image-recognition-at-scale",
+    "title": "An Image Is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+    "tags": [
+      "ML",
+      "Paper Review"
+    ],
+    "createdAt": "2023-01-21T00:00:00.000Z",
+    "updatedAt": "2023-01-21T00:00:00.000Z",
+    "path": "/memos/an-image-is-worth-16x16-words-transformers-for-image-recognition-at-scale",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/d85a2e9b-ff58-4682-92f6-41794756e2f9.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n# Introduction\n\n셀프 어텐션 기반 아키텍쳐들, 특히 **트랜스포머**는 자연어 처리 태스크에서 매우 뛰어난 성능을 보였다. 트랜스포머의 효율성과 확장성 덕분에 수억개의 파라미터의 개수를 가진 모델을 훈련시키는 것이 가능해졌다.\n\n그러나 컴퓨터 비전에서는 **컨볼루션 아키텍처**가 여전히 주로 ..."
+  },
+  {
+    "name": "arbitrary-style-transfer-in-real-time-with-adaptive-instance-normalization",
+    "title": "Arbitrary Style Transfer in Real-time with Adaptive Instance Normalization",
+    "tags": [
+      "Style Transfer",
+      "Paper Review",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/arbitrary-style-transfer-in-real-time-with-adaptive-instance-normalization",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/a7532056-e9de-4df5-9b69-754709be926e.png",
+    "slicedContent": "\n\n<!-- Table of Contents -->\n\n# 개요\n\n해당 논문은 *Gatys*등이 소개한 스타일 트랜스퍼 기법을 통하여 생성하는 과정이 매우 느리기 때문에 이를 개선하기 위해 만들어 졌다.\n\n논문의 저자는 피드포워드 신경망을 이용하여 빠른 근사치를 구하는 것은 뉴럴 스타일 트랜스퍼의 속도를 올리는데 목적을 가지고 있지만 속도의 향상은 신경망이 ..."
+  },
+  {
+    "name": "aws-nodejs-애플리케이션-cicd-구축-경험",
+    "title": "AWS Nodejs 애플리케이션 CI/CD 구축 경험",
+    "tags": [
+      "aws"
+    ],
+    "createdAt": "2023-12-21T00:00:00.000Z",
+    "updatedAt": "2023-12-21T00:00:00.000Z",
+    "path": "/memos/aws-nodejs-애플리케이션-cicd-구축-경험",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/f76bb774-54c5-4b9a-9f2d-2c65849bd147.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n\n[**디스코드 봇**](https://github.com/windopper/samtaegi)을 amazon ec2에 자동 배포하는 시스템을 만들고 싶어서 구축하게 되었다.\n\n# CI 구축하기\n\nCI 과정은 Github Actions를 통해 진행한다.\n\n## Github 환경변수 등록\n\ngithub 레포지..."
+  },
+  {
+    "name": "brain-stroke-prediction-dataset",
+    "title": "Brain stroke prediction dataset",
+    "tags": [
+      "ML",
+      "Data Analysis"
+    ],
+    "createdAt": "2023-01-02T00:00:00.000Z",
+    "updatedAt": "2023-01-02T00:00:00.000Z",
+    "path": "/memos/brain-stroke-prediction-dataset",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/528af116-399f-48ca-b79a-2da05e161974.png",
+    "slicedContent": "\n\n[https://www.kaggle.com/datasets/zzettrkalpakbal/full-filled-brain-stroke-dataset](https://www.kaggle.com/datasets/zzettrkalpakbal/full-filled-brain-stroke-dataset)\n\n\n실습 환경은 캐글 노트북입니다.\n\n# Import Dat..."
+  },
+  {
+    "name": "canvas로-scatterplot-그리기-feat-visx",
+    "title": "canvas로 scatterplot 그리기 (feat. visx)",
+    "tags": [
+      "Takeoff",
+      "React",
+      "Visx",
+      "D3"
+    ],
+    "createdAt": "2025-06-26T00:00:00.000Z",
+    "updatedAt": "2025-06-26T00:00:00.000Z",
+    "path": "/memos/canvas로-scatterplot-그리기-feat-visx",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/21e05c15-30a1-807f-820a-c5266e6b46be.png",
+    "slicedContent": "\n![완성결과](/markdown-memo/legacy/images/21e05c15-30a1-807f-820a-c5266e6b46be.png)\n\n\n\nLLM 벤치마크 페이지 구현을 위해 날짜, 점수 축을 위한 scatterplot을 만들어보려고 한다. \n\n페이지 스타일링 일관성을 위해 `visx`와 캔버스로 직접 구현하였다.\n\nsvg가 아닌 캔버스를 통해 구..."
+  },
+  {
+    "name": "cors-이해하기",
+    "title": "CORS 이해하기",
+    "tags": [
+      "CS"
+    ],
+    "createdAt": "2024-02-11T00:00:00.000Z",
+    "updatedAt": "2024-02-11T00:00:00.000Z",
+    "path": "/memos/cors-이해하기",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n\n[https://inpa.tistory.com/entry/WEB-📚-CORS-💯-정리-해결-방법-👏](https://inpa.tistory.com/entry/WEB-📚-CORS-💯-정리-해결-방법-👏)\n\n\n..."
+  },
+  {
+    "name": "dataframe-문자열-칼럼-분할하기",
+    "title": "DataFrame 문자열 칼럼 분할하기",
+    "tags": [
+      "Pandas",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-04T00:00:00.000Z",
+    "updatedAt": "2023-01-04T00:00:00.000Z",
+    "path": "/memos/dataframe-문자열-칼럼-분할하기",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/9e2a201e-38ef-4dd5-8f60-89608364368a.png",
+    "slicedContent": "\n캐글의 *Spaceship Titanic* 실습 과정 중 칼럼 ‘Cabin’을 분할해야 할 필요성을 느꼈다.\n\n```python\ndata = pd.read_csv('../input/spaceship-titanic/train.csv')\ndata.head()\n```\n\n![](/markdown-memo/legacy/images/9e2a201e-38ef-4dd5..."
+  },
+  {
+    "name": "dataframe-조작하기",
+    "title": "DataFrame 조작하기",
+    "tags": [
+      "Pandas",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-01-01T00:00:00.000Z",
+    "path": "/memos/dataframe-조작하기",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/8f55879a-47eb-4a24-a312-148a73adf629.png",
+    "slicedContent": "\npandas에서는 데이터의 집합들을 감싸고 있는 객체들을 DataFrame 이라고 한다.\n\n이를 조작하여 다양한 데이터를 필터하여 데이터 간 유의미한 상관관계를 찾는데 도움을 줄 수 있다.\n\n\n실습은 캐글 노트북에서 진행했으며 데이터는 유명한 [타이타닉](https://www.kaggle.com/competitions/titanic) 데이터 셋을 사용하였..."
+  },
+  {
+    "name": "design-pattern",
+    "title": "Design Pattern",
+    "tags": [
+      "Knowledge",
+      "CS",
+      "Design Pattern"
+    ],
+    "createdAt": "2023-07-08T00:00:00.000Z",
+    "updatedAt": "2023-07-08T00:00:00.000Z",
+    "path": "/memos/design-pattern",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/1bda935d-5c77-442f-af97-93e08a8811db.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n\n# 개요\n\n디자인 패턴은 소프트웨어 디자인의 일반적인 문제들에 대해 검증된 해결책의 모음집이다. \n\n디자인 패턴은 다른 사람들과 협업을 할 때 사용할 수 있는 공통 언어를 정의함으로써 목표를 달성하는데 효율적인 의사소통이 가능하게 한다.\n\n# 생성 패턴\n\n## Abstract Factory\n\n추상 팩토리..."
+  },
+  {
+    "name": "dfs-bfs",
+    "title": "DFS & BFS",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-05-01T00:00:00.000Z",
+    "updatedAt": "2023-05-01T00:00:00.000Z",
+    "path": "/memos/dfs-bfs",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\nDFS와 BFS는 그래프를 탐색하는 데 사용되는 알고리즘입니다. DFS는 깊이 우선 탐색이라고하며, 그래프의 깊은 부분을 우선적으로 탐색합니다. BFS는 너비 우선 탐색이라고하며, 그래프의 가까운 부분부터 탐색합니다.\n\n# 전략\n\n## 배열에 접근여부를 설정할 때 차원의 크기가 너무 크다면\n\n일반적으로 `visited` 또는 `check` 라는..."
+  },
+  {
+    "name": "diffusion-model",
+    "title": "Diffusion Model",
+    "tags": [
+      "Generative Model",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/diffusion-model",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/5664060f-3c0c-4fe1-89f9-1ba3c1380606.png",
+    "slicedContent": "\n![](/markdown-memo/legacy/images/5664060f-3c0c-4fe1-89f9-1ba3c1380606.png)\n\n*DDPM 논문으로부터 발췌* *(*[*https://arxiv.org/abs/2006.11239*](https://arxiv.org/abs/2006.11239)*).*\n\n\n디퓨전 모델은 특정 분야에서 유명한 생성모델인 ..."
+  },
+  {
+    "name": "docker-compose로-redis-replication-구성하기",
+    "title": "Docker-Compose로 Redis Replication 구성하기",
+    "tags": [
+      "Docker",
+      "Redis"
+    ],
+    "createdAt": "2024-01-30T00:00:00.000Z",
+    "updatedAt": "2024-01-30T00:00:00.000Z",
+    "path": "/memos/docker-compose로-redis-replication-구성하기",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/dbd38725-8d39-4088-a164-3fbe0f3f9a78.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n# docker-compose 설치\n\ndocker-compose는 여러개의 도커 컨테이너를 하나의 어플리케이션으로 구축할 수 있도록 도와주는 오케스트레이션 도구이다.\n\nRedis Replication을 구축하기 위해 Redis 서버를 master 1개와 replica 2개, 총 3개의 Redis 서버를 도..."
+  },
+  {
+    "name": "fenwick",
+    "title": "Fenwick",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2024-05-25T00:00:00.000Z",
+    "updatedAt": "2024-05-25T00:00:00.000Z",
+    "path": "/memos/fenwick",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/cd592ca0-1b77-4199-b843-7bf9e827e6f9.png",
+    "slicedContent": "\n# Introduction\n\n어떤 배열의 특정 구간 구간합과 같은 쿼리가 많을 경우 별도의 특별한 트리 구조를 만들어 이를 통해 시간복잡도 문제를 해결하기 위한 자료구조\n\n펜윅 트리 말고도 세그먼트트리로도 문제를 해결 할 수 있으나 구현이 깔끔하고 메모리를 절약할 수 있는 장점이 있다\n\n\n# Implementation\n\n배열 A를 이용하여 세그먼트 트리를..."
+  },
+  {
+    "name": "firebase",
+    "title": "Firebase",
+    "tags": [
+      "Firebase"
+    ],
+    "createdAt": "2024-01-31T00:00:00.000Z",
+    "updatedAt": "2024-01-31T00:00:00.000Z",
+    "path": "/memos/firebase",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n[https://firebase.google.com/?hl=ko](https://firebase.google.com/?hl=ko)\n\n[https://github.com/firebase/](https://github.com/firebase/)\n\n> Firebase는 실시간 데이터베이스, 인증, 스토리지, 분석 등 다양한 기능을 제공하는 모바일 및 웹 앱 개..."
+  },
+  {
+    "name": "generative-adversarial-nets",
+    "title": "Generative Adversarial Nets",
+    "tags": [
+      "ML",
+      "Paper Review"
+    ],
+    "createdAt": "2023-01-24T00:00:00.000Z",
+    "updatedAt": "2023-01-24T00:00:00.000Z",
+    "path": "/memos/generative-adversarial-nets",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/9b62590b-a529-4b6d-8963-b519c9606d8d.png",
+    "slicedContent": "\n작성중 \n\n<!-- Table of Contents -->\n\n# Abstract\n\n# Introduction\n\n# Related Work\n\n# Adversarial nets\n\n적대적 모델 프레임워크는 두 모델이 MLP(Multi Layer Perceptron) 일때 가장 직관적으로 적용된다.\n\n데이터 $x$에 대해 생성자의 distribution $p_g..."
+  },
+  {
+    "name": "generative-agent-interactive-simulacra-of-human-behavior",
+    "title": "Generative Agent: Interactive Simulacra of Human Behavior",
+    "tags": [
+      "AI",
+      "Paper Review"
+    ],
+    "createdAt": "2023-06-30T00:00:00.000Z",
+    "updatedAt": "2023-06-30T00:00:00.000Z",
+    "path": "/memos/generative-agent-interactive-simulacra-of-human-behavior",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/c33234bc-ad84-4c94-b704-46a110c27204.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n\n해당 논문에서 생성 에이전트를 만들기 위해서 사용했던 방법에 대해 요약하고자 정리한 글이다.\n\n\n![](/markdown-memo/legacy/images/c33234bc-ad84-4c94-b704-46a110c27204.png)\n\n# Memory and Retrival\n\n언어 모델의 한계점인 **제한된..."
+  },
+  {
+    "name": "heavy-light-decomposition",
+    "title": "Heavy-Light Decomposition",
+    "tags": [
+      "Algorithm",
+      "Segment Tree"
+    ],
+    "createdAt": "2023-04-21T00:00:00.000Z",
+    "updatedAt": "2023-04-21T00:00:00.000Z",
+    "path": "/memos/heavy-light-decomposition",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\nHeavy-Light Decomposition(이하 HLD)는 트리를 여러 개의 체인으로 분할하여 임의의 두 정점 사이의 경로에 최대 logN개의 체인만 존재하도록 하는 자료구조입니다.\n\nHLD의 Heavy와 Light의 의미는 간선들을 무거운(Heavy)과 가벼운(Light) 간선으로 구분하는 것인데, 여기서는 이 무게에 대한 기준을 “서브 ..."
+  },
+  {
+    "name": "image-style-transfer-using-cnn",
+    "title": "Image Style Transfer Using CNN",
+    "tags": [
+      "Style Transfer",
+      "Paper Review",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/image-style-transfer-using-cnn",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/5ef6bb14-111a-4d37-aca3-8580ae20f7af.png",
+    "slicedContent": "\n\n<!-- Table of Contents -->\n\n# 개요\n\n저자는 이미지를 다른 스타일의 semantic content로 렌더링 하는 것은 어려운 이미지 프로세싱 태스크라고 말하며 객체 검출에 최적화된 CNN을 해당 모델의 image representation을 추출하는데 사용했다고 말한다.\n\n또한 해당 모델은 이미지의 content 와 style 를..."
+  },
+  {
+    "name": "image-style-transfer-using-convolutional-neural-network",
+    "title": "Image Style Transfer Using Convolutional Neural Network",
+    "tags": [
+      "Pytorch",
+      "Style Transfer",
+      "ML",
+      "Paper Implementation"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/image-style-transfer-using-convolutional-neural-network",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/efcdef56-197b-4764-b2a4-66e7215e056e.png",
+    "slicedContent": "\n\n[https://colab.research.google.com/drive/1IlEmPsHzXIGYM6qGKLfj41Ev08FLyRPv?usp=sharing](https://colab.research.google.com/drive/1IlEmPsHzXIGYM6qGKLfj41Ev08FLyRPv?usp=sharing)\n\n\n<!-- Table of Content..."
+  },
+  {
+    "name": "in-context-learning",
+    "title": "In-Context Learning",
+    "tags": [
+      "Paper Review",
+      "Knowledge",
+      "AI"
+    ],
+    "createdAt": "2023-07-06T00:00:00.000Z",
+    "updatedAt": "2023-07-06T00:00:00.000Z",
+    "path": "/memos/in-context-learning",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/e4e2168a-0299-4606-ae2a-a59c6ce46410.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n# 개요\n\nIn-Context Learning(이하 ICL)은 프롬프트를 통해 몇 가지 예제를 입력시키고 요구사항을 던져주면 모델이 마치 **파인 튜닝**을 한 것처럼 원하는 답변을 정확히 출력하는 현상을 말하는 것이다.\n\nICL은 다른 말로 Zero-Shot Learning 혹은 Few-Shot Lear..."
+  },
+  {
+    "name": "inductive-bias",
+    "title": "Inductive bias",
+    "tags": [
+      "ML",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-22T00:00:00.000Z",
+    "updatedAt": "2023-01-22T00:00:00.000Z",
+    "path": "/memos/inductive-bias",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/2155f8ef-6c37-4571-ac2d-34424e2e4504.png",
+    "slicedContent": "\n# Inductive Bias\n\n> *학습 알고리즘의 inductive bias (또한 learning bias라고도 알려짐)는 한번도 마주치지 않은 입력 값에 대한 예측을 할 때 사용하는 추가적인 가정이다.\n\n*[https://en.wikipedia.org/wiki/Inductive_bias](https://en.wikipedia.org/wiki/Ind..."
+  },
+  {
+    "name": "kmp",
+    "title": "kmp",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-05T00:00:00.000Z",
+    "updatedAt": "2023-04-05T00:00:00.000Z",
+    "path": "/memos/kmp",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n문자열 검색 알고리즘으로 문자열 S에서 문자열 H를 찾는 naive한 알고리즘을 짠다면 각각의 길이를 N, M이라고 할 때 시간 복잡도는 **O(NM)**이 걸리게 됩니다.\n\n그러나 kmp 알고리즘은 어떤 경우라도 **O(N+M)**의 시간복잡도로 문자열 H를 찾을 수 있습니다.\n\n\n# 전처리\n\nkmp 알고리즘을 사용하기 위해서는 **pi**배..."
+  },
+  {
+    "name": "lca-최소-공통-조상",
+    "title": "LCA (최소 공통 조상)",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-03-09T00:00:00.000Z",
+    "updatedAt": "2023-03-09T00:00:00.000Z",
+    "path": "/memos/lca-최소-공통-조상",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n\n# 코드\n\n## 희소배열을 사용한 LCA\n\n> 💡 *- 트리 노드 최대 개수가 ****100000****개라고 가정*\n\n\n```c++\nfor(int i=1; i<18; i++) {\n\t// 희소배열을 계산\n\tparent[i][cur] = parent[i-1][parent[i-1]][cur]];\n}\n```\n\n### 예시\n\n`parent[2][1..."
+  },
+  {
+    "name": "mldl-하면서-얻은-지식",
+    "title": "ML/DL 하면서 얻은 지식",
+    "tags": [
+      "AI",
+      "Machine Learning",
+      "Deep Learning"
+    ],
+    "createdAt": "2023-05-13T00:00:00.000Z",
+    "updatedAt": "2023-05-13T00:00:00.000Z",
+    "path": "/memos/mldl-하면서-얻은-지식",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Unknown block type: child_database -->\n\n---\n\n# 기타\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block t..."
+  },
+  {
+    "name": "mongodb-삽질",
+    "title": "MongoDB 삽질",
+    "tags": [
+      "Knowledge"
+    ],
+    "createdAt": "2023-07-16T00:00:00.000Z",
+    "updatedAt": "2023-07-16T00:00:00.000Z",
+    "path": "/memos/mongodb-삽질",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Unknown block type: child_page -->\n\n\n..."
+  },
+  {
+    "name": "next-auth와-prisma를-이용한-사용자-인증-구현",
+    "title": "next-auth와 prisma를 이용한 사용자 인증 구현",
+    "tags": [
+      "Next.js",
+      "Prisma"
+    ],
+    "createdAt": "2024-02-05T00:00:00.000Z",
+    "updatedAt": "2024-02-05T00:00:00.000Z",
+    "path": "/memos/next-auth와-prisma를-이용한-사용자-인증-구현",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n> References\n\n[https://next-auth.js.org/getting-started/example](https://next-auth.js.org/getting-started/example)\n\n\n<!-- Table of Contents -->\n\n# Setting\n\n1. NextAuth 설치\n1. `.env` 파일에 `NEXTAUTH_URL`..."
+  },
+  {
+    "name": "nextjs",
+    "title": "Next.js",
+    "tags": [
+      "Next.js",
+      "React"
+    ],
+    "createdAt": "2024-02-04T00:00:00.000Z",
+    "updatedAt": "2024-02-04T00:00:00.000Z",
+    "path": "/memos/nextjs",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Unknown block type: link_preview -->\n\n> The React Framework\n\n\n<!-- Table of Contents -->\n\n# 특징\n\n- Pre-Rendering - 각 페이지들을 사전에 미리 HTML 문서로 가지고 있음\n- Server Side Rendering (SSR) - 페이지를 서버에서 렌더링하여 초..."
+  },
+  {
+    "name": "parameter-vector-transfer",
+    "title": "Parameter Vector Transfer",
+    "tags": [
+      "AI"
+    ],
+    "createdAt": "2024-04-29T00:00:00.000Z",
+    "updatedAt": "2024-04-29T00:00:00.000Z",
+    "path": "/memos/parameter-vector-transfer",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n```python\nfrom transformers import AutoModelForCausalLM, AutoTokenizer\nimport torch\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport numpy as np\n\n# Load Models\ninformative_model_name = \"g..."
+  },
+  {
+    "name": "persistent-segment-tree",
+    "title": "Persistent Segment Tree",
+    "tags": [
+      "Algorithm",
+      "Segment Tree"
+    ],
+    "createdAt": "2023-04-29T00:00:00.000Z",
+    "updatedAt": "2023-04-29T00:00:00.000Z",
+    "path": "/memos/persistent-segment-tree",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n세그먼트 트리의 쿼리 중 다음과 같은 쿼리가 있습니다.\n\n> 갱신된 정보를 반영한 새로운 세그먼트 트리를 만든다.\nK번째 세그먼트 트리로 가서 구간합 쿼리를 진행한다.\n\n이를 naive하게 구하면 O(NQ)의 공간복잡도가 나옵니다.\n\n\n퍼시스턴트 세그먼트 트리는 바뀌는 정점들에 대해서만 새로운 트리를 생성합니다.\n\n즉, 바뀌지 않는 정점은 이전..."
+  },
+  {
+    "name": "prisma",
+    "title": "Prisma",
+    "tags": [
+      "Prisma",
+      "ORM"
+    ],
+    "createdAt": "2024-02-05T00:00:00.000Z",
+    "updatedAt": "2024-02-05T00:00:00.000Z",
+    "path": "/memos/prisma",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n[https://github.com/prisma](https://github.com/prisma)\n\n> Next-generation Node.js and TypeScript ORM\n\n# 특징\n\n- SQL문을 직접 작성하지 않아도, 데이터베이스와 상호작용할 수 있는 ORM\n- 타 ORM과 달리, 자체적인 스키마 문법을 제공하여 직접 DB 마이그레이션, 클라..."
+  },
+  {
+    "name": "process-thread",
+    "title": "Process & Thread",
+    "tags": [
+      "CS"
+    ],
+    "createdAt": "2023-12-05T00:00:00.000Z",
+    "updatedAt": "2023-12-05T00:00:00.000Z",
+    "path": "/memos/process-thread",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/933503f4-56a5-41f3-8c14-a999badcce2f.png",
+    "slicedContent": "\n\n<!-- Table of Contents -->\n\n# Process & Thread\n\n운영체제로부터 자원을 할당받은 작업의 단위를 **Process**, **Process**가 할당받은 자원을 이용하는 실행 흐름의 단위를 **Thread **라고 한다.\n\n# Process\n\n컴퓨터에서 실행할 수 있는 파일인 프로그램 (Program)을 실행하면 운영체제..."
+  },
+  {
+    "name": "ps에-필요한-수학-잡지식",
+    "title": "PS에 필요한 수학 잡지식",
+    "tags": [
+      "Algorithm",
+      "Knowledge"
+    ],
+    "createdAt": "2023-05-07T00:00:00.000Z",
+    "updatedAt": "2023-05-07T00:00:00.000Z",
+    "path": "/memos/ps에-필요한-수학-잡지식",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Unknown block type: child_page -->\n\n\n..."
+  },
+  {
+    "name": "react-firebase-유저-연동해보기",
+    "title": "React + Firebase 유저 연동해보기",
+    "tags": [
+      "Firebase",
+      "React"
+    ],
+    "createdAt": "2024-02-01T00:00:00.000Z",
+    "updatedAt": "2024-02-01T00:00:00.000Z",
+    "path": "/memos/react-firebase-유저-연동해보기",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n# Firebase 인스턴스 선언\n\n```typescript\n// firebaseApp.ts\n\nimport { initializeApp, FirebaseApp, getApp } from \"firebase/app\";\nimport \"firebase/auth\";\n\nexport let app: FirebaseAp..."
+  },
+  {
+    "name": "react로-전역-변수-관리하는-간단한-예제",
+    "title": "React로 전역 변수 관리하는 간단한 예제",
+    "tags": [
+      "React",
+      "Redux"
+    ],
+    "createdAt": "2024-02-02T00:00:00.000Z",
+    "updatedAt": "2024-02-02T00:00:00.000Z",
+    "path": "/memos/react로-전역-변수-관리하는-간단한-예제",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n# Context API\n\n```typescript\nimport { Dispatch, ReactNode, createContext, useReducer } from \"react\";\n\n// 액션 타입 선언\ntype CountState = number;\n\ntype CountAction =\n  | { type:..."
+  },
+  {
+    "name": "redis",
+    "title": "Redis",
+    "tags": [
+      "Redis"
+    ],
+    "createdAt": "2024-01-21T00:00:00.000Z",
+    "updatedAt": "2024-01-21T00:00:00.000Z",
+    "path": "/memos/redis",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Unknown block type: link_preview -->\n\n> Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, ..."
+  },
+  {
+    "name": "segment-tree-beats",
+    "title": "Segment Tree Beats",
+    "tags": [
+      "Algorithm",
+      "Segment Tree"
+    ],
+    "createdAt": "2023-04-28T00:00:00.000Z",
+    "updatedAt": "2023-04-28T00:00:00.000Z",
+    "path": "/memos/segment-tree-beats",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 세그비츠 개요\n\n> 1 L R X: 모든 L ≤ i ≤ R에 대해 A_i = min(A_i, X)를 적용\n2 L R: max(A_L, A_L+1, …, A_R-1 + A_R)를 출력\n3 L R: A_L + A_L+1 + … + A_R-1 + A_R를 출력\n\n상단과 같은 쿼리를 효율적으로 수행하기 위한 세그먼트 트리 테크닉에 대한 것입니다.\n\n세그비츠는..."
+  },
+  {
+    "name": "spaceship-titanic",
+    "title": "Spaceship Titanic",
+    "tags": [
+      "ML",
+      "Data Analysis"
+    ],
+    "createdAt": "2023-01-04T00:00:00.000Z",
+    "updatedAt": "2023-01-04T00:00:00.000Z",
+    "path": "/memos/spaceship-titanic",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/9773202e-6a48-43c6-8360-73e2479524f0.png",
+    "slicedContent": "\n[https://www.kaggle.com/competitions/spaceship-titanic](https://www.kaggle.com/competitions/spaceship-titanic)\n\n\n<!-- Table of Contents -->\n\n# Description\n\n> *Welcome to the year 2912, where your dat..."
+  },
+  {
+    "name": "spfa-shortest-path-faster-algorithm",
+    "title": "SPFA (Shortest Path Faster Algorithm)",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-04-15T00:00:00.000Z",
+    "updatedAt": "2023-04-15T00:00:00.000Z",
+    "path": "/memos/spfa-shortest-path-faster-algorithm",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n벨만-포드 알고리즘의 성능을 향상시킨 알고리즘으로 매 반복마다 모든 간선을 확인하는 것인 아닌 갱신된 정점에 대해서만 업데이트를 진행한다.\n\n시간 복잡도는 **O(V+E) **로 동작한다.\n\n# 코드 \n\n```c++\n#include <bits/stdc++.h>\n\nusing namespace std;\nconst int MAXN = 100000;\n..."
+  },
+  {
+    "name": "synchronize-deadlock",
+    "title": "Synchronize & Deadlock",
+    "tags": [
+      "CS"
+    ],
+    "createdAt": "2023-12-07T00:00:00.000Z",
+    "updatedAt": "2023-12-07T00:00:00.000Z",
+    "path": "/memos/synchronize-deadlock",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/5f11bf1a-ea2d-4925-b967-dc8ed6d7f6c3.png",
+    "slicedContent": "\n<!-- Unknown block type: link_to_page -->\n\n\n<!-- Table of Contents -->\n\n# 간단한 예제\n\n멀티 스레드 환경에서 스레드는 프로세스의 데이터, 힙 영역을 공유하게 된다.\n\n여기서 다음 코드와 같은 문제가 발생할 수 있다.\n\n```java\npublic class ReproduceRaceCondition ..."
+  },
+  {
+    "name": "tftile",
+    "title": "tf.tile",
+    "tags": [
+      "Tensorflow",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-08T00:00:00.000Z",
+    "updatedAt": "2023-01-08T00:00:00.000Z",
+    "path": "/memos/tftile",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n입력 텐서를 반복시켜서 리턴해주는 메서드이다.\n\n```python\ntf.tile(\n    input, multiples, name=None\n)\n```\n\n\n# 예제\n\n```python\nx = tf.constant([[1, 2, 3], [4, 5, 6]], dtype=tf.int32)\ny = tf.constant([3, 3], dtype=tf.int32)\nt..."
+  },
+  {
+    "name": "threejs",
+    "title": "Three.js",
+    "tags": [
+      "JS",
+      "Knowledge"
+    ],
+    "createdAt": "2023-08-19T00:00:00.000Z",
+    "updatedAt": "2023-08-19T00:00:00.000Z",
+    "path": "/memos/threejs",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n\n# 참고자료\n\n[https://sbcode.net/react-three-fiber/](https://sbcode.net/react-three-fiber/)\n\n[https://threejs.org/](https://threejs.org/)\n\n[https://threejs.org/examples/#webgl_geometry_spline_editor](htt..."
+  },
+  {
+    "name": "torchsummarysummary-cuda-문제",
+    "title": "torchsummary.summary() cuda 문제",
+    "tags": [
+      "Pytorch"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/torchsummarysummary-cuda-문제",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n\n간단한 UNet을 구성하여 torchsummary 모듈로 구조를 확인하기 위하여 summary() 메서드를 사용하던 중 발생하였다.\n\n```python\nnet = BasicUNet()\n\nimport torchsummary\ntorchsummary.summary(net, input_size=(1, 28, 28), batch_size=8)\n\n---------..."
+  },
+  {
+    "name": "transformer",
+    "title": "Transformer",
+    "tags": [
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/transformer",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/5aa184ab-ce63-4cab-831c-21337f54f2d8.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n\n# Transformer\n\n트랜스포머(Transformer)는 2017년 구글이 발표한 논문인 **Attention is all you need**에서 나온 모델로 기존의 seq2seq의 구조인 인코더-디코더를 따르면서도, 논문의 이름처럼 어텐션(Attention)만으로 구현한 모델이다. 이 모델은 RN..."
+  },
+  {
+    "name": "upsampling",
+    "title": "UpSampling",
+    "tags": [
+      "ML",
+      "Tutorial",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/upsampling",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n[https://zzsza.github.io/data/2018/06/25/upsampling-with-transposed-convolution/](https://zzsza.github.io/data/2018/06/25/upsampling-with-transposed-convolution/)\n\n..."
+  },
+  {
+    "name": "vae",
+    "title": "VAE",
+    "tags": [
+      "Generative Model",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/vae",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n\n# 사전 지식\n\n\n\n# References\n\n[https://itrepo.tistory.com/m/48](https://itrepo.tistory.com/m/48)\n\n[https://taeu.github.io/paper/deeplearning-paper-vae/](https://taeu.github.io/paper/deeplearning-paper-va..."
+  },
+  {
+    "name": "vision-transformer-vit",
+    "title": "Vision Transformer (ViT)",
+    "tags": [
+      "ML",
+      "Pytorch",
+      "Paper Implementation"
+    ],
+    "createdAt": "2023-01-23T00:00:00.000Z",
+    "updatedAt": "2023-01-23T00:00:00.000Z",
+    "path": "/memos/vision-transformer-vit",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/61eb2fa0-bbf1-4e0f-9c78-b13cf685732f.png",
+    "slicedContent": "\n\n<!-- Table of Contents -->\n\n\n[https://colab.research.google.com/drive/18g2NRUKGy2aGaKfIrKiZxkYbsT27kZLP?hl=ko#scrollTo=5uJanWrbRjOZ](https://colab.research.google.com/drive/18g2NRUKGy2aGaKfIrKiZxkYb..."
+  },
+  {
+    "name": "vstack-vs-hstack",
+    "title": "vstack vs hstack",
+    "tags": [
+      "Numpy",
+      "Knowledge"
+    ],
+    "createdAt": "2022-12-20T00:00:00.000Z",
+    "updatedAt": "2022-12-20T00:00:00.000Z",
+    "path": "/memos/vstack-vs-hstack",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n\n\n```javascript\nimport numpy as np\n\na = np.arange(10).reshape(2, 5)\nb = np.arange(8).reshape(2, 4)\nc = np.arange(15).reshape(3, 5)\n\n\"\"\"\na\n[[0, 1, 2, 3, 4],\n [5, 6, 7, 8, 9]]\n\nb\n[[0, 1, 2, 3],\n [4, 5,..."
+  },
+  {
+    "name": "webui",
+    "title": "Webui",
+    "tags": [
+      "Stable Diffusion"
+    ],
+    "createdAt": "2024-01-11T00:00:00.000Z",
+    "updatedAt": "2024-01-11T00:00:00.000Z",
+    "path": "/memos/webui",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n\n# WebUI Setting\n\nSDXL 모델 실행시 webui-user.bat의 COMMANDLINE_ARGS에 —no-half-vae를 활성화해야한다.\n\n모델 구동시 vram 부족시 COMMANDLINE_ARGS에 —lowvram 또는 —medvram 옵션을 켜준다 \n\n# 이미지 재현\n\n동일한 이미지 ..."
+  },
+  {
+    "name": "강아지-vs-고양이",
+    "title": "강아지 vs 고양이",
+    "tags": [
+      "Tensorflow",
+      "Tutorial",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/강아지-vs-고양이",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n해당 실습에서는 합성곱 신경망을 이용하여 강아지와 고양이 사진을 입력으로 받았을때 이를 잘 분류할 수 있도록 판단하는 인공지능 모델을 만들 것입니다.\n\n\n해당 실습에서는 신경망을 학습시키는 총 3가지 방식을 사용할 것입니다.\n\n- 처음부터 모델 훈련 시키기\n- 사전 훈련된 모델을 사용하여 특성 추출하기\n- 사전 훈련된 모델을 세밀하게 튜닝시키기\n\n이 뿐만..."
+  },
+  {
+    "name": "그람-행렬-gram-matrix",
+    "title": "그람 행렬 ( Gram Matrix )",
+    "tags": [
+      "ML",
+      "Pytorch",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-12T00:00:00.000Z",
+    "updatedAt": "2023-01-12T00:00:00.000Z",
+    "path": "/memos/그람-행렬-gram-matrix",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/b12bbecc-8edb-4361-928c-2c9395876f9a.png",
+    "slicedContent": "\n\n# 개요\n\n행렬 $X$의 집합을 $v_1, ...,v_n$라고 한다면, 벡터 좌표들이 실수일 때 그람 행렬은 $X^TX$라고 할 수 있다.\n\n\n[https://openaccess.thecvf.com/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf](https://openac..."
+  },
+  {
+    "name": "그리디-알고리즘",
+    "title": "그리디 알고리즘",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-01T00:00:00.000Z",
+    "updatedAt": "2023-04-01T00:00:00.000Z",
+    "path": "/memos/그리디-알고리즘",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 그리디 알고리즘\n\n그리디 알고리즘은 최적해를 구하는 상황에서 사용되는 알고리즘입니다. 최적해란 문제의 조건을 만족시키면서, 최대 또는 최소의 값을 가지는 해를 의미합니다.\n\n그리디 알고리즘은 매 순간 최적이라고 생각되는 것을 선택해 나가면서 문제를 해결합니다. 하지만 이러한 선택들이 모여 최적해를 만들어내지 않을 수 있습니다. 따라서 그리디 알고리즘은..."
+  },
+  {
+    "name": "뉴스-기사-분류-다중-분류-문제",
+    "title": "뉴스 기사 분류: 다중 분류 문제",
+    "tags": [
+      "Tensorflow",
+      "Tutorial",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/뉴스-기사-분류-다중-분류-문제",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/45f1fbde-1bb5-4150-a208-d2cbdeaa0124.png",
+    "slicedContent": "\n\n케라스의 로이터 뉴스 데이터셋은 46개의 카테고리로 나뉘어져 있다.\n\n해당 데이터는 **다중 분류 문제**에 속하며, 각 데이터 포인트들이 정확히 하나의 범주로 분류되기 때문에 **단일 레이블 다중 분류** 문제이다.\n\n\n```python\nfrom tensorflow.keras.datasets import reuters\n\n(train_data, trai..."
+  },
+  {
+    "name": "느리게-갱신되는-세그먼트-트리",
+    "title": "느리게 갱신되는 세그먼트 트리",
+    "tags": [
+      "Algorithm",
+      "Segment Tree"
+    ],
+    "createdAt": "2023-02-11T00:00:00.000Z",
+    "updatedAt": "2023-02-11T00:00:00.000Z",
+    "path": "/memos/느리게-갱신되는-세그먼트-트리",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n작성 중.\n\n\n[https://www.acmicpc.net/problem/10999](https://www.acmicpc.net/problem/10999)\n\n해당 문제를 풀다가 일반적인 세그먼트 트리로는 시간 초과로 도저히 안 풀려서 찾아봤던 방법이다.\n\n\n일반적인 세그먼트 트리는 갱신 범위내의 리프 노드까지 내려가 값을 변경한다.\n\n```python\nd..."
+  },
+  {
+    "name": "다익스트라",
+    "title": "다익스트라",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-03-11T00:00:00.000Z",
+    "updatedAt": "2023-03-11T00:00:00.000Z",
+    "path": "/memos/다익스트라",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n\n## 다익스트라(Dijkstra) 알고리즘이란?\n\n다익스트라 알고리즘은 그래프에서 최단 경로를 찾는 알고리즘 중 하나입니다. 음의 가중치를 갖는 간선을 포함하지 않는 경우에 이용할 수 있습니다.\n\n## 알고리즘 개념\n\n1. 시작 정점을 기준으로 거리 값을 할당하고, 시작 정점 외의 다른 정점들은 무한대의 값으로 초기화합니다.\n1. 방문하지 않..."
+  },
+  {
+    "name": "단절점과-단절선",
+    "title": "단절점과 단절선",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-03-24T00:00:00.000Z",
+    "updatedAt": "2023-03-24T00:00:00.000Z",
+    "path": "/memos/단절점과-단절선",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 단절점과 단절선\n\n## 정의\n\n그래프에서 단절점(Cut vertex)이란 노드 하나가 제거될 때 그래프의 연결성이 떨어지는 노드를 의미합니다. 또한, 단절선(Cut edge)이란 간선 하나가 제거될 때 그래프의 연결성이 떨어지는 간선을 의미합니다.\n\n## 단절점과 단절선의 조건\n\n1. 루트 노드의 자식 노드 중 하나 이상이 단절선일 경우\n1. 루트 노..."
+  },
+  {
+    "name": "동적-계획법",
+    "title": "동적 계획법",
+    "tags": [
+      "Algorithm",
+      "Dynamic Programming"
+    ],
+    "createdAt": "2023-01-29T00:00:00.000Z",
+    "updatedAt": "2023-01-29T00:00:00.000Z",
+    "path": "/memos/동적-계획법",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/bad545bd-2d1f-49c3-b93b-715e80897333.png",
+    "slicedContent": "\n# 더 다양한 유형들\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: link_to_page -->\n\n# 개요\n\n최적화 이론의 한 기술로,..."
+  },
+  {
+    "name": "로테이팅-캘리퍼스",
+    "title": "로테이팅 캘리퍼스",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-18T00:00:00.000Z",
+    "updatedAt": "2023-04-18T00:00:00.000Z",
+    "path": "/memos/로테이팅-캘리퍼스",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 코드\n\n```c++\n\npair<vec, vec> rotating_calipers(vector<vec>& p) {\n    vector<int> tmp = convex_hull(p);\n    vector<vec> cx;\n    for(int now : tmp) cx.push_back(p[now]);\n    int p1 = 0, p2 = 1;\n    lon..."
+  },
+  {
+    "name": "매우-간단한-mnist-분류",
+    "title": "매우 간단한 MNIST 분류",
+    "tags": [
+      "Pytorch",
+      "ML",
+      "Tutorial"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/매우-간단한-mnist-분류",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n```python\nimport torch\nimport torchvision.datasets as dsets\nimport torchvision.transforms as transforms\nimport torch.nn.init\n\ndevice = 'cuda' if torch.cuda.is_available() else 'cpu'\n\ntorch.manual_see..."
+  },
+  {
+    "name": "머지-소트-트리",
+    "title": "머지 소트 트리",
+    "tags": [
+      "Algorithm",
+      "Segment Tree"
+    ],
+    "createdAt": "2023-04-02T00:00:00.000Z",
+    "updatedAt": "2023-04-02T00:00:00.000Z",
+    "path": "/memos/머지-소트-트리",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/a6d7dcc3-ebca-44df-a9d7-37b4a91bc643.png",
+    "slicedContent": "\n![](/markdown-memo/legacy/images/a6d7dcc3-ebca-44df-a9d7-37b4a91bc643.png)\n\n# 개요\n\n세그먼트 트리의 노드 부분이 배열 인 것 빼고는 다른 점이 없다.\n\n합치기 연산 시에 c++의 내장 함수 merge()를 사용하면 굉장히 간편하게 구현할 수 있다.\n\n일반적으로 머지 소트 트리의 질의는 특정 구..."
+  },
+  {
+    "name": "배치-정규화",
+    "title": "배치 정규화",
+    "tags": [
+      "ML",
+      "Tutorial",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/배치-정규화",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/063b1ae6-2a4e-4df1-962b-e628a4bc8c05.png",
+    "slicedContent": "\n# 개요\n\n기울기 소실 또는 기울기 폭주 현상을 방지하고 학습과정을 안정화 그리고 속도를 가속 시키도록 하는 방법입니다.\n\n\n# 과정\n\n\n![](/markdown-memo/legacy/images/063b1ae6-2a4e-4df1-962b-e628a4bc8c05.png)\n\n\n$\\mu_\\mathcal{B}\\leftarrow{1\\over{m}}\\Sigma^m..."
+  },
+  {
+    "name": "병렬-이분-탐색",
+    "title": "병렬 이분 탐색",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-05-07T00:00:00.000Z",
+    "updatedAt": "2023-05-07T00:00:00.000Z",
+    "path": "/memos/병렬-이분-탐색",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n\n# 예제\n\n[https://www.acmicpc.net/problem/1396](https://www.acmicpc.net/problem/1396)\n\n  <details>\n  <summary>코드</summary>\n\n</details>\n\n..."
+  },
+  {
+    "name": "부분-문자열-팰린드롬-판별-알고리즘",
+    "title": "부분 문자열 팰린드롬 판별 알고리즘",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-05-07T00:00:00.000Z",
+    "updatedAt": "2023-05-07T00:00:00.000Z",
+    "path": "/memos/부분-문자열-팰린드롬-판별-알고리즘",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n팰린드롬은 어떤 문자열이 양쪽에 대해 대칭하는 것을 의미합니다.\n\n대표적으로 `abccba` 의 경우가 있으며 `aba` 와 `a` 의 경우도 성립합니다.\n\n\n# Naive한 접근\n\n어떤 문자열이 팰린드롬인 경우를 판별하기 위한 가장 단순한 방법은 해당 문자열을 뒤집었을 떄 같은 문자열이 나오는 방법입니다.\n\n그러나 해당 알고리즘을 부분 문자열..."
+  },
+  {
+    "name": "비트마스킹",
+    "title": "비트마스킹",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-28T00:00:00.000Z",
+    "updatedAt": "2023-04-28T00:00:00.000Z",
+    "path": "/memos/비트마스킹",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 비트마스킹\n\n비트마스킹은 이진수 연산을 이용하여 집합을 나타내는 기법입니다. 이 기법을 이용하면 집합에 대한 다양한 연산을 빠르게 처리할 수 있습니다.\n\n다음은 비트마스킹을 이용한 집합 연산에 대한 예시입니다.\n\n<!-- Unknown block type: table -->\n\n\n# 예제 문제\n\n### 백준 2961번: 도영이가 만든 맛있는 음식\n\n재귀..."
+  },
+  {
+    "name": "성능-최적화-방법",
+    "title": "성능 최적화 방법",
+    "tags": [
+      "CS",
+      "Knowledge"
+    ],
+    "createdAt": "2024-01-20T00:00:00.000Z",
+    "updatedAt": "2024-01-20T00:00:00.000Z",
+    "path": "/memos/성능-최적화-방법",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 아키텍처 리팩토링\n\n## 아키텍처 평가\n\n현재 아키텍처를 검토하고 문제점을 식별. 확장성, 보안, 성능 및 기타 요구 사항을 고려\n\n## 아키텍처 변경\n\n필요한 경우 아티텍처를 변경하고 모놀리식 애플리케이션을 마이크로서비스 어키텍처로 분해하거나 모듈화하거나, 서버리스 아키텍처를 이전할 수 있음\n\n# 어플리케이션 리팩토링\n\n## 코드 베이스 분석\n\n기존..."
+  },
+  {
+    "name": "세그먼트-트리-실전-테크닉",
+    "title": "세그먼트 트리 실전 테크닉",
+    "tags": [
+      "Algorithm",
+      "Segment Tree"
+    ],
+    "createdAt": "2023-04-09T00:00:00.000Z",
+    "updatedAt": "2023-04-09T00:00:00.000Z",
+    "path": "/memos/세그먼트-트리-실전-테크닉",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n> 단순 최소, 최대 구간 쿼리가 아닌 이게 세그먼트 트리로 해결이 가능하다고? 라고 생각할 만한 문제들을 해결 할 수 있도록 하는 아이디어 모음집입니다.\n\n\n<!-- Table of Contents -->\n\n# 개요\n\n일반적으로 한 요소에 대해 정렬 후 다른 요소의 존재 여부 혹은 \n\n# 2-elements\n\n대표적으로 Inversion Counting..."
+  },
+  {
+    "name": "세그먼트-트리",
+    "title": "세그먼트 트리",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-02-11T00:00:00.000Z",
+    "updatedAt": "2023-02-11T00:00:00.000Z",
+    "path": "/memos/세그먼트-트리",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n세그먼트 트리는 **여러 개의 데이터가 연속적으로 존재할 때 특정한 범위의 데이터의 합을 구하는 방법**에 관한 것이다.\n\n\n우리는 배열에서 특정 구간의 합을 구하기 위해서 일반적으로 범위에 속하는 수를 하나씩 더하여 계산한다.\n\n이는 매우 단순하지만 데이터의 개수가 N개 있다고 가정하면 시간 복잡도는 O(N)이 나온다.\n\n하지만 세그먼트 트리..."
+  },
+  {
+    "name": "스위핑",
+    "title": "스위핑",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-28T00:00:00.000Z",
+    "updatedAt": "2023-04-28T00:00:00.000Z",
+    "path": "/memos/스위핑",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n스위핑(Sweeping) 알고리즘은 평면상에서 여러 개의 선분이나 점들이 주어졌을 때, 그들이 교차하는 지점의 좌표 등을 찾는 알고리즘입니다. 스위핑 알고리즘은 대개 빠른 시간복잡도와 함께 많은 문제에서 활용됩니다.\n\n# 예제\n\n[https://www.acmicpc.net/problem/5419](https://www.acmicpc.net/pr..."
+  },
+  {
+    "name": "영화-리뷰-분류-이진-분류-문제",
+    "title": "영화 리뷰 분류: 이진 분류 문제",
+    "tags": [
+      "Tensorflow",
+      "Tutorial",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/영화-리뷰-분류-이진-분류-문제",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/77bd42ea-2b9b-4bd6-8c36-1517ce24381c.png",
+    "slicedContent": "\n\n케라스의 imdb 데이터셋을 활용한 이진 분류 문제를 풀어보자.\n\n```python\nfrom tensorflow.keras.datasets import imdb\n\n(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)\n```\n\n```python\nlen(t..."
+  },
+  {
+    "name": "온도-예측-문제",
+    "title": "온도 예측 문제",
+    "tags": [
+      "Tutorial",
+      "Tensorflow"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/온도-예측-문제",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/c93f3170-29ca-4011-bdac-e1f1484e70ba.png",
+    "slicedContent": "\n온도 예측 문제는 대표적인 시계열(time series) 문제로 이번 문제에서는 매시간 측정값이 주어졌을 때 24시간 뒤의 온도를 예측해 보겠습니다.\n\n데이터 셋은 독일 예나시에 있는 막스 플랑크 생물지구화학연구소의 기상 관측소에서 수집한 데이터를 사용하겠습니다.\n\n해당 데이터는 온도, 풍향, 기압, 습도등 14개의 관측치가 10분 간격으로 기록되어 있습..."
+  },
+  {
+    "name": "유량-문제",
+    "title": "유량 문제",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-04-14T00:00:00.000Z",
+    "updatedAt": "2023-04-14T00:00:00.000Z",
+    "path": "/memos/유량-문제",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/d6044a00-ad1d-4055-b796-a1c52baaf252.png",
+    "slicedContent": "\n# 개요\n\n간선마다 용량이 있고 그 용량을 준수하는 유량이 있을 때 간선을 따라 흐를 수 있는 최대 유량을 구하는 문제로 전혀 관계없어 보이는 문제도 그래프 모델링을 통하여 유량 문제로 변환하여 풀곤 한다.\n\n# 코드\n\n## 에드몬드-카프\n\n```c++\n#include <bits/stdc++.h>\n\nusing namespace std;\nconst int ..."
+  },
+  {
+    "name": "이미지-분할-해보기-시맨틱-분할",
+    "title": "이미지 분할 해보기: 시맨틱 분할",
+    "tags": [
+      "Tensorflow",
+      "Tutorial",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/이미지-분할-해보기-시맨틱-분할",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/4683a032-1496-4329-8d97-519243273a06.png",
+    "slicedContent": "\n\n**시맨틱 분할**이란?\n\n이미지안에 고양이가 존재한다면 각 픽셀이 독립적으로 고양이와 같은 하나의 의미를 가진 범주로 분류됩니다. 이미지 안에 여러마리의 고양이들이 존재한다면 이에 해당하는 모든 픽셀은 동일한 ‘cat’  범주로 매핑됩니다.\n\n\n사용한 데이터 셋\n\nOxfod-IIIT Pets 데이터 셋은 다양한 품종의 고양이와 강아지 사진 7390개와..."
+  },
+  {
+    "name": "이분-탐색",
+    "title": "이분 탐색",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-01T00:00:00.000Z",
+    "updatedAt": "2023-04-01T00:00:00.000Z",
+    "path": "/memos/이분-탐색",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 이분 탐색\n\n## 개요\n\n이분 탐색 알고리즘은 정렬된 배열에서 특정 값을 찾을 때 사용되는 알고리즘이다. 배열의 중간값을 선택하여 찾고자 하는 값과 비교하고, 찾고자 하는 값이 중간값보다 작으면 중간값의 왼쪽 부분 배열에서 탐색을 진행하고, 찾고자 하는 값이 중간값보다 크면 중간값의 오른쪽 부분 배열에서 탐색을 진행한다. 이 과정을 반복하여 값을 찾는..."
+  },
+  {
+    "name": "이분매칭",
+    "title": "이분매칭",
+    "tags": [
+      "Algorithm",
+      "Graph"
+    ],
+    "createdAt": "2023-04-09T00:00:00.000Z",
+    "updatedAt": "2023-04-09T00:00:00.000Z",
+    "path": "/memos/이분매칭",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 이분매칭\n\n\n# 기본 코드\n\n```c++\n#include <bits/stdc++.h>\n\nusing namespace std;\nint aMatch[51];\nint bMatch[51];\nint dis[51];\n\nbool dfs(int cur) {\n\tif(dis[cur]) return false;\n\tdis[cur] = true;\n\tfor(int next :..."
+  },
+  {
+    "name": "이항계수와-페르마의-소정리",
+    "title": "이항계수와 페르마의 소정리",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-11T00:00:00.000Z",
+    "updatedAt": "2023-04-11T00:00:00.000Z",
+    "path": "/memos/이항계수와-페르마의-소정리",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/6e46f648-1d67-481b-870e-e3df68e6bdf5.png",
+    "slicedContent": "\n# 개요\n\n$$\n\\binom{n}{k}=nCk=\\frac{n!}{(n-k)!k!}( 단, 0\\le k \\le n)\n$$\n\n$$\n(\\frac{n!}{k!(n-k)!})\\% P \\ne \\frac{n!\\% P}{k!(n-k)!\\%P}\n$$\n\n## 페르마의 소정리\n\n> *p*가 소수이고 a가 p의 배수가 아니면, $a^{p-1}\\equiv{1(mod\\ p)}$이..."
+  },
+  {
+    "name": "잔차-연결-residual-connection",
+    "title": "잔차 연결 (Residual connection)",
+    "tags": [
+      "Tutorial",
+      "Knowledge",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/잔차-연결-residual-connection",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/6405651c-8ec7-49e6-b336-f74b7e6853de.png",
+    "slicedContent": "\n\n잔차 연결은 하위 층의 출력 텐서를 상위 층의 출력 텐서에 더하여 아래층의 표현이 네트워크 위쪽으로 흘러 갈 수 있도록 하는 기법이다.\n\n![](/markdown-memo/legacy/images/6405651c-8ec7-49e6-b336-f74b7e6853de.png)\n\n어떤 함수 $H(x)$가 있다고 하자\n\n위 그림은 입력 $x$와 $x$에 대한 어..."
+  },
+  {
+    "name": "주택-가격-예측-회귀-문제",
+    "title": "주택 가격 예측: 회귀 문제",
+    "tags": [
+      "Tensorflow",
+      "Tutorial",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/주택-가격-예측-회귀-문제",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/2f724ee4-e089-4ddc-ace9-6026574fc070.png",
+    "slicedContent": "\n\n주택 가격 예측에 필요한 데이터 셋은 케라스의 datasets 모듈의 boston_housing 을 사용했다.\n\n해당 데이터셋은 1970년 중반 보스턴 외곽 지역의 범죄율, 지방세율 등의 데이터가 주어졌을 때 주택 가격의 중간 값을 예측해 보겠다.\n\n```python\nfrom tensorflow.keras.datasets import boston_hou..."
+  },
+  {
+    "name": "층-정규화-layer-normalization",
+    "title": "층 정규화 (Layer Normalization)",
+    "tags": [
+      "ML",
+      "Tutorial",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/층-정규화-layer-normalization",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n층 정규화는 **텐서의 마지막 차원**에 대해서 평균과 분산을 구하고, 이를 가지고 어떤 수식을 통해 값을 정규화하는 기법입니다.\n\n사실 상 배치 정규화랑 효과는 똑같으며 정규화 하는 대상이 다를 뿐입니다.\n\n배치 정규화는 모든 샘플에 대한 각 피쳐들을 대상으로 한다면 층 정규화는 각 샘플에 대한 피쳐들을 대상으로 한다는 점이 다릅니다.\n\n\n층..."
+  },
+  {
+    "name": "커넥션-프로파일-다이내믹-프로그래밍",
+    "title": "커넥션 프로파일 다이내믹 프로그래밍",
+    "tags": [
+      "Algorithm",
+      "Dynamic Programming"
+    ],
+    "createdAt": "2023-05-05T00:00:00.000Z",
+    "updatedAt": "2023-05-05T00:00:00.000Z",
+    "path": "/memos/커넥션-프로파일-다이내믹-프로그래밍",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/680c4c48-836f-4cba-854d-8bccd4d0ee88.png",
+    "slicedContent": "\n<!-- Table of Contents -->\n\n# 사전지식\n\n[https://www.acmicpc.net/problem/1648](https://www.acmicpc.net/problem/1648)\n\n  <details>\n  <summary>코드</summary>\n\n</details>\n\n격자에서 비트마스크 DP를 돌리는 기본적인 문제로 좌상단을 기준으..."
+  },
+  {
+    "name": "컨벡스-헐",
+    "title": "컨벡스 헐",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-03-23T00:00:00.000Z",
+    "updatedAt": "2023-03-23T00:00:00.000Z",
+    "path": "/memos/컨벡스-헐",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 컨벡스 헐\n\n## 개요 및 정의\n\n컨벡스 헐(Convex Hull)은 2차원 평면 상에 있는 점들의 집합 중에서 아래와 같은 조건을 만족하는 가장 작은 볼록 다각형(Convex Polygon)을 의미합니다.\n\n1. 모든 점들이 볼록 다각형 내부에 위치해야 합니다.\n1. 볼록 다각형의 모든 각이 180도보다 작거나 같아야 합니다.\n컨벡스 헐은 컴퓨터 그..."
+  },
+  {
+    "name": "텐서플로-선형-분류기",
+    "title": "텐서플로 선형 분류기",
+    "tags": [
+      "Tensorflow",
+      "Tutorial",
+      "ML"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/텐서플로-선형-분류기",
+    "description": "",
+    "thumbnail": "/markdown-memo/legacy/images/6f3981b8-809c-40ca-8435-db1d64db8094.png",
+    "slicedContent": "\n\n경사 하강 기반의 선형 분류기를 만들어 보자.\n\n\n선형적으로 잘 구분되는 합성 데이터를 만든다. 이는 2D 평면의 포인트로 2개의 클래스를 가진다.\n\n\n\n특정한 펑균과 공분산 행렬을 가진 랜덤한 분포에서 좌표값을 뽑아 각 클래스의 포인트를 생성한다.\n\n\n```python\nimport tensorflow as tf\nimport numpy as np\nimp..."
+  },
+  {
+    "name": "트라이-trie",
+    "title": "트라이 Trie",
+    "tags": [
+      "Algorithm"
+    ],
+    "createdAt": "2023-04-24T00:00:00.000Z",
+    "updatedAt": "2023-04-24T00:00:00.000Z",
+    "path": "/memos/트라이-trie",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n# 개요\n\n트라이(Trie)는 문자열 검색을 위한 트리 자료구조입니다. 이 자료구조는 문자열에서 일치하는 문자열을 빠르게 찾을 수 있도록 해줍니다. 트라이는 각 노드가 문자 하나를 나타내는 트리입니다. 루트 노드에서부터 각 문자열의 글자를 따라 내려가며, 각 노드에서 해당 글자를 나타내는 자식 노드로 이동합니다. 이를 통해 문자열을 검색할 수 있습니다.\n..."
+  },
+  {
+    "name": "프롬프트-엔지니어링",
+    "title": "프롬프트 엔지니어링",
+    "tags": [
+      "AI"
+    ],
+    "createdAt": "2023-06-21T00:00:00.000Z",
+    "updatedAt": "2023-06-21T00:00:00.000Z",
+    "path": "/memos/프롬프트-엔지니어링",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: child_page -->\n\n<!-- Unknown block type: child_page -->\n\n..."
+  },
+  {
+    "name": "합성곱-신경망",
+    "title": "합성곱 신경망",
+    "tags": [
+      "ML",
+      "Tutorial",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/합성곱-신경망",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n합성곱 신경망은 이미지 관련 모델에서 엄청난 성능을 보여주면서 딥러닝 초창기에 가장 큰 성과를 낸 사례를 꼽힙니다.\n\n\n본격적으로 들어가기 전, 합성곱 신경망이 왜 엄청난 주목을 받았었는지 간단하게 모델을 구성하여 알아보겠습니다.\n\n\n데이터셋은 MNIST를 사용하였습니다.\n\n\n먼저 Dense 층을 활용하여 모델을 구성해보겠습니다.\n\n```python\nfr..."
+  },
+  {
+    "name": "훈련-성능을-향상시켜봅시다",
+    "title": "훈련 성능을 향상시켜봅시다!",
+    "tags": [
+      "Tutorial",
+      "ML",
+      "Knowledge"
+    ],
+    "createdAt": "2023-01-20T00:00:00.000Z",
+    "updatedAt": "2023-01-20T00:00:00.000Z",
+    "path": "/memos/훈련-성능을-향상시켜봅시다",
+    "description": "",
+    "thumbnail": "",
+    "slicedContent": "\n\n모델을 훈련시켜 실제 데이터에 대해서도 잘 작동하는 좋은 신경망을 만들기 위해서는 먼저 과대적합되어야 합니다.\n\n과대적합하는 그 경계를 발견함으로써 우리는 해당 문제를 해결할 수 있는 목표에 한 발짝 더 가까이 다가갈 수 있습니다.\n\n경계를 발견한 후 우리는 과대적합과 싸워 일반화 성능을 개선하는데 초점을 맞추고자 할 것입니다.\n\n\n해당 단계에서 우리는..."
   }
 ]

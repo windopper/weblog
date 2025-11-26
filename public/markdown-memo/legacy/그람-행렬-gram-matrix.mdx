@@ -1,0 +1,84 @@
+---
+title: "그람 행렬 ( Gram Matrix )"
+description: ""
+tags: ["ML","Pytorch","Knowledge"]
+date: "2023-01-12"
+thumbnail: "/markdown-memo/legacy/images/b12bbecc-8edb-4361-928c-2c9395876f9a.png"
+---
+
+
+# 개요
+
+행렬 $X$의 집합을 $v_1, ...,v_n$라고 한다면, 벡터 좌표들이 실수일 때 그람 행렬은 $X^TX$라고 할 수 있다.
+
+
+[https://openaccess.thecvf.com/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf](https://openaccess.thecvf.com/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf)
+
+Image Style Transfer Using Convolutional Neural Networks 논문에서 이미지의 style representation을 구하는데 쓰였다.
+
+
+# 뉴럴 스타일 트랜스퍼에서의 그람 행렬
+
+상단에서 소개한 논문에서 이미지의 style representation을 구하기 위해서는 입력 데이터의 피쳐 맵을 입력 값으로 그람 행렬을 계산하는데, 여기서 피쳐 맵의 크기는 다음과 같다.
+
+> **( 피쳐의 채널 수, 피쳐의 높이, 피쳐의 너비 )**
+
+
+뉴럴 스타일 트랜스퍼에서의 피쳐 맵 $F$의 크기는 다음과 같다.
+
+> **( 피쳐의 채널 수, 피쳐의 높이 * 피쳐의 너비 )**
+
+즉, 높이와 너비의 곱은 픽셀의 개수이므로 다음과 같다.
+
+> **( 피쳐의 채널 수, 픽셀 개수 )**
+
+
+논문에서는 그람 행렬에 대한 식을 다음과 같이 정의 하고 있다.
+
+$$
+G^l_{ij}=\sum_kF^l_{ik}F^l_{jk}
+$$
+
+$F^l_{ij}$는 레이어 $l$ 의 $j$ 번째 레이어에서의 $i$ 번째 필터 (피쳐 맵)이다.
+
+$j$ 번째 레이어라는 것은 신경망에서의 층을 의미하는 것이고, $i$ 번째 필터라는 것은 해당 층을 선택했을 때 `( 피쳐의 채널 수, 픽셀개수 )` 크기의 피쳐 중 $i$ 번째 필터를 의미하는 것이다.
+
+
+![](/markdown-memo/legacy/images/b12bbecc-8edb-4361-928c-2c9395876f9a.png)
+
+예를 들어, VGG16 모델의 conv5 레이어에서의 그람 행렬을 구해보자
+
+
+`( 3, 224, 224 )` 크기의 이미지를 신경망에 통과시켜보면, 해당 이미지에 대한 conv5의 크기는 `( 512, 14, 14 )` 이다.
+
+해당 행렬을 2차원으로 변경하면, `( 512, 196 )` 이다.
+
+픽셀 개수는 196개이고 채널 수는 512개인 행렬을 통해 그람 행렬을 구해보면,
+
+`( 채널 수, 채널 수 )` 의 크기를 가지는 그람 행렬이 도출된다.
+
+
+파이토치로 구현한 그람 행렬은 다음과 같다
+
+```python
+def gram_matrix(x):
+	b, c, h, w = x.size()
+	# b -> 배치 사이즈
+	# c -> 피쳐 맵 개수
+	# h -> 피쳐 맵 높이
+	# w -> 피쳐 맵 너비
+	features = x.view(b * c, h * w)
+	# 피쳐 맵의 크기를 변환한다.
+	# 예를 들어 원래 피쳐 맵의 크기가 (1, 512, 14, 14) 라면
+	# ( 512, 196 ) 으로 바꾼다는 것
+	return torch.mm(features, features.T).div(b*c*h*w)
+	# 피쳐 맵의 내적을 구한 후 정규화!
+```
+
+
+
+
+
+
+
+

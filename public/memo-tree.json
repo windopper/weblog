@@ -28,5 +28,367 @@
     "name": "환영",
     "subTreeMenus": [],
     "fileName": "welcome"
+  },
+  {
+    "name": "Algorithm",
+    "subTreeMenus": [
+      {
+        "name": "Graph",
+        "subTreeMenus": [],
+        "fileName": "2-sat"
+      },
+      {
+        "name": "Segment Tree",
+        "subTreeMenus": [],
+        "fileName": "heavy-light-decomposition"
+      },
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "ps에-필요한-수학-잡지식"
+      },
+      {
+        "name": "Dynamic Programming",
+        "subTreeMenus": [],
+        "fileName": "동적-계획법"
+      }
+    ],
+    "fileName": "fenwick"
+  },
+  {
+    "name": "ML",
+    "subTreeMenus": [
+      {
+        "name": "Paper Review",
+        "subTreeMenus": [],
+        "fileName": "an-image-is-worth-16x16-words-transformers-for-image-recognition-at-scale"
+      },
+      {
+        "name": "Data Analysis",
+        "subTreeMenus": [],
+        "fileName": "brain-stroke-prediction-dataset"
+      },
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "inductive-bias"
+      },
+      {
+        "name": "Tutorial",
+        "subTreeMenus": [
+          {
+            "name": "Knowledge",
+            "subTreeMenus": [],
+            "fileName": "upsampling"
+          }
+        ]
+      },
+      {
+        "name": "Pytorch",
+        "subTreeMenus": [
+          {
+            "name": "Paper Implementation",
+            "subTreeMenus": [],
+            "fileName": "vision-transformer-vit"
+          },
+          {
+            "name": "Knowledge",
+            "subTreeMenus": [],
+            "fileName": "그람-행렬-gram-matrix"
+          }
+        ]
+      }
+    ],
+    "fileName": "transformer"
+  },
+  {
+    "name": "Style Transfer",
+    "subTreeMenus": [
+      {
+        "name": "Paper Review",
+        "subTreeMenus": [
+          {
+            "name": "ML",
+            "subTreeMenus": [],
+            "fileName": "arbitrary-style-transfer-in-real-time-with-adaptive-instance-normalization"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "aws",
+    "subTreeMenus": [],
+    "fileName": "aws-nodejs-애플리케이션-cicd-구축-경험"
+  },
+  {
+    "name": "Takeoff",
+    "subTreeMenus": [
+      {
+        "name": "React",
+        "subTreeMenus": [
+          {
+            "name": "Visx",
+            "subTreeMenus": [
+              {
+                "name": "D3",
+                "subTreeMenus": [],
+                "fileName": "canvas로-scatterplot-그리기-feat-visx"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "CS",
+    "subTreeMenus": [
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "성능-최적화-방법"
+      }
+    ],
+    "fileName": "cors-이해하기"
+  },
+  {
+    "name": "Pandas",
+    "subTreeMenus": [
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "dataframe-문자열-칼럼-분할하기"
+      }
+    ]
+  },
+  {
+    "name": "Knowledge",
+    "subTreeMenus": [
+      {
+        "name": "CS",
+        "subTreeMenus": [
+          {
+            "name": "Design Pattern",
+            "subTreeMenus": [],
+            "fileName": "design-pattern"
+          }
+        ]
+      }
+    ],
+    "fileName": "mongodb-삽질"
+  },
+  {
+    "name": "Generative Model",
+    "subTreeMenus": [
+      {
+        "name": "ML",
+        "subTreeMenus": [],
+        "fileName": "diffusion-model"
+      }
+    ]
+  },
+  {
+    "name": "Docker",
+    "subTreeMenus": [
+      {
+        "name": "Redis",
+        "subTreeMenus": [],
+        "fileName": "docker-compose로-redis-replication-구성하기"
+      }
+    ]
+  },
+  {
+    "name": "Firebase",
+    "subTreeMenus": [
+      {
+        "name": "React",
+        "subTreeMenus": [],
+        "fileName": "react-firebase-유저-연동해보기"
+      }
+    ],
+    "fileName": "firebase"
+  },
+  {
+    "name": "AI",
+    "subTreeMenus": [
+      {
+        "name": "Paper Review",
+        "subTreeMenus": [],
+        "fileName": "generative-agent-interactive-simulacra-of-human-behavior"
+      },
+      {
+        "name": "Machine Learning",
+        "subTreeMenus": [
+          {
+            "name": "Deep Learning",
+            "subTreeMenus": [],
+            "fileName": "mldl-하면서-얻은-지식"
+          }
+        ]
+      }
+    ],
+    "fileName": "parameter-vector-transfer"
+  },
+  {
+    "name": "Pytorch",
+    "subTreeMenus": [
+      {
+        "name": "Style Transfer",
+        "subTreeMenus": [
+          {
+            "name": "ML",
+            "subTreeMenus": [
+              {
+                "name": "Paper Implementation",
+                "subTreeMenus": [],
+                "fileName": "image-style-transfer-using-convolutional-neural-network"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ML",
+        "subTreeMenus": [
+          {
+            "name": "Tutorial",
+            "subTreeMenus": [],
+            "fileName": "매우-간단한-mnist-분류"
+          }
+        ]
+      }
+    ],
+    "fileName": "torchsummarysummary-cuda-문제"
+  },
+  {
+    "name": "Paper Review",
+    "subTreeMenus": [
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [
+          {
+            "name": "AI",
+            "subTreeMenus": [],
+            "fileName": "in-context-learning"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Next.js",
+    "subTreeMenus": [
+      {
+        "name": "Prisma",
+        "subTreeMenus": [],
+        "fileName": "next-auth와-prisma를-이용한-사용자-인증-구현"
+      },
+      {
+        "name": "React",
+        "subTreeMenus": [],
+        "fileName": "nextjs"
+      }
+    ]
+  },
+  {
+    "name": "Prisma",
+    "subTreeMenus": [
+      {
+        "name": "ORM",
+        "subTreeMenus": [],
+        "fileName": "prisma"
+      }
+    ]
+  },
+  {
+    "name": "React",
+    "subTreeMenus": [
+      {
+        "name": "Redux",
+        "subTreeMenus": [],
+        "fileName": "react로-전역-변수-관리하는-간단한-예제"
+      }
+    ]
+  },
+  {
+    "name": "Redis",
+    "subTreeMenus": [],
+    "fileName": "redis"
+  },
+  {
+    "name": "Tensorflow",
+    "subTreeMenus": [
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "tftile"
+      },
+      {
+        "name": "Tutorial",
+        "subTreeMenus": [
+          {
+            "name": "ML",
+            "subTreeMenus": [],
+            "fileName": "강아지-vs-고양이"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "JS",
+    "subTreeMenus": [
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "threejs"
+      }
+    ]
+  },
+  {
+    "name": "Numpy",
+    "subTreeMenus": [
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [],
+        "fileName": "vstack-vs-hstack"
+      }
+    ]
+  },
+  {
+    "name": "Stable Diffusion",
+    "subTreeMenus": [],
+    "fileName": "webui"
+  },
+  {
+    "name": "Tutorial",
+    "subTreeMenus": [
+      {
+        "name": "Tensorflow",
+        "subTreeMenus": [],
+        "fileName": "온도-예측-문제"
+      },
+      {
+        "name": "Knowledge",
+        "subTreeMenus": [
+          {
+            "name": "ML",
+            "subTreeMenus": [],
+            "fileName": "잔차-연결-residual-connection"
+          }
+        ]
+      },
+      {
+        "name": "ML",
+        "subTreeMenus": [
+          {
+            "name": "Knowledge",
+            "subTreeMenus": [],
+            "fileName": "훈련-성능을-향상시켜봅시다"
+          }
+        ]
+      }
+    ]
   }
 ]

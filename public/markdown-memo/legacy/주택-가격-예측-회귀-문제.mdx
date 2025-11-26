@@ -1,0 +1,259 @@
+---
+title: "주택 가격 예측: 회귀 문제"
+description: ""
+tags: ["Tensorflow","Tutorial","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/2f724ee4-e089-4ddc-ace9-6026574fc070.png"
+---
+
+
+주택 가격 예측에 필요한 데이터 셋은 케라스의 datasets 모듈의 boston_housing 을 사용했다.
+
+해당 데이터셋은 1970년 중반 보스턴 외곽 지역의 범죄율, 지방세율 등의 데이터가 주어졌을 때 주택 가격의 중간 값을 예측해 보겠다.
+
+```python
+from tensorflow.keras.datasets import boston_housing
+
+(train_data, train_targets), (test_data, test_targets) = boston_housing.load_data()
+
+"""
+train_data[0]
+
+array([  1.23247,   0.     ,   8.14   ,   0.     ,   0.538  ,   6.142  ,
+        91.7    ,   3.9769 ,   4.     , 307.     ,  21.     , 396.9    ,
+        18.72   ])
+
+len(train_data)
+404
+
+len(test_data)
+102
+
+"""
+```
+
+해당 데이터 셋은 총 404개의 훈련 데이터와 102개의 테스트 데이터로 구성되어 있다.
+
+
+# 데이터 전처리
+
+데이터를 사용하기에 앞서 전처리를 진행해보자.
+
+입력데이터를 한번 살펴보면 상이한 스케일을 가진 값들로 구성되어 있는 것을 알 수 있다.
+
+이러한 값들을 모델에 그대로 주입하여 학습을 진행시킬 수도 있지만 해당 모델이 학습하는 데 어려움을 느낄 수 있다.
+
+따라서 이런 각기 다른 특성을 가진 데이터들을 특성별로 정규화를 하는 방법이 있다.
+
+```python
+mean = train_data.mean(axis=0) # 첫번째 축의 데이터에 대한 평균값을 낸다.
+train_data -= mean
+std = train_data.std(axis=0) # 첫번재 축의 데이터에 대한 표준 편차를 낸다.
+train_data /= std
+
+test_data -= mean # 테스트 데이터에 대해 똑같이 전처리를 진행한다.
+test_data /= std
+```
+
+
+머신러닝 라이브러리인 사이킷런에는 해당 전처리를 쉽게 진행할 수 있도록 하는 함수가 마련되어있다.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+scaler.fit(train_data)
+train_data = scaler.transform(train_data)
+test_data = scaler.transform(test_data)
+```
+
+
+> 💡 테스트 데이터를 정규화할 때 사용한 값이 훈련 데이터에서 계산한 값임을 알아야 한다. 전처리 작업 과정에서 절대로 테스트 데이터에서 계산한 어떠한 값도 사용해서는 안된다.
+
+
+# 모델 구성하기
+
+해당 문제는 회귀 문제이므로 마지막 층의 활성화 함수로 sigmoid를 사용하였다.
+
+옵티마이저로 rmsprop, 손실 함수로 평균 제곱 오차 (mse)를 사용하였고, 데이터를 모니터링 할 지표로 평균 절대 오차 (mae)를 사용하였다.
+
+```python
+from tensorflow import keras
+from tensorflow.keras import layers
+
+def build_model():
+	model = keras.Sequential([
+		layers.Dense(64, activation='relu'),
+		layers.Dense(64, activation='relu'),
+		layers.Dense(1, activation='sigmoid')
+	])
+	model.compile(
+		optimizer='rmsprop',
+		loss='mse',
+		metrics=['mae']
+	)
+	return model
+```
+
+
+# K-Fold Validation 을 이용한 모델 검증
+
+훈련에 사용할 매개변수들을 조정하며 모델을 평가하기 위해 훈련 데이터에서 검증 데이터를 분리한다.
+
+그러나 훈련 데이터의 수가 많지 않기 때문에 데이터들이 편향적으로 분리될 가능성이 높다.
+
+따라서 데이터를 K개의 분할로 나눈 후 해당 분할에서 훈련하고 나머지 분할에서 검증하여 총 K번 평가하는 방식을 사용하여 최대한 공정하게 평가할 것이다.
+
+
+```python
+import numpy as np
+
+K = 4
+num_val_samples = len(train_data) // K
+num_epochs = 100
+all_scores = []
+
+for i in range(K):
+	print(f"preprocessing {i}'th fold")
+	val_data = train_data[i*num_val_samples:(i+1)*num_val_samples]
+	val_targets = train_targets[i*num_val_samples:(i+1)*num_val_samples]
+	"""
+	검증 데이터 및 타겟 분할
+	"""
+	partial_train_data = np.concatenate([
+		train_data[:i*num_val_samples],
+		train_data[(i+1)*num_val_samples:]		
+	])
+	partial_train_targets = np.concatenate([
+		train_targets[:i*num_val_samples],
+		train_targets[(i+1)*num_val_samples:]
+	])
+	"""
+	훈련 데이터 및 타겟 분할
+	"""
+	model = build_model()
+	model.fit(
+		partial_train_data,
+		partial_train_targets,
+		epochs=num_epochs,
+	)
+	val_mse, val_mae = model.evaluate(val_data, val_targets)
+	all_scores.append(val_mae) # 모델 평가 후 해당 평균 절대 오차를 저장
+```
+
+```python
+all_scores
+[1.8516002893447876, 2.4282381534576416, 2.4706802368164062, 2.490154266357422]
+
+np.mean(all_scores)
+2.3101682364940643
+```
+
+검증 세트가 다르므로 검증 점수 간의 변화가 큰 것을 확인 할 수 있다.
+
+
+이번에는 에포크를 200으로 늘린 후 모델 학습 히스토리를 저장하여 시각화를 진행해보겠다.
+
+
+```python
+num_epochs = 200
+all_mse_histories = []
+
+for i in range(K):
+	print(f"preprocessing {i}'th fold")
+	val_data = train_data[i*num_val_samples: (i+1)*num_val_samples]
+  val_targets = train_targets[i*num_val_samples: (i+1)*num_val_samples]
+  partial_train_data = np.concatenate([
+      train_data[:i*num_val_samples],
+      train_data[(i+1)*num_val_samples:]
+  ])
+  partial_train_targets = np.concatenate([
+      train_targets[:i*num_val_samples],
+      train_targets[(i+1)*num_val_samples:]
+  ])
+  model = build_model()
+
+  history = model.fit(
+      partial_train_data,
+      partial_train_targets,
+      epochs=num_epochs,
+      batch_size=16,
+      validation_data=(val_data, val_targets),
+      verbose = 1
+  )
+  mae_history = history.history['val_mae']
+  all_mae_histories.append(mae_history)
+
+average_mae_history = [
+    np.mean([x[i] for x in all_mae_histories]) for i in range(num_epochs)
+]
+```
+
+```python
+import matplotlib.pyplot as plt
+
+plt.plot(range(1, len(average_mae_history) + 1), average_mae_history)
+plt.xlabel('Epochs')
+plt.ylabel('Average MAE')
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/2f724ee4-e089-4ddc-ace9-6026574fc070.png)
+
+해당 그래프는 절대 평균 오차 최대와 최소 값 사이가 너무 크기 때문에 보기가 어렵다.
+
+10 에포크 이후의 절대 평균 오차 개요를 그래프로 그려보자
+
+```python
+truncated = average_mae_history[10:]
+plt.plot(range(1, len(truncated) + 1), truncated)
+plt.xlabel('Epochs')
+plt.ylabel('Average MAE')
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/a86568c7-c386-4c0a-884b-808385e19c61.png)
+
+
+해당 그래프를 통하여 120~140 번째 에포크 즈음에 검증 mae가 줄어드는 것을 멈춘 것을 확인 할 수 있다.
+
+그 이후로 과대적합이 일어난다고 판단됨으로 130에포크까지만 학습을 진행하여 보겠다.
+
+```python
+model = build_model()
+model.fit(train_data, train_targets, epochs=130, batch_size=16)
+test_mse_score, test_mae_score = model.evaluate(test_data, test_targets)
+
+Epoch 1/130
+26/26 [==============================] - 1s 3ms/step - loss: 481.0276 - mae: 19.9033
+Epoch 2/130
+26/26 [==============================] - 0s 3ms/step - loss: 288.4814 - mae: 14.6302
+Epoch 3/130
+26/26 [==============================] - 0s 3ms/step - loss: 131.9535 - mae: 8.9162
+.
+.
+.
+Epoch 130/130
+26/26 [==============================] - 0s 3ms/step - loss: 4.4006 - mae: 1.4911
+
+4/4 [==============================] - 0s 3ms/step - loss: 15.3248 - mae: 2.6521
+```
+
+```python
+test_mae_score
+2.652055263519287
+```
+
+테스트 데이터로 평가 결과 mae 손실 지표로 2.6이 나오는 것을 확인 할 수 있다. 대략 타겟 가격과 2600달러 정도 차이가 난다는 뜻이다.
+
+
+해당 모델을 개선하기 위해 다른 실습에서도 사용했던 모델의 층 및 유닛 개수를 변경하여 성능을 테스트 하여 볼 수 있다.
+
+
+# 매듭짓기
+
+- 훈련 데이터의 수가 적다면 중간 층의 수를 줄여 과대적합을 피하도록 할 수 있다.
+- 훈련 데이터의 수가 적어 모델을 검증하기 어려울 떄는 K-Fold Validation 기법을 활용하여 모델을 최대한 공정하게 평가 할 수 있다.
+- 각기 다른 스케일을 가진 데이터의 경우 각 특성마다 표준화를 적용하여 신경망이 학습을 올바르게 하도록 도움을 줄 수 있다.
+- 회귀 문제의 경우 신경망의 마지막 층에는 시그모이드 함수를 적용한다.
+- 회귀 문제에서 사용되는 손실 함수는 분류 문제와는 다르게 평균 제곱 오차(mse)를 사용한다.

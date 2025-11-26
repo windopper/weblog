@@ -1,0 +1,188 @@
+---
+title: "Image Style Transfer Using CNN"
+description: ""
+tags: ["Style Transfer","Paper Review","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/5ef6bb14-111a-4d37-aca3-8580ae20f7af.png"
+---
+
+
+<!-- Table of Contents -->
+
+# 개요
+
+저자는 이미지를 다른 스타일의 semantic content로 렌더링 하는 것은 어려운 이미지 프로세싱 태스크라고 말하며 객체 검출에 최적화된 CNN을 해당 모델의 image representation을 추출하는데 사용했다고 말한다.
+
+또한 해당 모델은 이미지의 content 와 style 를 분리하고 합칠 수 있다고 소개하며 CNN에 의해서 학습된 image representation이 고수준의 이미지 synthesis와 manipulation을 할 수 있다는 가능성을 증명하여 해당 분야에 대한 새로운 insight를 제공했다고 한다.
+
+
+저자는 Introduction에서 한 이미지의 스타일을 다른 이미지의 스타일로 전송하는 것은 texture transfer의 문제로 보았다.
+
+texture transfer은 원본 이미지의 texture를 타겟 이미지의 semantic content를 보존하며 texture를 합성하는 것을 뜻한다.
+
+기존의 texture synthesis은 주어진 원본 teture의 픽셀들을 resampling 하여 자연스럽게 합성할 수 있는 non-parametric 알고리즘들이 있다.
+
+그러나 해당 알고리즘들은 괄목할 만한 성과를 냈음에도 모두 같은 근본적인 한계점이 존재했다.
+
+해당 알고리즘들은 texture transfer를 하기 위해 target image의 low-level image features 만을 사용하여 사용했다는 것이다.
+
+그러나 해당 논문에서 제시하는 style transfer 알고리즘은 target image의 semantic image content 를 추출 할 수 있고 이를 통하여 source image의 style에서 target image의 semantic content를 render 하기 위해 texture transfer 를 진행할 수 있다.
+
+근본적인 전제조건은 semantic image content 와 style 에서 독립적인 model variations가 주어지는 image representations을 찾는 것이다.
+
+일반적으로 natural image (일반적인 이미지) 에서 style과 content로 분리하는 것은 매우 매우 어려운 문제이지만, 최근의 DCNN (Deep Convolutional Neural Networks) 의 발전으로 natural image에서 고수준의 semantic information을 추출하는 것을 학습한 강력한 computer vision 시스템들이 등장하였다.
+
+저자는 해당 시스템들을 이용하여 natural images에서 content 와 style을 manipulate 또는 synthesis 하는 알고리즘을 만들었다.
+
+# 과정
+
+![](/markdown-memo/legacy/images/5ef6bb14-111a-4d37-aca3-8580ae20f7af.png)
+
+
+# Deep Image Representations
+
+모델은 기본적으로 VGG 네트워크 위에서 작동한다.
+
+**16개의 합성곱 신경망과 5개의 풀링 층**을 가진 VGG-19 네트워크를 사용하였다.
+
+저자는 신경망의 각각의 합성곱 필터들의 가중치들을 scaling 하여 정규화시켜 주었다.
+
+image synthesis 에서 저자는 맥스 풀링을 평균 풀링으로 바꾸는 것이 약간 더 나은 결과를 보여주었기에 평균 풀링으로 설정해주었다.
+
+# Content Representation
+
+$N_l$ → 한 레이어의 필터 수. 즉, 채널 수
+
+$M_l$ → feature map의 너비와 높이의 곱
+
+$F^l_{ij}$ → $j$ 번째 레이어 $l$ 의 $i^{th}$번째 필터이며  $F^l ∈ R^{N_l\times{M_l}} $ 로 표현가능
+
+$\vec{p}$ → original image
+
+$\vec{x}$ → generated image
+
+$P^l$ → original image의 layer $l$ 에 대한 feature representation
+
+$F^l$ → generated image의 layer $l$ 에 대한 feature representation
+
+
+encoded 되어 있는 다양한 계층의 image information을 시각화 하는 방법은 original image의 feature responses와 match 하는 다른 이미지를 찾을 수 있도록 white noise image에 경사하강법을 시행하여 알 수 있다.
+
+
+original image와 generated image사이의 제곱 오차 손실에 대한 정의이다.
+
+![](/markdown-memo/legacy/images/ab33a32c-94ef-46f1-9e29-e6a445b04e8f.png)
+
+
+상단에 정의한 손실에 대한 미분
+
+![](/markdown-memo/legacy/images/c6fa9ccc-938f-40fb-8e11-a25bd3dfe094.png)
+
+각각의 이미지 $\vec{x}$들은 standard error back-propagation 을 통하여 계산 할 수 있다.
+
+CNN 네트워크가 객체 인식 태스크에 대해 훈련될 때 마다 신경망은 processing hierarchy 에 따라 object information 를 암시적으로 이미지의 representation을 개발하도록 만든다.
+
+신경망의 processing hierarchy에 따라 입력 이미지는 점점 이미지의 actual content에 가까워지는 representation으로 변환된다. 그러나 입력 이미지는 이미지의 precise appearance에서 relatively invariant 된다.
+
+따라서 신경망의 높은 층에서는 객체의 범위에서 high-level content를 포착하고 입력 이미지에 대한 arrangement 들은 reconstruction의 실제 픽셀 값을 그렇게 많이 제한하지 않는다.
+
+반대로, 낮은 층에서의 reconstructions은 original image의 exact pixel values를 reproduce 한다.
+
+# Style Representation
+
+입력 이미지에 대한 style의 representation을 얻기 위해서는 texture information을 포착하도록 설계된 feature space를 사용해야 한다.
+
+해당 feature space는 신경망의 어떤 층에서든 filter response의 꼭대기에 설치될 수 있다.
+
+feature space는 다양한 filter responses들 사이에서의 correlation을 구성하며, 이는 feature map의 공간적 범위에 대한 기대가 이루어진다.
+
+이러한 **feature correlations**은 그람 행렬로 주어진다. 이는 신경망 층 $l$에서의 벡터화 된 feature map $i$ 와 $j$ 사이의 **inner product**로 계산된다.
+
+<!-- Unknown block type: link_to_page -->
+
+$G^l\in{\R^{N_1\times{N_1}}}$
+
+$G^l_{ij}=\sum\limits_k{F^l_{ik}F^l_{jk}}$
+
+여러 층에서의 feature correlations 들을 포함하여, global arrangement 가 아닌 입력 이미지의 texture information을 포착하여 stationary 하고 multi-scale 한 representation을 얻을 수 있다.
+
+또, 우리는 주어진 입력 이미지의 style representation에 맞는 이미지를 constructing 함으로써 신경망의 다양한 층에 있는 style feature spaces를 포착하여 해당 information를 시각화 할 수 있다.
+
+이를 시각화하기 위해서는 white noise image 에서 original image에 대한 그람 행렬 값과 generated image의 그람 행렬 사이의 mean squared distance를 최소화하여 경사하강법을 시행하여야 한다.
+
+$\vec{a}$와 $\vec{x}$를 각각 original image와 generated image라고 하고, $A^l$와 $G^l$를 각각 신경망 층 $l$에서의 style representation 이라고 하면, 선택한 층 $l$의 총 손실 값은 다음과 같다.
+
+![](/markdown-memo/legacy/images/c172047e-023e-4fce-9d9f-4e0644cc77a8.png)
+
+그리고 총 style 손실 값은 다음과 같다
+
+![](/markdown-memo/legacy/images/c8ea345e-2159-4bb7-8015-9a27078d65bd.png)
+
+$w_l$은 가중치로 각 층의 total loss에 대한 기여도를 나타낸다.
+
+활성화 층에 따른 $E_l$의 미분은 다음과 같이 계산된다.
+
+![](/markdown-memo/legacy/images/2a5222b1-19d0-4894-8ad7-3b307cda2bb2.png)
+
+
+> 💡 *- Style Representation을 추출하기 위해서는 그람 행렬을 통하여 계산한다.
+- 원본 이미지와 생성된 이미지의 그람 행렬을 각각 구하여 주어진 손실 함수를 최소화 하는 방식으로 style를 유사하게 만든다.*
+
+
+# Style Transfer
+
+artwork의 style인 $\vec{a}$을 photograph인 $\vec{p}$에 스타일을 전송하기 위해서 새로운 이미지에 $\vec{p}$의 content representation과 $\vec{a}$의 style representation을 동시에 합성시켜 주어야 한다.
+
+따라서 photograph의 content representation과 white noise image의 feature representation의 거리와 CNN의 정의된 층에서의 artwork의 style representation의 거리의 합을 결함한 식을 최소화 시켜야한다.
+
+우리가 최소화 할 손실 함수는 
+
+![](/markdown-memo/legacy/images/8d942f1b-70eb-4469-a424-7ff4ff5c00fe.png)
+
+$\alpha$와 $\beta$는 content와 style reconstruction의 각각의 가중치이다.
+
+각각의 픽셀 값에 따른 손실 함수의 기울기인 ${\partial{L_{total}}}\over{\partial\vec{x}}$ numerical optimisation strategy로 사용될 수 있다.
+
+논문에서는 **L-BFGS** 라는 optimization 알고리즘이 image synthesis 과정에서 가장 좋은 성과를 보였다고 한다.
+
+image information을 추출하기 위해서는 feature representation 을 계산하기 이전에 style image를 content image와 같은 크기로 맞춰주어야 한다.
+
+> 💡 *- style transfer의 손실함수는 content loss와 style loss의 결합으로 정의되며 해당 loss들의 비율은 조절될 수 있다.
+*- style transfer을 진행하기 전에 style image와 content image를 같은 크기로 resize 해야 한다.
+
+
+# Results
+
+해당 논문에서의 주요 발견은 합성곱 신경망에서의 content와 style의 representation은 분리 가능하다는 것이다.
+
+의미하는 바는, perceptually meaningful 한 새로운 이미지를 만들어 내기 위해서 독립적으로 representation들을 조작할 수 있다는 것이다.
+
+해당 발견을 입증하기 위해서 논문에서는 두 가지의 다른 이미지로부터  content와 style representation을 섞어서 새로운 이미지를 생성하였다.
+
+이 논문에서는 Fig3 에서 제시한 이미지들을 생성하기 위해서 `conv4_2` 의 층에서 *content representation* 을 `conv1_1, conv2_1, conv3_1, conv4_1, conv5_1`의 층에서 *style representation*을 추출하여 합성시켰다.
+
+
+$\alpha/\beta$의 비율은 다음과 같다.
+
+B의 그림 → $1\times10^{-3}$
+
+C의 그림 → $8\times10^{-4}$
+
+D의 그림 → $5\times10^{-3}$
+
+E와 F의 그림 → $5\times10^{-4}$
+
+
+![](/markdown-memo/legacy/images/c46b4225-b04b-4e45-aadf-e4712350cd51.png)
+
+
+# Implementation
+
+<!-- Unknown block type: link_to_page -->
+
+# References
+
+[https://aigong.tistory.com/359](https://aigong.tistory.com/359)
+
+[https://openaccess.thecvf.com/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf](https://openaccess.thecvf.com/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf)
+

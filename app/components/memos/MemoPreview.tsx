@@ -43,7 +43,7 @@ export default function MemoPreview({ memo }: MemoPreviewProps) {
       {/** Header Image */}
       <div className="relative w-full h-40">
         <Image
-          src={memo.thumbnail || ""}
+          src={memo.thumbnail || "/image/weblog.png"}
           alt={memo.title}
           fill
           className="object-cover"

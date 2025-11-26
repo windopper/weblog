@@ -42,7 +42,7 @@ export default function MemoItem({ memo }: MemoItemProps) {
           {/** image */}
           <div className="absolute top-0 left-0 -z-50 w-full h-full">
             <Image
-              src={memo.thumbnail || ""}
+              src={memo.thumbnail || "/image/weblog.png"}
               alt="memo"
               fill
               className="object-cover rounded-lg"

@@ -1,0 +1,546 @@
+---
+title: "Spaceship Titanic"
+description: ""
+tags: ["ML","Data Analysis"]
+date: "2023-01-04"
+thumbnail: "/markdown-memo/legacy/images/9773202e-6a48-43c6-8360-73e2479524f0.png"
+---
+
+[https://www.kaggle.com/competitions/spaceship-titanic](https://www.kaggle.com/competitions/spaceship-titanic)
+
+
+<!-- Table of Contents -->
+
+# Description
+
+> *Welcome to the year 2912, where your data science skills are needed to solve a cosmic mystery. We've received a transmission from four lightyears away and things aren't looking good.*
+
+# File and Data Field Descriptions
+
+*PassengerId - *승객의 고유한 아이디
+
+*HomePlanet - *승객의 고향 planet
+
+*CryoSleep - *냉동 수면 여부
+
+*Cabin - *승객이 머무는 cabin 넘버. 형태는 deck/num/side이다. side는 P (Port) 또는 S (Starboard) 둘 중 하나이다.
+
+*Destination *- 승객이 내릴 지점
+
+*Age - *승객의 나이
+
+*VIP - *승객이 VIP 인지?
+
+*RoomService, FoodCourt, ShoppingMall, Spa, VRDeck - *승객이 해당 편의 시설에서 지불한 가격
+
+*Name - *승객의 이름
+
+*Transported - *승객이 다른 차원으로 전송되었는지, 여기서는 우리가 예측해야 될 값이다.
+
+
+# Data Analysis
+
+필요 라이브러리들 임포트
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(style='darkgrid', font_scale=1.4)
+import plotly.express as px
+import plotly
+```
+
+```python
+# import train data and test data
+train = pd.reac_csv('../input/spaceship-titanic/train.csv')
+test = pd.read_csv('../input/spaceship-titanic/test.csv')
+
+# print train and test shape
+print(f"Train Data Shape: {train.shape}")
+print(f"Test Data Shape: {test.shape}")
+
+Train Data Shape: (8693, 14)
+Test Data Shape: (4277, 13)
+```
+
+
+`head()` 메서드를 사용하여 처음부터 5개의 데이터를 확인해 보겠다.
+
+```python
+train.head()
+```
+
+![](/markdown-memo/legacy/images/9773202e-6a48-43c6-8360-73e2479524f0.png)
+
+
+전체적인 데이터 분포를 확인하겠다.
+
+```python
+train.describe().T.sort_values(by='std', ascending=False)\
+	.style.background_gradient(cmap='GnBu')\
+	.bar(subset=['max'], color='#BB0000')\
+	.bar(subset=['mean'], color='green')
+
+"""
+T -> 데이터를 전치한다.
+sort_values(by='std', ascending=False) -> 'std' 피쳐를 기준으로 내림차순으로 정렬
+.style.background_gradient(cmap='GnBu') -> 백그라운드 그레디언트를 'GnBu' 스타일로 설정
+.bar(subset=['max'], color='#BB0000') -> 부분집합 'max' 피쳐에 대해 '#BB0000'의 색깔을 지정
+.bar(subset=['mean'], color='green') -> 부분집합 'mean' 피쳐에 대해 'green'의 색깔을 지정
+"""
+```
+
+![](/markdown-memo/legacy/images/542a7019-1b1f-4faf-af0e-d620502fb60d.png)
+
+> 💡 *- **`FoodCourt, VRDeck, Spa, RoomService, ShoppingMall`** 피쳐들은 대부분의 값들이 0임을 알 수 있다.
+- **`FoodCourt, VRDeck, Spa, RoomService, ShoppingMall`** 피쳐들은 매우 큰 이상치를 가지고 있다.
+- count 열 값이 모두 같지 않은 것으로 보아 몇몇 결측치가 있다는 사실을 파악할 수 있다. (이는 결측치를 파악하는 부분에서 명확하게 드러날 것이다)*
+
+
+데이터를 다루기에 앞서 다음의 순서대로 진행하겠다.
+
+1. **데이터 결측값 및 중복 여부 확인하기**
+1. **데이터 카디널리티(cardinality) 확인**
+1. **데이터 피쳐 타입 확인**
+1. **탐색적 데이터 분석 진행**
+
+# 데이터 결측값 및 중복 여부 확인하기
+
+데이터에서 결측값을 찾는 방법은 간단하다.
+
+`DataFrame` 객체의 `isna()` 메서드를 사용하여 해당 피쳐들이 결측값인지 아닌지 불리언(Boolean) 형태로 변환하고, `True` 값이 숫자로 `1` 인 점을 사용하여 `sum()` 메서드를 통해 각 피쳐별 결측값의 개수를 구한다.
+
+```python
+print(train.isna().sum())
+
+PassengerId       0
+HomePlanet      201
+CryoSleep       217
+Cabin           199
+Destination     182
+Age             179
+VIP             203
+RoomService     181
+FoodCourt       183
+ShoppingMall    208
+Spa             183
+VRDeck          188
+Name            200
+Transported       0
+dtype: int64
+```
+
+*PassengerId*를 제외한 모든 피쳐들이 결측값을 가지고 있는 것을 확인 할 수 있다.
+
+결측값 시각화 하기
+
+```python
+train_null = pd.DataFrame(train.isna().sum(), columns=['Null Count'])
+test_null = pd.DataFrame(test.isna().sum(), columns=['Null Count'])
+fig = plotly._subplots.make_subplots(1, 2)
+fig.add_trace(plotly.graph_objects.Bar(x=train_null['Null Count'], y=train_null.index,
+                                      orientation='h',
+                                      ), 1 ,1)
+fig.add_trace(plotly.graph_objects.Bar(x=test_null['Null Count'], y=test_null.index,
+                                      orientation='h',), 1 ,2)
+fig.update_layout(showlegend=False, title_text='Missing Values', title_x=0.5)
+fig.show()
+```
+
+
+![](/markdown-memo/legacy/images/68d0dc7c-e9bd-4036-91f7-fe1cd5bf5b00.png)
+
+> 💡 - 고르게 결측치가 나타나는 것으로 보아 몇몇 피쳐들을 특정값으로 채울 수 있을 것으로 보인다.
+- 피쳐 `PassengerId`는 결측치가 나타나지 않았다.
+
+# 데이터 카디널리티 확인
+
+`DataFrame`객체의 `nunique()` 메서드는 유니크한 값에 대한 개수를 반환한다.
+
+```python
+print(train.nunique())
+
+PassengerId     8693
+HomePlanet         3
+CryoSleep          2
+Cabin           6560
+Destination        3
+Age               80
+VIP                2
+RoomService     1273
+FoodCourt       1507
+ShoppingMall    1115
+Spa             1327
+VRDeck          1306
+Name            8473
+Transported        2
+dtype: int64
+```
+
+```python
+# 데이터의 유니크한 값의 개수를 시각화 함
+train_nunique = pd.DataFrame(train.nunique(), columns=['nunique'])
+# 훈련 데이터의 유니크한 값의 개수를 새로운 데이터 프레임으로 만들고
+# 그 개수의 라벨을 'nunique' 라고 명명
+fig = px.bar(train_nunique, y='nunique', color='nunique', orientation='v', text_auto=True
+      ,color_continuous_scale='armyrose',)
+# 바 형태의 그래프를 만든 후, y축의 값을 'nunique'로 설정.
+# 수치 값을 그래픽으로 올린 후, 연속 스케일 컬러는 'armyrose'로 설정
+fig.update_layout(showlegend=False)
+```
+
+![](/markdown-memo/legacy/images/1e1bcafd-39a8-4409-9f7b-87d4808084b4.png)
+
+카디널리티를 확인하여 중복도가 적은 데이터와 많은 데이터로 분리할 수 있다.
+
+- 적은 중복도를 가진 데이터
+- 큰 중복도를 가진 데이터
+# 데이터 피쳐 타입 확인
+
+```python
+print(train.dtypes)
+
+PassengerId      object
+HomePlanet       object
+CryoSleep        object
+Cabin            object
+Destination      object
+Age             float64
+VIP              object
+RoomService     float64
+FoodCourt       float64
+ShoppingMall    float64
+Spa             float64
+VRDeck          float64
+Name             object
+Transported        bool
+dtype: object
+```
+
+
+# 탐색적 데이터 분석 진행
+
+그래프를 그리기에 앞서 카디널리티 분석으로 확인했던 데이터에 따라서 두 분류로 나누었다.
+
+```python
+categories = ['HomePlanet', 'CryoSleep', 'Destination', 'VIP']
+numericals = ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
+"""
+우리가 예측하고자 하는 값은 'Transported' 이다.
+"""
+```
+
+```python
+for category in categories:
+	px.histogram(train.dropna(), x='Transported', facet_col=category, color='Transported').show()
+```
+
+
+![](/markdown-memo/legacy/images/2bb5579b-8e3c-4386-8f0c-c13d83b42bfb.png)
+
+![](/markdown-memo/legacy/images/47390799-8929-4cac-ba82-30a9834114c9.png)
+
+![](/markdown-memo/legacy/images/6bdd035c-3c76-458c-8a47-4e742731e5f3.png)
+
+![](/markdown-memo/legacy/images/956a45a0-2085-44c3-90ce-030cbf2c26ee.png)
+
+
+```python
+for numerical in numericals:
+    px.histogram(train.dropna(), x=numerical, color='Transported', marginal='box').show()
+```
+
+
+![](/markdown-memo/legacy/images/1e28d464-acf1-48f3-8cbe-55eb388c9d33.png)
+
+![](/markdown-memo/legacy/images/1b1a25f9-5281-4988-91c9-218fb0eff040.png)
+
+![](/markdown-memo/legacy/images/5cf41edd-ac56-4a2b-9f0e-45058a6de87f.png)
+
+![](/markdown-memo/legacy/images/f4e0cc88-ec94-4136-997f-6bee8085de25.png)
+
+![](/markdown-memo/legacy/images/e2a0a05e-12c2-464e-a6d3-369ece8859c6.png)
+
+![](/markdown-memo/legacy/images/d2f12a54-0ed3-42d8-bc3d-62cf9e7310b3.png)
+
+> 💡 - *Europa가 고향인 사람들이 상대적으로 더 많이 Transported 되었고, Earth가 고향인 사람들은 상대적으로 더 적게 Transported 되었다.
+- 동면에 들지 않은 사람들은 Transported 될 확률이 적었고, 동면에 든 사람들은 Transported 될 확률이 높았다.
+- Transported 되는 기준은 나이에 거의 영향을 받지 않았다.
+- 대부분의 사람들은 RoomService, FoodCourt, ShoppingMall, Spa, VRDeck 같은 고급 편의 시설을 이용하지 않았다.*
+
+
+# 추가적인 데이터 분석
+
+## Q1. 고급 편의 시설에 돈을 많이 쓴 사람들은 대부분 VIP 일까?
+
+먼저, 고급 편의 시설인 `RoomService, FoodCourt, ShoppingMall, Spa, VRDeck` 를 모두 합친 값과 `VIP` 피쳐를 따로 추출한 후 새로운 `DataFrame` 객체를 만들었다.
+
+```python
+train_sums = pd.DataFrame(train.dropna()[['VRDeck', 'RoomService', 'FoodCourt',
+	'ShoppingMall', 'Spa']].sum(axis=1), columns=['luxury_sum'])
+train_sums = pd.concat([train_sums, train.dropna()['VIP']], axis=1)
+```
+
+```python
+px.histogram(train_sums, x='VIP', color='VIP')
+```
+
+
+![VIP 회원의 수](/markdown-memo/legacy/images/0c002fce-01b0-4ac1-a6b3-ebc38f8c3809.png)
+
+VIP 회원의 수는 각각 6444명과 162명으로 나타났다.
+
+```python
+px.histogram(train_sums, x='luxury_sum', color='VIP', marginal='box')
+```
+
+![](/markdown-memo/legacy/images/f9a39bf1-6552-4890-bfef-6e8b07f016ec.png)
+
+> 💡 *- VIP들 중 고급 편의 시설에 쓴 돈의 중앙값은 ****2776.5k**** 로 VIP가 아닌 사람들 중 쓴 돈의 중앙값인 ****724k ****보다 높은 것으로 파악되었다.*
+
+
+## Q2. 같은 그룹에 속한 사람들은 동면 여부에 대해 동일한 선택을 했을까?
+
+해당 데이터에서는 `PassengerId`가 `gggg_pp`의 형태를 가지고 있다고 말하고 있다. 여기서 `gggg`는 그룹을 가리키며 `pp`는 해당 그룹 내의 번호라고 말한다.
+
+또한 주로 그룹에 속한 사람들은 대부분 가족 구성원이라고 말하며 모든 그룹 구성원들이 모두 그렇지는 않다고 한다.
+
+
+***그렇다면 탑승객 그룹 중 모두 같은 동면 여부를 선택하지 않은 그룹은 얼마나 될까?***
+
+
+이를 파악하기 위해 먼저 같은 그룹임을 뜻하는 `PassengerId`의 `gggg_pp` 형태에서 `gggg` 만 추출한 후, 동면 여부를 뜻하는 `CryoSleep` 피쳐를 가져오겠다.
+
+```python
+group = train.PassengerId.str.split('_').str[0].to_frame('Group')
+group = pd.concat([group, train['CryoSleep']], axis=1)
+```
+
+`train` 에서 `split()` 메서드를 사용하여 `gggg` 와 `pp` 로 쪼갠 후 `gggg` 요소만 가져와서 피쳐 이름을 `Group` 으로 설정하였다.
+
+`pandas` 모듈의 `concat` 메서드를 사용하여 `group` 과 `train['CryoSleep']` 를 합친다. 파라미터 `axis=1` 은 `row-wise` 하게 합치겠다는 뜻이다.
+
+
+필요한 데이터를 그룹화 한 후 같은 그룹의 인원들 중 동면에 든 사람이 있는지 그리고 그룹원의 수는 몇 명 인지를 계산하는 피쳐를 만들어 추가하겠다.
+
+피쳐 이름은 각각 `IsGroupCryoSleep`과 `GroupCount` 라고 명명했다.
+
+```python
+group['IsGroupCryoSleep'] = False
+group['GroupCount'] = 0
+```
+
+
+`Group`에 대하여 오름차순으로 정렬한 후 상위 10개를 출력해보겠다.
+
+<!-- Unknown block type: column_list -->
+
+```python
+print(group.isna().sum())
+
+Group                 0
+CryoSleep           217
+IsGroupCryoSleep      0
+GroupCount            0
+dtype: int64
+
+
+len_group = len(group) # row를 드롭하기 전 길이를 저장한다!
+group = group.dropna(axis=0)
+```
+
+결측값 여부를 확인하자 `CryoSleep` 피쳐 값에 217개가 확인되었다. 해당 값들은 True 또는 False로 임의로 설정하기 애매하므로 해당 피쳐를 가진 행을 드랍하였다.
+
+
+이제 그룹화한 데이터를 돌면서 `IsGroupCryoSleep` 과 `GroupCount` 의 여부를 계산해야 한다.
+
+```python
+mem_index = [] #
+current_group = 1
+is_group_cryo_sleep = False
+
+for i in range(len_group): # 모든 데이터에 대하여 루프를 돈다.
+		if not group.index.isin([i]).any(): continue
+		# 217개의 row를 드랍하였으므로 존재하지 않는 인덱스로 접근할 수도 있다.
+		# try-catch 문으로 감쌀 수도 있었으나 if 문으로 가볍게 처리가 가능하기에
+		# 존재 여부만 확인 한 후 존재하지 않는다면 continue를 통하여 다음 이터레이션을 진행하였다.
+
+    if current_group is not int(group.loc[i, 'Group']): 
+				# 현재 그룹이 해당 인덱스의 그룹이 아닐 때
+        for j in mem_index:
+            group.loc[j, 'IsGroupCryoSleep'] = is_group_cryo_sleep
+						# 같은 그룹이 동면에 들었는지 여부를 저장한다.
+            group.loc[j, 'GroupCount'] = len(mem_index)
+						# 그룹 수는 몇 명인지 값을 저장한다.
+
+        current_group = int(group.loc[i, 'Group'])
+        mem_index = []
+        is_group_cryo_sleep = False
+				# 다른 그룹으로 넘어갈 때 변수를 초기화 해준다.
+        
+    mem_index.append(i)
+		# 같은 그룹 사람들인 요소의 인덱스를 추가한다.
+    if not is_group_cryo_sleep and group.loc[i, 'CryoSleep']:
+				# 같은 그룹이 동면을 하지 않고 현재 인덱스의 동면 여부가 True 일경우
+        is_group_cryo_sleep = True # 그룹의 동면 여부를 True로 설정한다.
+
+# 마지막 그룹에 대해서는 상단의 for loop에서 동면여부와 그룹 수가 저장되지 않으므로
+# mem_index에 대해 저장된 인덱스들에 대해서 값을 설정해준다.
+for j in mem_index:
+    group.loc[j, 'IsGroupCryoSleep'] = is_cryo_sleep
+    group.loc[j, 'GroupCount'] = len(mem_index)
+```
+
+
+전체 그룹에 대해 그룹원 중 한 명이라도 동면을 선택한 그룹의 수는 다음과 같다.
+
+```python
+px.bar(group.groupby('Group').any().groupby('IsGroupCryoSleep').count(), y='CryoSleep')
+```
+
+![](/markdown-memo/legacy/images/680b3740-5620-4c79-8d9f-645f5fc2de43.png)
+
+전체 그룹에 대하여 그룹원 한 명이라도 동면을 선택한 경우는 **2483**건, 아닌 경우는 **3626**건으로 집계되었다.
+
+그룹원 한 명이라도 동면을 선택한 **2483건**중 동면을 선택하지 않은 그룹원이 있는 그룹의 수를 계산해보면 다음과 같다.
+
+```python
+len(group[(group['CryoSleep'] == False) & (group['IsGroupCryoSleep'] == True)]
+	.groupby('Group'))
+
+811
+```
+
+피쳐 `CryoSleep`이 `False` 이고 `IsGroupCryoSleep` 이 `True` 인 데이터들을 `Group` 으로 묶어서 개수를 계산하면 **811**건이 도출된다.
+
+
+> 💡 *- 동면을 결정한 그룹원이 있는 그룹 ****2483건**** 중 ****811건****이 동면을 결정하지 않은 그룹원이 존재한다. 이는 약 ****32.6%****에 속한다.*
+
+
+데이터 상관관계 파악하기
+
+```python
+sns.heatmap(train.corr()[['Transported']], annot=True)
+```
+
+![](/markdown-memo/legacy/images/25daa356-0c73-4e59-bab5-e244e2c67396.png)
+
+
+# 결측값 처리하기
+
+EDA (Exploratory Data Analysis)를 통해서 확인 할 수 있었듯이 대부분의 사람들은 Luxury Amenities 를 이용하지 않았다. 또한 `Age, RoomService, FoodCourt` 등의 numerical한 피쳐들은 예측하고자 하는 값인 `Transported` 와 상관관계가 거의 없으므로 모두 중앙값을 넣도록 하겠다.
+
+```python
+from sklearn.impute import SimpleImputer
+impute_cols = ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
+imputer = SimpleImputer(strategy='median') # strategy 파라미터를 중앙값으로 설정!!
+imputer.fit(train[impute_cols])
+train[imputer_cols] = imputer.transform(train[imputer_cols])
+test[imputer_cols] = imputer.transform(test[imputer_cols])
+```
+
+
+피쳐 `PassengerId, Name, Cabin`은 모델을 훈련시킬 때 제외하도록 하겠다.
+
+```python
+drop_columns = ['PassengerId', 'Name', 'Cabin']
+train = train.drop(columns=drop_columns)
+test = test.drop(columns=drop_columns)
+```
+
+
+나머지 피쳐들은 row-wise 로 드랍시켜 모든 결측값을 없애도록 하겠다.
+
+```python
+train = train.dropna(axis=0)
+test = test.dropna(axis=0)
+```
+
+
+# 데이터 전처리
+
+범주형 피쳐는 원-핫 인코딩을 진행하고 수치형 피쳐들은 표준정규화를 진행하도록 하겠다.
+
+또한 `train` 데이터 셋의 `Transported` 피쳐는 `Boolean` 형태를 숫자로 바꿔주도록 하겠다. 
+
+```python
+train = pd.get_dummies(train, columns=categories)
+test = pd.get_dummeis(test, columns=categories)
+
+from sklearn.preprocessing import StandardScaler
+scale_target = ['Age', 'RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
+scaler = StandardScaler()
+scaler.fit(train[scale_target])
+train[scale_target] = scaler.transform(train[scale_target])
+test[scale_target] = scaler.transform(test[scale_target])
+
+train.loc[train['Transported'] == True, 'Transported'] = 1
+train.loc[train['Transported'] == False, 'Transported'] = 0
+```
+
+
+훈련하기에 앞서 입력 데이터와 출력 데이터로 분리해 줘야 하는데 해당 태스크에서는 `Transported` 피쳐가 타겟 데이터 이므로 해당 코드로 타겟을 분리해준다.
+
+```python
+X = train.drop(columns=['Transported'])
+y = train['Transported']
+```
+
+
+`sklearn.model_selection` 의 `train_test_split` 으로 훈련 데이터와 검증 데이터로 분리하여 준다.
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+
+X_train.shape
+(6330, 16)
+y_train.shape
+(6330, )
+X_test.shape
+(1583, 16)
+y_test.shape
+(1583, )
+```
+
+데이터가 잘 분리되었다.
+
+
+# 모델 훈련시키기
+
+캐글의 참가자들이 애용하는 머신러닝 모델인 XGBoost를 사용하여 이진 분류를 시행하겠다.
+
+```python
+import xgboost as xgb
+xgb_clf = xgb.XGBClassifier()
+xgb_clf.fit(X_train, y_train)
+y_pred = xgb_clf.predict(X_test)
+```
+
+
+# 모델 평가하기
+
+```python
+from sklearn.metrics import accuracy_score, classification_report
+
+print(accuracy_score(y_test.tolist(), y_pred))
+print(classification_report(y_test.tolist(), y_pred))
+
+0.784586228679722
+
+								precision    recall  f1-score   support
+
+           0       0.80      0.76      0.78       793
+           1       0.77      0.81      0.79       790
+
+    accuracy                           0.78      1583
+   macro avg       0.79      0.78      0.78      1583
+weighted avg       0.79      0.78      0.78      1583
+```
+
+약 **78.4%**의 정확도를 보인다
+
+

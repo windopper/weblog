@@ -1,0 +1,92 @@
+---
+title: "컨벡스 헐"
+description: ""
+tags: ["Algorithm"]
+date: "2023-03-23"
+thumbnail: ""
+---
+
+# 컨벡스 헐
+
+## 개요 및 정의
+
+컨벡스 헐(Convex Hull)은 2차원 평면 상에 있는 점들의 집합 중에서 아래와 같은 조건을 만족하는 가장 작은 볼록 다각형(Convex Polygon)을 의미합니다.
+
+1. 모든 점들이 볼록 다각형 내부에 위치해야 합니다.
+1. 볼록 다각형의 모든 각이 180도보다 작거나 같아야 합니다.
+컨벡스 헐은 컴퓨터 그래픽스, 기하학, 패턴 인식 등 다양한 분야에서 활용되며, 고속의 알고리즘으로 구현이 가능합니다.
+
+
+## 컨벡스 헐 선물 포장 알고리즘
+
+1. 선물 상자에 들어갈 수 있는 모든 점들의 집합을 구합니다.
+1. 컨벡스 헐 알고리즘을 사용해 이 점들의 컨벡스 헐을 구합니다.
+1. 구한 컨벡스 헐을 기준으로, 선물 상자를 둘러싸는 가장 작은 볼록 다각형을 구합니다.
+1. 이 볼록 다각형의 변들을 따라 선물 포장지를 자릅니다.
+1. 선물 포장지를 이용해 선물 상자를 포장합니다.
+
+## 컨벡스 헐 그라함 스캔 알고리즘
+
+컨벡스 헐을 찾는 가장 일반적인 알고리즘은 그라함 스캔(Graham Scan) 알고리즘입니다.
+
+1. 가장 아래에 있는 점을 기준으로 시작점을 선택합니다.
+1. 시작점에서부터 다른 점들과의 각도를 계산합니다.
+1. 각도가 작은 순서대로 점들을 정렬합니다.
+1. 선분으로 이루어진 스택을 이용해 점들을 순회하면서 컨벡스 헐을 구합니다.
+1. 스택에 쌓인 점들이 볼록 다각형을 이루도록 점을 추가하거나 삭제합니다.
+그라함 스캔 알고리즘은 O(n log n)의 시간복잡도를 가집니다.
+
+
+```c++
+vector<pair<int, int>> p;
+
+int N;
+
+long long ccw(vec &a, vec &b, vec &c) {
+    vec p12 = {b.first - a.first, b.second - a.second};
+    vec p23 = {c.first - b.first, c.second - b.second};
+    return 1LL * p12.first * p23.second - 1LL * p12.second * p23.first;
+}
+
+bool compare(vec &a,vec &b) {
+    long long v = ccw(p[0], a, b);
+    if(v) return v > 0;
+    return a.first == b.first ? a.second < b.second : a.first < b.first;
+}
+
+
+stack<int> graham_scan() {
+    int next = 2;
+
+		// O(N)
+    swap(p[0], *min_element(p.begin(), p.end()));
+		// O(NlogN)
+    sort(p.begin() + 1, p.end(), compare);
+
+    stack<int> s;
+
+    s.push(0);
+    s.push(1);
+
+    while(next < N) {
+        while(s.size() >= 2) {
+            int first, second;
+            second = s.top();
+            s.pop();
+            first = s.top();
+
+            // 좌회전?
+            if (ccw(p[first], p[second], p[next]) > 0) {
+                s.push(second);
+                break;
+            }
+        }
+
+        s.push(next++);
+    }
+
+    return s;
+}
+```
+
+

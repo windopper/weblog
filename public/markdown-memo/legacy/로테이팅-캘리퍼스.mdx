@@ -1,0 +1,68 @@
+---
+title: "로테이팅 캘리퍼스"
+description: ""
+tags: ["Algorithm"]
+date: "2023-04-18"
+thumbnail: ""
+---
+
+# 코드
+
+```c++
+
+pair<vec, vec> rotating_calipers(vector<vec>& p) {
+    vector<int> tmp = convex_hull(p);
+    vector<vec> cx;
+    for(int now : tmp) cx.push_back(p[now]);
+    int p1 = 0, p2 = 1;
+    long double maxv = (cx[p1] - cx[p2]).norm();
+    ans1 = cx[p1];
+    ans2 = cx[p2];
+    
+    for(int i=0; i<cx.size()*2; i++) {
+        int np1 = (p1+1) % cx.size();
+        int np2 = (p2+1) % cx.size();
+        ll tmp = ccw(cx[np1] - cx[p1], cx[p2] - cx[np2]);
+        if(tmp > 0) p1 = np1;
+        if(tmp < 0) p2 = np2;
+        if(tmp == 0) {
+            p1 = np1;
+            p2 = np2;
+        }
+        
+        long double nowv = (cx[p1] - cx[p2]).norm();
+        if(maxv < nowv) {
+            maxv = nowv;
+            ans1 = cx[p1];
+            ans2 = cx[p2];
+        }
+    }
+    
+    return {ans1, ans2};
+}
+```
+
+
+# 예제
+
+[https://www.acmicpc.net/problem/10254](https://www.acmicpc.net/problem/10254)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+그라함 스캔 + 로테이팅 캘리퍼스 문제
+
+자료형에 주의해야 한다.
+
+
+[https://www.acmicpc.net/problem/2049](https://www.acmicpc.net/problem/2049)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+웰 노운 문제
+

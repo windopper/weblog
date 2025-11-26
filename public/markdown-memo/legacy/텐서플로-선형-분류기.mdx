@@ -1,0 +1,206 @@
+---
+title: "텐서플로 선형 분류기"
+description: ""
+tags: ["Tensorflow","Tutorial","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/6f3981b8-809c-40ca-8435-db1d64db8094.png"
+---
+
+
+경사 하강 기반의 선형 분류기를 만들어 보자.
+
+
+선형적으로 잘 구분되는 합성 데이터를 만든다. 이는 2D 평면의 포인트로 2개의 클래스를 가진다.
+
+
+
+특정한 펑균과 공분산 행렬을 가진 랜덤한 분포에서 좌표값을 뽑아 각 클래스의 포인트를 생성한다.
+
+
+```python
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+
+선형적으로 잘 구분되는 합성 데이터들을 만들어 보자.
+
+```python
+num_samples_per_class = 1000
+
+negative_samples = np.random.multivariate_normal(
+	mean=[0, 3],
+	cov=[[1, 0.5], [0.5, 1]],
+	size=num_samples_per_class
+)
+
+positive_samples = np.random.multivariate_normal(
+	mean=[3, 0],
+	cov=[[1, 0.5], [0.5, 1]],
+	size=num_samples_per_class
+)
+```
+
+공분산이 (1, 0.5)와 (0.5, 1) 이고 평균이 각각 (0, 3), (3, 0)인 데이터 2000개를 만들었다. 해당 데이터들을 한 배열로 만들어 보자.
+
+
+```python
+inputs = np.vstack((negative_samples, positive_samples)).astype(np.float32)
+```
+
+데이터들을 세로로 쌓아 모양이 (2000, 2)인 배열을 만들었다.
+
+vstack에 관한 정보는 [vstack vs hstack](/fe836bf502f441e8a1e0889afa7f5b79) 포스트에서 찾아 볼 수 있다.
+
+
+해당 데이터들에 클래스를 부여하기 위해 모양이 각각 (1000, 2)이고 0과 1로 구성된 배열을 생성한 후 (2000, 2) 모양인 배열로 합쳐보자.
+
+```python
+targets = np.vstack((
+	np.zeros((num_samples_per_class, 1), dtype='float32'),
+	np.ones((num_samples_per_class, 1), dtype='float32')
+))
+```
+
+
+데이터를 충분히 생성했으니 올바르게 생성되었는지 matplotlib을 통하여 시각화를 진행해보자.
+
+```python
+plt.scatter(inputs[:, 0], inputs[:, 1], c=targets[:, 0])
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/6f3981b8-809c-40ca-8435-db1d64db8094.png)
+
+
+# 선형 분류기의 변수 만들기
+
+
+두 포인트 덩어리들을 분류할 수 있도록 모델을 훈련시켜보도록 하자.
+
+해당 선형 분류기는 아핀 변환이며, 예측과 타깃 사이의* *<u>**차이를 제곱한 값을 최소화**</u> 시키는 방향으로 훈련 될 것 이다.
+
+```python
+input_dim = 2
+output_dim = 1
+W = tf.Variable(initial_value=tf.random.uniform((input_dim, output_dim)))
+b = tf.Variable(initial_value=tf.randomm.uniform((output_dim, )))
+```
+
+input_dim은 입력층의 차원으로 입력으로 포인트의 좌표 x와 y 값을 받으므로 2이다.
+
+output_dim은 출력층의 차원으로 출력으로 포인트가 해당 클래스의 확률을 출력한다. 0에 가까우면 0이며 1에 가까우면 1로 출력된다.
+
+W은 레이어의 가중치로 (input_dim, output_dim)의 크기를 가진다.
+
+b는 레이어의 편차로 (output_dim)의 크기를 가진다.
+
+
+```python
+def model(inputs):
+	return tf.matmul(inputs, W) + b
+```
+
+해당 계산을 통하여 결과 값이 출력된다.
+
+
+해당 선형 분류기는 2D 입력을 다루기 때문에 W는 2개의 스칼라 가중치 w1와 w2로 이루어 진다.
+
+(W = [[w1], [w2]]). 반면 b는 하나의 스칼라 값이다.
+
+
+따라서 어떤 입력 포인트 [x, y]가 주어지면, 예측 값은 prediction = [[w1], [w2]]ㆍ[x, y] + b = w1 * x + w2 * y + b가 된다.
+
+
+# 평균 제곱 오차 손실 함수
+
+```python
+def mean_squared_loss(targets, predictions):
+	per_samples_losses = tf.square(targets - predictions)
+	return tf.reduce_mean(per_samples_losses)
+```
+
+
+tf.square 함수는 값을 제곱한다.
+
+tf.reduce_mean 함수는 해당 배열 값들의 평균을 구해준다.
+
+# 훈련 스텝 함수
+
+```python
+learning_rate = 0.1
+def training_step(inputs, targets):
+	with tf.GradientTape() as tape:
+		predictions = model(inputs) # 모델을 통하여 예측 값을 가져온다.
+		loss = mean_squared_loss(targets, predictions) # 예측 값과 실제 값의 손실 값을 구한다.
+	grad_loss_wrt_W, grad_loss_wrt_b = tape.gradient(loss, [W, b])
+	# gradientTape의 자동 미분을 통하여 미분 값을 가져온다.
+	W.assign_sub(grad_loss_wrt_W * learning_rate)
+	b.assign_sub(grad_loss_wrt_b * learning_rate)
+	# assign_sub 함수를 통하여 trainable한 값을 조정한다.
+```
+
+
+# 배치 훈련 루프
+
+```python
+for step in range(40):
+	loss = training_step(inputs, targets)
+	print(f"{step}번째 스텝의 손실. {loss: .4f}")
+```
+
+```python
+0번째 스텝의 손실:  1.8698
+1번째 스텝의 손실:  0.2985
+2번째 스텝의 손실:  0.0966
+3번째 스텝의 손실:  0.0651
+4번째 스텝의 손실:  0.0578
+5번째 스텝의 손실:  0.0542
+6번째 스텝의 손실:  0.0514
+7번째 스텝의 손실:  0.0489
+8번째 스텝의 손실:  0.0466
+9번째 스텝의 손실:  0.0446
+.
+.
+.
+37번째 스텝의 손실:  0.0251
+38번째 스텝의 손실:  0.0250
+39번째 스텝의 손실:  0.0249
+```
+
+
+훈련 입력에 대한 모델의 예측 값을 시각화 해보자.
+
+```python
+predictions = model(inputs)
+plt.scatter(inputs[:, 0], inputs[:, 1], c=predictions[:, 0] > 0.5)
+plt.show()
+```
+
+![훈련 타깃과 매우 비슷하다. ㅎㅎ](/markdown-memo/legacy/images/4c130107-c95a-4219-972a-f5126249c383.png)
+
+
+해당 데이터 포인트들을 잘 분류하는 직선을 그려보자.
+
+
+클래스 0은 w1 * x + w2 * x + b < 0.5 이고 클래스 1은 w1 * x + w2 * x + b > 0.5이다.
+
+따라서 찾고자 하는 것은 직선의 방정식 w1 * x + w2 * x + b = 0.5 이고 y에 대한 방정식으로 바꾸면
+
+$$
+y = -{w_1\over{w_2}}x+{0.5 - b\over{w_2}}
+$$
+
+
+```python
+x = np.linspace(-1, 4 , 100)
+y = -W[0] / W[1] * x + (0.5 - b) / W[1]
+plt.plot(x, y, "-r")
+plt.scatter(inputs[:, 0], inputs[:, 1], c=predictions[:, 0] > 0.5)
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/fecd97c3-a92c-49de-9737-6a1f08056831.png)
+
+

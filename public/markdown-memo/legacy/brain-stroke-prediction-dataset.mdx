@@ -1,0 +1,126 @@
+---
+title: "Brain stroke prediction dataset"
+description: ""
+tags: ["ML","Data Analysis"]
+date: "2023-01-02"
+thumbnail: "/markdown-memo/legacy/images/528af116-399f-48ca-b79a-2da05e161974.png"
+---
+
+
+[https://www.kaggle.com/datasets/zzettrkalpakbal/full-filled-brain-stroke-dataset](https://www.kaggle.com/datasets/zzettrkalpakbal/full-filled-brain-stroke-dataset)
+
+
+실습 환경은 캐글 노트북입니다.
+
+# Import Data
+
+```javascript
+data = pd.read_csv('../input/full-filled-brain-stroke-dataset/full_data.csv')
+data.head()
+```
+
+![](/markdown-memo/legacy/images/528af116-399f-48ca-b79a-2da05e161974.png)
+
+- gender - 성별, `Male` 또는 `Female` 또는 `Other`
+- age -  나이
+- hypertension - 고혈압 여부
+- heart_disease - 심장질환 여부
+- ever_married - 결혼 여부
+- work_type - 직장 종류
+- Residence_type - 주거 지역
+- avg_glucose_level - 혈당
+- bmi - bmi
+- smoking_status - 흡연 여부
+- stroke - 뇌졸중
+# Data Analysis
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+import missingno
+import plotly.express as px
+```
+
+
+> 결측값 확인하기
+
+```python
+missingno.matrix(data)
+```
+
+![](/markdown-memo/legacy/images/c4f34588-8aca-4205-ba60-1188252a7ca2.png)
+
+결측값이 없는 것을 확인 할 수 있습니다.
+
+`DataFrame` 의 `info` 메서드를 통해서도 결측값 여부를 판단할 수 있습니다.
+
+```python
+data.info()
+
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 4981 entries, 0 to 4980
+Data columns (total 11 columns):
+ #   Column             Non-Null Count  Dtype  
+---  ------             --------------  -----  
+ 0   gender             4981 non-null   object 
+ 1   age                4981 non-null   float64
+ 2   hypertension       4981 non-null   int64  
+ 3   heart_disease      4981 non-null   int64  
+ 4   ever_married       4981 non-null   object 
+ 5   work_type          4981 non-null   object 
+ 6   Residence_type     4981 non-null   object 
+ 7   avg_glucose_level  4981 non-null   float64
+ 8   bmi                4981 non-null   float64
+ 9   smoking_status     4981 non-null   object 
+ 10  stroke             4981 non-null   int64  
+dtypes: float64(3), int64(3), object(5)
+memory usage: 428.2+ KB
+```
+
+
+> 히트맵 확인하기
+
+```python
+sns.heatmap(data.corr()[['stroke']], annot=True)
+```
+
+![](/markdown-memo/legacy/images/7be18df4-f5a7-412c-8e08-4572a39f6fdb.png)
+
+`stroke` 와 `age` 간의 상관관계가 다른 피쳐들에 비해서 높다는 것을 확인 할 수 있습니다.
+
+
+> 범주형 피쳐에 따른 `stroke` 여부 확인
+
+```python
+categories = ['gender', 'ever_married', 'work_type', 'Residence_type', 'smoking_status']
+
+for category in categories:
+    px.histogram(data, x='stroke', facet_col=category, color='stroke').show()
+```
+
+
+![](/markdown-memo/legacy/images/7ec75db7-f4d6-46f3-a94d-ddb60d946976.png)
+
+![](/markdown-memo/legacy/images/52329376-d06a-4b81-9ed0-dfc4aa024fb8.png)
+
+![](/markdown-memo/legacy/images/5538cfad-078c-4e26-94ae-9f5bdd3fc72e.png)
+
+![](/markdown-memo/legacy/images/0dc9e1be-b626-46f0-a09c-48829e006fb0.png)
+
+![](/markdown-memo/legacy/images/82719795-c7d9-49ed-a4a7-267e83483de8.png)
+
+
+```python
+px.histogram(data, x='age', color='stroke', marginal='box')
+```
+
+![](/markdown-memo/legacy/images/b8aa5da7-0e74-47f5-a405-46be392997a1.png)
+
+
+```python
+px.histogram(data, x='avg_glucose_level', color='stroke', marginal='box')
+```
+
+![](/markdown-memo/legacy/images/c798bd7e-8fcc-4c5e-9a56-00f91754ed20.png)
+
+

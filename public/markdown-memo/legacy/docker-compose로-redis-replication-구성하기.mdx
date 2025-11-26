@@ -1,0 +1,141 @@
+---
+title: "Docker-Compose로 Redis Replication 구성하기"
+description: ""
+tags: ["Docker","Redis"]
+date: "2024-01-30"
+thumbnail: "/markdown-memo/legacy/images/dbd38725-8d39-4088-a164-3fbe0f3f9a78.png"
+---
+
+<!-- Table of Contents -->
+
+# docker-compose 설치
+
+docker-compose는 여러개의 도커 컨테이너를 하나의 어플리케이션으로 구축할 수 있도록 도와주는 오케스트레이션 도구이다.
+
+Redis Replication을 구축하기 위해 Redis 서버를 master 1개와 replica 2개, 총 3개의 Redis 서버를 도커를 통해 생성할 예정이다.
+
+# docker-compose.yaml 생성
+
+```yaml
+# docker-copmose.yaml
+
+version: '3.8'
+networks:
+  replica:
+    driver: bridge
+
+services:
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - replica
+    restart: always
+
+  replica:
+    container_name: replica
+    image: redis
+    ports:
+      - 6378:6379 # 호스트 포트 6378를 컨테이너 포트 6379에 매핑
+    networks:
+      - replica
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+		# 로컬 './conf' 디렉터리를 컨테이너의 '/usr/local/etc/redis/'에 마운트
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: always # 컨테이너가 중지되면 항상 다시 시작
+
+  replica2:
+    container_name: replica2
+    image: redis
+    ports:
+      - 6377:6379
+    networks:
+      - replica
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: always
+```
+
+`docker-compose`가 실행할 컨테이너 설정을 지정 후 저장한다.
+
+# replica 서버 master 지정하기
+
+replica 서버 실행시 master 서버를 지정하기 위해 redis에서는 `replicaof` 명령어를 사용한다.
+
+매번 명령을 적용하는 것은 귀찮으므로 `redis.conf` 파일에 master 서버 정보를 입력하여 실행 시 적용될 수 있도록 한다.
+
+로컬 환경에서 `./conf/edis.conf` 경로에 파일을 생성 후 해당 정보를 입력 후 저장한다.
+
+```plain text
+replicaof redis 6379
+```
+
+도커 컴포즈 실행 시 `docker-compose.yaml` 파일에 의해 로컬 환경에서의 `./conf` 디렉토리가 통째로 마운트 되므로 도커 내부 디렉토리에 파일을 생성 할 필요 없다.
+
+# docker-compose 실행하기
+
+`docker-compose up -d` 명령을 실행하면 같은 디렉토리의 `docker-compose.yaml` 파일을 참조하여 도커 컨테이너들을 생성한다.
+
+```bash
+$ docker-compose up -d
+ Container replica  Created
+ Container redis  Created
+ Container replica2  Created
+ Container replica  Starting
+ Container redis  Starting
+ Container replica2  Starting
+ Container redis  Started
+do Container replica  Started
+ Container replica2  Started
+```
+
+`docker-compose ps`를 통해 잘 생성된 것을 알 수 있다.
+
+![](/markdown-memo/legacy/images/dbd38725-8d39-4088-a164-3fbe0f3f9a78.png)
+
+`docker exec -it redis redis-cli` 명령을 통해 `master` 서버의 `cli` 에 접속한다.
+
+`info replication` 명령을 통해 연결된 `replica`들의 정보를 얻을 수 있다.
+
+![](/markdown-memo/legacy/images/948391d2-da3b-4172-8649-0540ba444717.png)
+
+`connected_slaves`가 `2` 이므로 잘 연결 된 것을 알 수 있다.
+
+# master, replica 장애 시 재연결 및 데이터 동기화 테스트
+
+`master` 서버와 `replica` 서버가 갑작스러운 장애 시 재연결 및 데이터 동기화가 잘 이루어 지는지 테스트를 해보려한다.
+
+먼저 동기화가 잘 이루어 지는지 테스트를 해보기 위해 임의의 값을 넣었다
+
+![](/markdown-memo/legacy/images/4600a5ca-c1ca-4690-9349-27491423ab24.png)
+
+<!-- Unknown block type: column_list -->
+
+키 확인 결과 동기화가 잘 이루어짐을 확인했다
+
+
+`replica` 서버 정지 후 `master` 서버의 정보를 확인해보았다.
+
+![](/markdown-memo/legacy/images/236704b5-5b66-4edf-9a79-98b057daa2d6.png)
+
+![](/markdown-memo/legacy/images/69e87808-0037-488c-b835-78a4e6237a9c.png)
+
+`connected_slaves`의 값이 1로 줄어든 것을 확인 할 수 있다.
+
+
+재연결 후 키를 조회했더니 `master` 서버와 동일 한 것을 확인 할 수 있다.
+
+![](/markdown-memo/legacy/images/cd566601-d13b-48c3-93d0-d5fdb1c1b306.png)
+
+
+이번에는 `master` 서버 정지 후 재 연결시 데이터가 복구되는지 확인해보겠다.
+
+![](/markdown-memo/legacy/images/0825c892-3401-4a84-aac6-c51dea6134a4.png)
+
+데이터가 `replica` 서버와 동기화 되었다.
+
+

@@ -1,0 +1,152 @@
+---
+title: "Persistent Segment Tree"
+description: ""
+tags: ["Algorithm","Segment Tree"]
+date: "2023-04-29"
+thumbnail: ""
+---
+
+# 개요
+
+세그먼트 트리의 쿼리 중 다음과 같은 쿼리가 있습니다.
+
+> 갱신된 정보를 반영한 새로운 세그먼트 트리를 만든다.
+K번째 세그먼트 트리로 가서 구간합 쿼리를 진행한다.
+
+이를 naive하게 구하면 O(NQ)의 공간복잡도가 나옵니다.
+
+
+퍼시스턴트 세그먼트 트리는 바뀌는 정점들에 대해서만 새로운 트리를 생성합니다.
+
+즉, 바뀌지 않는 정점은 이전의 정점을 그대로 유지하고 있다는 뜻입니다. 따라서 공간복잡도를 O(N+QlogN)으로 줄일 수 있습니다.
+
+> 💡 기존의 정점 O(N), 업데이트시 마다 생성되는 정점들 O(logN). 즉, O(N+QlogN)
+
+# PST 만들기
+
+PST는 일반적으로 Node 구조체를 통해 구현합니다.
+
+```c++
+struct Node {
+	Node *l, *r;
+	ll v;
+	Node() {
+		l = r = NULL;
+		v = 0;
+	}
+}
+```
+
+
+K번째 세그먼트 트리를 구하기 위해서는 각 루트를 달리함으로써 구할 수 있습니다.
+
+```c++
+Node *root[100001]; // root[K] = K번째 세그먼트 트리의 루트
+int arr[100001]; // 초기값
+```
+
+
+## 트리 생성하기
+
+0번째 트리를 생성하는 방법은 일반적인 세그먼트 트리를 생성하는 방법과 동일합니다.
+
+```c++
+void build(int s, int e, Node* node) {
+	if(s == e) {
+		node->v = arr[s];
+		return;
+	}
+	int m = (s+e)/2;
+	node->l = new Node();
+	node->r = new Node();
+	build(s, m, node->l);
+	build(m+1, e, node->r);
+	node->v = node->l->v + node->r->v;
+}
+```
+
+
+트리를 업데이트 할 때는 갱신할 노드를 선택하여 그 노드가 속한 범위에 대해서만 업데이트를 진행합니다.
+
+```c++
+void add(int s, int e, Node* prv, Node* cur, int x, int v) {
+	if(s == e) {
+		cur->v = v;
+		return;
+	}
+	int m = (s+e)/2;
+	if(x <= m) {
+		// 왼쪽 자식이 새로 갱신되는 경우
+		// 왼쪽 노드는 새로 생성, 오른쪽 노드는 재활용
+		cur->l = new Node();
+		cur->r = prv->r;
+		add(s, m, prv->l, cur->l, x, v);
+	}
+	else {
+		cur->r = new Node();
+		cur->l = prv->l;
+		add(m+1, e, prv->r, cur->r, x, v);
+	}
+	cur->v = cur->l->v + cur->r->v;
+}
+```
+
+
+K번째 트리를 구할 떄는 함수의 인수로 K번째 Node를 넘기면 됩니다.
+
+```c++
+int query(int s, int e, Node* cur, int l, int r) {
+	if(s > r || e < l) return 0;
+	if(s >= l && e <= r) return cur->v;
+	int m = (s+e)>>1;
+	return query(s, m, cur->l, l, r) + query(m+1, e, cur->r, l, );
+}
+```
+
+
+## K번째 수 찾기?
+
+세그먼트 트리를 이용하여 `전체 구간`에서 K번째로 작은 수를 찾는 방법은 널리 알려져 있습니다.
+
+```c++
+int query(int s, int e, int i, int K) {
+	if(s == e) return s;
+	int m = (s+e) >> 1;
+	if(tree[i<<1] <= K) return query(s, m, i*2, K);
+	else return query(m+1, e, i*2+1, K - tree[i<<1]);
+}
+```
+
+
+PST를 이용하면 `[i, j]` 구간에서 `K` 번째로 작은 수를 구할 수 있습니다.
+
+이것이 가능한 이유는 PST가 누적합의 개념도 갖고 있기 때문입니다. PST에 1부터 N번째 원소까지 차례대로 추가를 하면 총 N개의 PST를 생성할 수 있습니다.
+
+구간 `[i, j]`에 대해서 `K` 번째 수를 구하기 위해서는 `j`번째 세그먼트 트리에서 `i-1` 번째 세그먼트 트리를 뺀 트리에서 K번째 원소를 찾으면 됩니다.
+
+```c++
+// query(root[i-1], root[j], s, e, K)
+int query(Node* l, Node* r, int s, int e, int k) {
+	if(s == e) return s;
+	int diff = r->l->v - l->l->v;
+	int m = (s+e) >> 1;
+	if(k <= diff) return query(l->l, r->l, s, m, k);
+	else return query(l->r, r->r, m+1, e, k-diff);
+}
+```
+
+
+# 예제
+
+[https://www.acmicpc.net/problem/7469](https://www.acmicpc.net/problem/7469)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+정석은 머지소트 트리 + 이분 탐색이지만 퍼시스턴트 세그트리를 이용해서 해결 할 수 있다.
+
+그러나 2*10^9의 크기로 배열을 선언하기에는 부담되어 좌표압축을 사용하였다.
+
+

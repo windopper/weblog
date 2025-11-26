@@ -1,0 +1,161 @@
+---
+title: "Redis"
+description: ""
+tags: ["Redis"]
+date: "2024-01-21"
+thumbnail: ""
+---
+
+<!-- Unknown block type: link_preview -->
+
+> Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, Streams, HyperLogLogs, Bitmaps.
+
+
+<!-- Table of Contents -->
+
+# 특징
+
+1. 속도가 매우 빨라서 높은 처리량을 가진다
+1. 메모리가 휘발성을 가진다.
+1. 다양한 데이터 타입을 제공한다.
+## 메모리의 데이터를 디스크에 저장할 수 있음
+
+특정 시점의 데이터를 디스크에 저장함. 
+
+- RDB - 특정 시점의 데이터를 디스크에 저장함. 저장 시점에 메모리 사용량이 급등 할 수 있음
+- AOF - 데이터 쓰기 작업 명령들을 히스토리로 저장함. RDB 방식보다 복구에 용이하나 더 많은 용량을 필요로 하고, 성능에 영향을 줄 수 있음.
+## 싱글 스레드
+
+외부로부터 동시에 명령을 받을 수 있으나 실제 처리를 순차적으로 함. 싱글 스레드는 락 없이도 원자적 연산이 가능하며 이는 데이터의 일관성을 보장함.
+
+그러나 싱글 스레드인 만큼 병목이 일어나면 서비스 성능에 큰 영향을 미침. 따라서 레디스 측에서 사용하는 알고리즘들의 시간복잡도를 고려하여 사용해야함.
+
+레디스 6.0부터는 성능 향상을 위해서 Thread IO가 도입되었는데 이로 인해 네트워크 IO등에서 병렬처리가 가능해짐.
+
+# 활용 사례
+
+- 서버 데이터 캐시
+- 세션 저장
+- pub/sub
+- messageQueue
+- Geospatial
+- Leaderboard
+
+# 데이터 타입 및 명령
+
+## Strings
+
+- SET
+- SETNX - 값이 존재하지 않는다면 SET
+- GET
+- MGET - 여러 값을 한번에 가져옴. (Multiple GET)
+- INCR - 값을 증가
+- DECR - 값을 감소
+## List
+
+- LPUSH
+- RPUSH
+- LPOP
+- RPOP
+- LLEN
+- LRANGE - 특정 범위의 데이터를 조회
+- BRPOP, BLPOP - 값이 없는 경우 일정 시간 동안 대기함
+## Sets
+
+- SADD - SET ADD
+- SREM - SET REMOVE
+- SISMEMBER - 집합에 멤버가 존재하는지 확
+- SMEMBERS - SET의 모든 멤버를 보여줌.
+- SINTER - 교집합을 구한다. 
+- SCARD - 집합 멤버 개수를 가져옴.
+## Sorted Sets
+
+- ZADD
+- ZREM
+- ZRANGE
+- ZCARD
+- ZRANK / ZREVRANK
+- ZINCRBY
+## Hashes
+
+- HSET
+- HGET, HMGET
+- HGETALL
+- HDEL
+- HINCRBY
+## Geospatial
+
+- GEOADD
+- GEOSEARCH
+- GEODIST
+- GEOPOS
+## Bitmap
+
+- SETBIT
+- GETBIT
+- BITCOUNT
+## Key 주요 명령어
+
+- EXPIRE [KEY] [SSECOND]
+- TTL [KEY}
+- SET [KEY] [VALUE]
+- GET [KEY]
+- DEL [KEY]
+- UNLINK [KEY]
+- MEMORY USAGE [KEY]
+# Transaction
+
+- MULTI - 트랜잭션의 시작
+- EXEC - 그동안 내렸던 명령들을 시작
+- DISCARD - 트랜잭션을 취소
+- WATCH - 동시에 같은 키를 수정하는 상황이 일어났을 때 트랜잭션을 취소
+# PubSub
+
+
+# Redis Pipeline
+
+대량의 데이터를 배치처리하는 기술
+
+[https://redis.io/docs/manual/pipelining/](https://redis.io/docs/manual/pipelining/)
+
+# 도커로 레디스 사용하기
+
+docker run -it -d —rm -p 6379:6379 redis
+
+- -it “interactive”를 나타냄. 이를 통해 컨테이너의 쉘과 상호작용할 수 있음
+- -d “detached” 백그라운드에서 컨테이너를 실행하므로 터미널을 열어둘 필요가 없음
+- —rm 이 옵션은 종료 시 컨테이너를 자동으로 제거함. 시스템을 깨끗하게 유지하는 데 도움됨.
+
+- -p 6379:6379 호스트 시스템의 포트 6379를 컨테이너의 포트 6379에 매핑함. 외부에서 컨테이너 내부 서비스에 액세스하는데 필수적.
+# 응용
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: link_to_page -->
+
+# Monitoring
+
+Prometheus + Grafana 
+
+# Replication
+
+## Redis Replication
+
+1. master-replicas
+1. command stream
+1. resync
+## Redis Sentinel
+
+1. monitoring
+1. automatic failover
+## Redis Cluster
+
+1. multiple master
+
+# Ref.
+
+[http://redisgate.kr/redis/introduction/redis_intro.php](http://redisgate.kr/redis/introduction/redis_intro.php)
+
+

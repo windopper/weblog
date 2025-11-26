@@ -1,0 +1,42 @@
+---
+title: "next-auth와 prisma를 이용한 사용자 인증 구현"
+description: ""
+tags: ["Next.js","Prisma"]
+date: "2024-02-05"
+thumbnail: ""
+---
+
+> References
+
+[https://next-auth.js.org/getting-started/example](https://next-auth.js.org/getting-started/example)
+
+
+<!-- Table of Contents -->
+
+# Setting
+
+1. NextAuth 설치
+1. `.env` 파일에 `NEXTAUTH_URL` 환경 변수 추가
+1. API Route 추가
+1. `_app.js` 파일에 Session Provider 설정
+1. `useSession()` 및 인증 훅으로 사용자 관리
+1. Prisma Adapter 설치 후, `next-auth` 파일에 정의
+1. `prisma.schema` 파일에 스키마 정의 후, `migrate` 하기
+1. Middleware 세팅
+- 특정 경로에서 항상 로그인을 해야하는 경우, middleware를 통해 보안을 걸 수 있음
+- `.env` 파일에 `NEXTAUTH_SECRET` 생성 후, 반드시 로그인이 필요한 페이지 경로를 Middleware를 통해 정의
+[https://next-auth.js.org/configuration/nextjs#middleware](https://next-auth.js.org/configuration/nextjs#middleware)
+
+# Google 연동
+
+1. [https://console.developers.google.com/apis/credentials](https://console.developers.google.com/apis/credentials) 에서 API 및 서비스 > 사용자 인증 정보 > API 키 생성 및 OAuth 클라이언트 ID 생성
+1. `[...nextauth].js` 파일에 다음 코드를 추가
+# Naver 연동
+
+1. [https://developers.naver.com/main/](https://developers.naver.com/main/) 네이버 디벨로퍼 가입 후, 네이버 로그인 클릭
+1. `[...nextauth].js` 파일에 다음 코드 추가
+# Kakao 연동
+
+1. [https://developers.kakao.com/](https://developers.kakao.com/) 카카오 디벨로퍼 가입 후, 앱 등록 > 동의 항목 설정
+1. `prisma.schema`에 `refresh_token_expires_in` `Int`로 추가 후 `migrate`
+1. `[...nextauth].js` 파일에 추가

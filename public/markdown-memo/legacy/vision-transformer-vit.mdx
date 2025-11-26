@@ -1,0 +1,776 @@
+---
+title: "Vision Transformer (ViT)"
+description: ""
+tags: ["ML","Pytorch","Paper Implementation"]
+date: "2023-01-23"
+thumbnail: "/markdown-memo/legacy/images/61eb2fa0-bbf1-4e0f-9c78-b13cf685732f.png"
+---
+
+
+<!-- Table of Contents -->
+
+
+[https://colab.research.google.com/drive/18g2NRUKGy2aGaKfIrKiZxkYbsT27kZLP?hl=ko#scrollTo=5uJanWrbRjOZ](https://colab.research.google.com/drive/18g2NRUKGy2aGaKfIrKiZxkYbsT27kZLP?hl=ko#scrollTo=5uJanWrbRjOZ)
+
+
+# 필요 라이브러리 불러오기
+
+```python
+import torch
+import torchvision
+import torch.nn.functional as F
+
+from torch import nn, Tensor
+from torchvision.transforms import Compose, Resize, ToTensor
+from einops import rearrange, reduce, repeat
+from einops.layers.torch import Rearrange, Reduce
+from torchsummary import summary
+```
+
+
+# Patch + Position + Extra learnable [class] Embedding 텐서 연산 추적
+
+모듈을 만들기에 앞서 *patch + position + extra learnable [class] embedding* 의 텐서 크기를 추적하기 위해 가짜 데이터를 만들겠다
+
+```python
+# (8, 3, 224, 224) 크기의 랜덤한 텐서를 만든다.
+# 이는 224X224 크기의 이미지에 대해 배치 사이즈 8로 묶은 데이터라고 할 수 있다.
+x = torch.randn(8, 3, 224, 224)
+x.shape
+
+torch.Size([8, 3, 224, 224])
+```
+
+
+논문에서는 **이미지들을 패치로 쪼갠 후 각 패치들에 대해 평탄화(*****flatten)***를 진행했다.
+
+우리가 만든 가짜 데이터는 224X224의 크기를 가진 이미지이므로 패치 사이즈를 16으로 설정한 후, 쪼개면 한 이미지가 **196개의 패치**들로 나누어지게 된다.
+
+한 패치는 **16 X 16의 크기**를 가지고 있고 이는 **3 채널로 구성**되어 있으므로, 한 패치당 픽셀의 수는 **16 X 16 X 3 즉 768개**이다.
+
+**따라서 (8, 3, 224, 224)의 크기를 가지고 있는 텐서를 16 X 16의 패치로 쪼갠 후 평탄화를 진행하면 (8, 196, 768)의 크기를 가진 텐서로 바뀌게 된다.**
+
+```python
+# 이미지를 각각의 패치로 나누기 위해 패치 사이즈를 16으로 가정하였다.
+# 패치 사이즈는 시퀀스 길이와 반비례 관계이므로 작으면 작을 수록 모델의 연산량이 많아진다.
+# 즉, 컴퓨팅 비용이 높아진다. 따라서 적절한 패치 사이즈 설정이 필요하다.
+patch_size = 16
+print('x:', x.shape)
+# (8, 3, 14*16, 14*16) -> (8, 14*14, 16*16*3)
+# 16의 패치 사이즈로 이미지를 쪼갠 결과 196개의 패치를 획득했다.
+# 그리고 패치들을 flatten한다.
+patches = rearrange(x, 'b c (h s1) (w s2) -> b (h w) (s1 s2 c)', s1=patch_size, s2=patch_size)
+print('patches:', patches.shape)
+
+x: torch.Size([8, 3, 224, 224])
+patches: torch.Size([8, 196, 768])
+```
+
+
+논문에서는 바닐라 ViT 모델을 **텐서 평탄화 후 *****linear projection***을 시행하였는데, 후에 실험 결과 평탄화 후 *linear projection*을 시행하는 것 보다 **합성곱 층을 적용하는 것**이 성능상의 이점을 가져온다는 것을 찾아냈다.
+
+여기에는 크게 두 가지 이유가 있다.
+
+1. 합성곱 층은 **입력 데이터의 공간 관계**에 대해 학습하지만 *linear projection*은 입력 픽셀 사이의 **공간 관계를 고려하지 않는 *****non-spatial***** 한 *****operation***을 진행한다. 따라서 합성곱 층은 이미지를 이해하는데 중요한 edge, texture 그리고 shape과 같은 특성을 학습할 수 있다.
+1. 합성곱 층은 *linear projection*보다 더 메모리를 효율적으로 사용한다. ***linear projection*****은 입력 크기가 증가할 때 마다 파라미터의 수가 이차적으로 증가**하지만, 합성곱 신경망은 **입력 크기에 상관 없이 고정된 수의 파라미터**를 가지고 있기 때문에 메모리를 효율적으로 사용한다.
+
+**기존의 *****patch split + flatten + linear projection***** 과정을 *****convolutional computation***** 으로 변경한다.**
+
+> *in_channels*는 입력 이미지의 채널 수를 이야기 한다. 여기서는 RGB 값을 고려하여 3 이다.
+
+
+합성곱 신경망을 통과한 4-rank 텐서를 평탄화 시켜 3-rank 텐서로 변환한다.
+
+텐서 크기를 추적하면 다음과 같다.
+
+**(8, 3, 224, 224) → 합성곱 → (8, 768, 14, 14) → 평탄화 → (8, 196, 768)**
+
+```python
+patch_size = 16
+in_channels = 3
+emb_size = 768
+
+projection = nn.Sequential(
+    # linear 레이어보다 conv 레이어를 쓰는 게 성능상의 이점이 있다고 한다.
+    nn.Conv2d(in_channels, emb_size, kernel_size=patch_size, stride=patch_size),
+    Rearrange('b e (h) (w) -> b (h w) e')
+)
+projection(x).shape
+
+torch.Size([8, 196, 768])
+```
+
+
+여기서는 *position embedding*과 클래스 토큰을 추가하겠다.
+
+논문에서 *position embedding*는 다음과 같이 정의되었다.
+
+$$
+E_{pos}\in\mathbb{R}^{(N+1)\times D}
+$$
+
+여기서 $N$은 패치의 수이고 $D$는 *emb_size*를 의미한다.
+
+*position embedding*과 클래스 토큰은 둘 다 학습 가능한 파라미터이므로 초기 값을 무작위로 설정한다.
+
+```python
+emb_size = 768
+img_size = 224
+patch_size = 16
+
+# 이미지를 패치 사이즈로 나누고 flatten
+projected_x = projection(x)
+print('Projected X shape: ', projected_x.shape)
+
+# cls_token과 position encoding parameter 정의
+# 각 파라미터들은 모두 학습가능하다.
+cls_token = nn.Parameter(torch.randn(1, 1, emb_size))
+positions = nn.Parameter(torch.randn((img_size // patch_size) ** 2 + 1, emb_size))
+print('Cls Shape: ', cls_token.shape, 'Pos Shape: ', positions.shape)
+
+# cls_token을 반복하여 배치사이즈의 크기와 맞춰줌
+batch_size = 8
+cls_tokens = repeat(cls_token, '() n e -> b n e', b = batch_size)
+print('Repeated Cls Shape: ', cls_tokens.shape)
+
+# cls_token과 projected_x를 concatenate
+cat_x = torch.cat([cls_tokens, projected_x], dim=1)
+
+# position encoding을 더해줌
+cat_x += positions
+print('output: ', cat_x.shape)
+
+Projected X shape:  torch.Size([8, 196, 768])
+Cls Shape:  torch.Size([1, 1, 768]) Pos Shape:  torch.Size([197, 768])
+Repeated Cls Shape:  torch.Size([8, 1, 768])
+output:  torch.Size([8, 197, 768])
+```
+
+
+# PatchEmbedding 정의
+
+이제 **PatchEmbedding **클래스를 정의하겠다.
+
+```python
+class PatchEmbedding(nn.Module):
+  def __init__(self, in_channels=3, patch_size=16, emb_size=768, img_size=224):
+    self.patch_size = patch_size
+    super().__init__()
+    self.projection = nn.Sequential(
+        nn.Conv2d(in_channels, emb_size, kernel_size=patch_size, stride=patch_size),
+        Rearrange('b e (h) (w) -> b (h w) e')
+    )
+
+    self.cls_token = nn.Parameter(torch.randn(1, 1, emb_size))
+    self.positions = nn.Parameter(torch.randn((img_size // patch_size) ** 2 + 1, emb_size))
+
+  def forward(self, x: Tensor) -> Tensor:
+    b, _, _, _ = x.shape
+    x = self.projection(x)
+    cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
+    x = torch.cat([cls_tokens, x], dim=1)
+    x += self.positions
+    return x
+
+PatchEmbedding()(x).shape
+
+torch.Size([8, 197, 768])
+```
+
+
+# 멀티 헤드 어텐션 텐서 연산 추적
+
+먼저, 멀티 헤드 어텐션을 간단하게 구현해 텐서가 어떻게 변하는지 알아보겠다.
+
+*patched_x*의 텐서 크기는 **(8, 197, 768) **이다.
+
+```python
+patched_x = PatchEmbedding()(x)
+
+emb_size = 768
+num_heads = 12
+keys = nn.Linear(emb_size, emb_size)
+queries = nn.Linear(emb_size, emb_size)
+values = nn.Linear(emb_size, emb_size)
+print(keys, queries, values, sep='\n')
+
+Linear(in_features=768, out_features=768, bias=True) 
+Linear(in_features=768, out_features=768, bias=True) 
+Linear(in_features=768, out_features=768, bias=True)
+```
+
+멀티 헤드 어텐션은 입력 데이터를 *num_heads*의 수 만큼 쪼개 학습함으로서 **모델이 서로 다른 관점에서 더 다양하고 풍부한 표현 능력**을 가질 수 있도록 해준다.
+
+여기서는 *num_heads*를 12로 설정하여 입력 데이터를 12개로 쪼개 주겠다.
+
+Query, Key, Value 레이어를 통과한 *patched_x*의 텐서 크기 변환 과정은 다음과 같다.
+
+**(8, 197, 768) → *****nn.Linear → *****(8, 197, 768) → *****num_heads 수로 쪼개기 → *****(8, 12, 197, 64)**
+
+```python
+# 멀티 헤드 어텐션에서 마지막 차원의 원소들을 num_heads 수로 쪼갠다
+queries = rearrange(queries(patched_x), 'b n (h d) -> b h n d', h=num_heads)
+keys = rearrange(keys(patched_x), 'b n (h d) -> b h n d', h=num_heads)
+values = rearrange(values(patched_x), 'b n (h d) -> b h n d', h=num_heads)
+
+print('Shape: ', queries.shape, keys.shape, values.shape)
+Shape:  torch.Size([8, 12, 197, 64]) torch.Size([8, 12, 197, 64]) torch.Size([8, 12, 197, 64])
+```
+
+
+
+![](/markdown-memo/legacy/images/61eb2fa0-bbf1-4e0f-9c78-b13cf685732f.png)
+
+
+*scaled dot-product attention* 연산 과정은 상단의 그림과 같다.
+
+```python
+# 쿼리와 키의 내적
+# b, h, n, d = queries.size()
+# energy = torch.matmul(queries.reshape(b, h, n, d), keys.reshape(b, h, d, n))
+# 해당 코드를 통해서도 내적이 가능하지만 einsum() 메서드가 훨씬 간단하고 가독성이 높다
+energy = torch.einsum('bhqd, bhkd -> bhqk', queries, keys)
+
+print('energy: ', energy.shape)
+
+# 내적 값을 스케일링, 소프트맥스를 통하여 어텐션 스코어를 구한다.
+scaling = emb_size ** (1/2)
+attention_score = F.softmax(energy / scaling, dim=-1)
+print('attention score: ', attention_score.shape)
+
+# 어텐션 스코어와 Values의 내적을 진행한다.
+out = torch.einsum('bhal, bhlv -> bhav', attention_score, values)
+print('out: ', out.shape)
+
+# 멀티 헤드로 인해 나뉘어졌던 헤드 연결하기
+out = rearrange(out, 'b h n d  -> b n (h d)')
+print('out2: ', out.shape)
+
+energy:  torch.Size([8, 12, 197, 197])
+attention score:  torch.Size([8, 12, 197, 197])
+out:  torch.Size([8, 12, 197, 64])
+out2:  torch.Size([8, 197, 768])
+```
+
+# MultiHeadAttention
+
+```python
+class MultiHeadAttention(nn.Module):
+  def __init__(self, emb_size=768, num_heads=12, dropout: float=0):
+    super().__init__()
+    self.emb_size = emb_size
+    self.num_heads = num_heads
+    self.keys = nn.Linear(emb_size, emb_size)
+    self.queries = nn.Linear(emb_size, emb_size)
+    self.values = nn.Linear(emb_size, emb_size)
+    self.att_drop = nn.Dropout(dropout)
+    self.projection = nn.Linear(emb_size, emb_size)
+    self.scaling = (self.emb_size // num_heads) ** -0.5
+
+  def forward(self, x: Tensor, mask: Tensor = None) -> Tensor:
+    queries = rearrange(self.queries(x), "b n (h d) -> b h n d", h = self.num_heads)
+    keys = rearrange(self.keys(x), "b n (h d) -> b h n d", h = self.num_heads)
+    values = rearrange(self.values(x), "b n (h d) -> b h n d", h = self.num_heads)
+
+    # batch, num_heads, query_len, key_len
+    energy = torch.einsum('bhqd, bhkd -> bhqk', queries, keys)
+    if mask is not None:
+      fill_value = torch.finfo(torch.float32).min
+      energy.masked_fill(~mask, fill_value)
+    scaling = self.emb_size ** (1/2)
+    att = F.softmax(energy / scaling, dim=-1)
+    att = self.att_drop(att)
+
+    out = torch.einsum('bhal, bhlv -> bhav', att, values)
+    out = rearrange(out, 'b h n d -> b n (h d)')
+    out = self.projection(out)
+    return out
+
+patches_embedded = PatchEmbedding()(x)
+MultiHeadAttention()(patches_embedded).shape
+
+torch.Size([8, 197, 768])
+```
+
+```python
+# 마스킹 예제
+mask = torch.Tensor([1, 1, 0, 0]).type(torch.bool)
+fill_value = torch.finfo(torch.float32).min
+# [1, 1, 1, 1]
+i = torch.ones(4)
+# ~mask -> [0, 0, 1, 1]
+i.masked_fill(~mask, fill_value)
+
+tensor([ 1.0000e+00,  1.0000e+00, -3.4028e+38, -3.4028e+38])
+```
+
+
+# Residual
+
+```python
+class ResidualAdd(nn.Module):
+  def __init__(self, fn):
+    super().__init__()
+    self.fn = fn
+
+  def forward(self, x, **kwargs):
+    res = x
+    x = self.fn(x, **kwargs)
+    x += res
+    return x
+```
+
+
+# FeedForwardBlock
+
+```python
+class FeedForwardBlock(nn.Sequential):
+  def __init__(self, emb_size: int, expansion: int = 4, drop_p: float = 0.):
+    super().__init__(
+        nn.Linear(emb_size, expansion * emb_size),
+        nn.GELU(),
+        nn.Dropout(drop_p),
+        nn.Linear(expansion * emb_size, emb_size)
+    )
+```
+
+# TransformerEncoderBlock
+
+```python
+class TransformerEncoderBlock(nn.Sequential):
+  def __init__(self,
+               emb_size:int = 768,
+               drop_p: float = 0.,
+               forward_expansion: int = 4,
+               forward_drop_p: float = 0.,
+               **kwargs
+               ):
+    super().__init__(
+        ResidualAdd(nn.Sequential(
+            nn.LayerNorm(emb_size),
+            MultiHeadAttention(emb_size, **kwargs),
+            nn.Dropout(drop_p)
+        )),
+        ResidualAdd(nn.Sequential(
+            nn.LayerNorm(emb_size),
+            FeedForwardBlock(
+                emb_size, expansion=forward_expansion, drop_p=forward_drop_p
+            ),
+            nn.Dropout(drop_p)
+        ))
+    )
+```
+
+# TransformerEncoder
+
+```python
+class TransformerEncoder(nn.Sequential):
+  def __init__(self, depth:int = 12, **kwargs):
+    super().__init__(*[TransformerEncoderBlock(**kwargs) for _ in range(depth)])
+```
+
+# ViT
+
+```python
+class ViT(nn.Sequential):
+  def __init__(self,
+               in_channels:int = 3,
+               patch_size:int = 16,
+               emb_size: int = 768,
+               img_size: int = 224,
+               depth:int = 12,
+               n_classes: int = 1000,
+               **kwargs):
+    super().__init__(
+        PatchEmbedding(in_channels, patch_size, emb_size, img_size),
+        TransformerEncoder(depth, emb_size=emb_size, **kwargs),
+        ClassificationHead(emb_size, n_classes)
+    )
+```
+
+```python
+summary(ViT(), (3, 224, 224), device='cpu')
+
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1          [-1, 768, 14, 14]         590,592
+         Rearrange-2             [-1, 196, 768]               0
+    PatchEmbedding-3             [-1, 197, 768]               0
+         LayerNorm-4             [-1, 197, 768]           1,536
+            Linear-5             [-1, 197, 768]         590,592
+            Linear-6             [-1, 197, 768]         590,592
+            Linear-7             [-1, 197, 768]         590,592
+           Dropout-8         [-1, 12, 197, 197]               0
+            Linear-9             [-1, 197, 768]         590,592
+MultiHeadAttention-10             [-1, 197, 768]               0
+          Dropout-11             [-1, 197, 768]               0
+      ResidualAdd-12             [-1, 197, 768]               0
+        LayerNorm-13             [-1, 197, 768]           1,536
+           Linear-14            [-1, 197, 3072]       2,362,368
+             GELU-15            [-1, 197, 3072]               0
+          Dropout-16            [-1, 197, 3072]               0
+           Linear-17             [-1, 197, 768]       2,360,064
+          Dropout-18             [-1, 197, 768]               0
+      ResidualAdd-19             [-1, 197, 768]               0
+        LayerNorm-20             [-1, 197, 768]           1,536
+           Linear-21             [-1, 197, 768]         590,592
+           Linear-22             [-1, 197, 768]         590,592
+           Linear-23             [-1, 197, 768]         590,592
+          Dropout-24         [-1, 12, 197, 197]               0
+           Linear-25             [-1, 197, 768]         590,592
+MultiHeadAttention-26             [-1, 197, 768]               0
+          Dropout-27             [-1, 197, 768]               0
+      ResidualAdd-28             [-1, 197, 768]               0
+        LayerNorm-29             [-1, 197, 768]           1,536
+           Linear-30            [-1, 197, 3072]       2,362,368
+             GELU-31            [-1, 197, 3072]               0
+          Dropout-32            [-1, 197, 3072]               0
+           Linear-33             [-1, 197, 768]       2,360,064
+          Dropout-34             [-1, 197, 768]               0
+      ResidualAdd-35             [-1, 197, 768]               0
+        LayerNorm-36             [-1, 197, 768]           1,536
+           Linear-37             [-1, 197, 768]         590,592
+           Linear-38             [-1, 197, 768]         590,592
+           Linear-39             [-1, 197, 768]         590,592
+          Dropout-40         [-1, 12, 197, 197]               0
+           Linear-41             [-1, 197, 768]         590,592
+MultiHeadAttention-42             [-1, 197, 768]               0
+          Dropout-43             [-1, 197, 768]               0
+      ResidualAdd-44             [-1, 197, 768]               0
+        LayerNorm-45             [-1, 197, 768]           1,536
+           Linear-46            [-1, 197, 3072]       2,362,368
+             GELU-47            [-1, 197, 3072]               0
+          Dropout-48            [-1, 197, 3072]               0
+           Linear-49             [-1, 197, 768]       2,360,064
+          Dropout-50             [-1, 197, 768]               0
+      ResidualAdd-51             [-1, 197, 768]               0
+        LayerNorm-52             [-1, 197, 768]           1,536
+           Linear-53             [-1, 197, 768]         590,592
+           Linear-54             [-1, 197, 768]         590,592
+           Linear-55             [-1, 197, 768]         590,592
+          Dropout-56         [-1, 12, 197, 197]               0
+           Linear-57             [-1, 197, 768]         590,592
+MultiHeadAttention-58             [-1, 197, 768]               0
+          Dropout-59             [-1, 197, 768]               0
+      ResidualAdd-60             [-1, 197, 768]               0
+        LayerNorm-61             [-1, 197, 768]           1,536
+           Linear-62            [-1, 197, 3072]       2,362,368
+             GELU-63            [-1, 197, 3072]               0
+          Dropout-64            [-1, 197, 3072]               0
+           Linear-65             [-1, 197, 768]       2,360,064
+          Dropout-66             [-1, 197, 768]               0
+      ResidualAdd-67             [-1, 197, 768]               0
+        LayerNorm-68             [-1, 197, 768]           1,536
+           Linear-69             [-1, 197, 768]         590,592
+           Linear-70             [-1, 197, 768]         590,592
+           Linear-71             [-1, 197, 768]         590,592
+          Dropout-72         [-1, 12, 197, 197]               0
+           Linear-73             [-1, 197, 768]         590,592
+MultiHeadAttention-74             [-1, 197, 768]               0
+          Dropout-75             [-1, 197, 768]               0
+      ResidualAdd-76             [-1, 197, 768]               0
+        LayerNorm-77             [-1, 197, 768]           1,536
+           Linear-78            [-1, 197, 3072]       2,362,368
+             GELU-79            [-1, 197, 3072]               0
+          Dropout-80            [-1, 197, 3072]               0
+           Linear-81             [-1, 197, 768]       2,360,064
+          Dropout-82             [-1, 197, 768]               0
+      ResidualAdd-83             [-1, 197, 768]               0
+        LayerNorm-84             [-1, 197, 768]           1,536
+           Linear-85             [-1, 197, 768]         590,592
+           Linear-86             [-1, 197, 768]         590,592
+           Linear-87             [-1, 197, 768]         590,592
+          Dropout-88         [-1, 12, 197, 197]               0
+           Linear-89             [-1, 197, 768]         590,592
+MultiHeadAttention-90             [-1, 197, 768]               0
+          Dropout-91             [-1, 197, 768]               0
+      ResidualAdd-92             [-1, 197, 768]               0
+        LayerNorm-93             [-1, 197, 768]           1,536
+           Linear-94            [-1, 197, 3072]       2,362,368
+             GELU-95            [-1, 197, 3072]               0
+          Dropout-96            [-1, 197, 3072]               0
+           Linear-97             [-1, 197, 768]       2,360,064
+          Dropout-98             [-1, 197, 768]               0
+      ResidualAdd-99             [-1, 197, 768]               0
+       LayerNorm-100             [-1, 197, 768]           1,536
+          Linear-101             [-1, 197, 768]         590,592
+          Linear-102             [-1, 197, 768]         590,592
+          Linear-103             [-1, 197, 768]         590,592
+         Dropout-104         [-1, 12, 197, 197]               0
+          Linear-105             [-1, 197, 768]         590,592
+MultiHeadAttention-106             [-1, 197, 768]               0
+         Dropout-107             [-1, 197, 768]               0
+     ResidualAdd-108             [-1, 197, 768]               0
+       LayerNorm-109             [-1, 197, 768]           1,536
+          Linear-110            [-1, 197, 3072]       2,362,368
+            GELU-111            [-1, 197, 3072]               0
+         Dropout-112            [-1, 197, 3072]               0
+          Linear-113             [-1, 197, 768]       2,360,064
+         Dropout-114             [-1, 197, 768]               0
+     ResidualAdd-115             [-1, 197, 768]               0
+       LayerNorm-116             [-1, 197, 768]           1,536
+          Linear-117             [-1, 197, 768]         590,592
+          Linear-118             [-1, 197, 768]         590,592
+          Linear-119             [-1, 197, 768]         590,592
+         Dropout-120         [-1, 12, 197, 197]               0
+          Linear-121             [-1, 197, 768]         590,592
+MultiHeadAttention-122             [-1, 197, 768]               0
+         Dropout-123             [-1, 197, 768]               0
+     ResidualAdd-124             [-1, 197, 768]               0
+       LayerNorm-125             [-1, 197, 768]           1,536
+          Linear-126            [-1, 197, 3072]       2,362,368
+            GELU-127            [-1, 197, 3072]               0
+         Dropout-128            [-1, 197, 3072]               0
+          Linear-129             [-1, 197, 768]       2,360,064
+         Dropout-130             [-1, 197, 768]               0
+     ResidualAdd-131             [-1, 197, 768]               0
+       LayerNorm-132             [-1, 197, 768]           1,536
+          Linear-133             [-1, 197, 768]         590,592
+          Linear-134             [-1, 197, 768]         590,592
+          Linear-135             [-1, 197, 768]         590,592
+         Dropout-136         [-1, 12, 197, 197]               0
+          Linear-137             [-1, 197, 768]         590,592
+MultiHeadAttention-138             [-1, 197, 768]               0
+         Dropout-139             [-1, 197, 768]               0
+     ResidualAdd-140             [-1, 197, 768]               0
+       LayerNorm-141             [-1, 197, 768]           1,536
+          Linear-142            [-1, 197, 3072]       2,362,368
+            GELU-143            [-1, 197, 3072]               0
+         Dropout-144            [-1, 197, 3072]               0
+          Linear-145             [-1, 197, 768]       2,360,064
+         Dropout-146             [-1, 197, 768]               0
+     ResidualAdd-147             [-1, 197, 768]               0
+       LayerNorm-148             [-1, 197, 768]           1,536
+          Linear-149             [-1, 197, 768]         590,592
+          Linear-150             [-1, 197, 768]         590,592
+          Linear-151             [-1, 197, 768]         590,592
+         Dropout-152         [-1, 12, 197, 197]               0
+          Linear-153             [-1, 197, 768]         590,592
+MultiHeadAttention-154             [-1, 197, 768]               0
+         Dropout-155             [-1, 197, 768]               0
+     ResidualAdd-156             [-1, 197, 768]               0
+       LayerNorm-157             [-1, 197, 768]           1,536
+          Linear-158            [-1, 197, 3072]       2,362,368
+            GELU-159            [-1, 197, 3072]               0
+         Dropout-160            [-1, 197, 3072]               0
+          Linear-161             [-1, 197, 768]       2,360,064
+         Dropout-162             [-1, 197, 768]               0
+     ResidualAdd-163             [-1, 197, 768]               0
+       LayerNorm-164             [-1, 197, 768]           1,536
+          Linear-165             [-1, 197, 768]         590,592
+          Linear-166             [-1, 197, 768]         590,592
+          Linear-167             [-1, 197, 768]         590,592
+         Dropout-168         [-1, 12, 197, 197]               0
+          Linear-169             [-1, 197, 768]         590,592
+MultiHeadAttention-170             [-1, 197, 768]               0
+         Dropout-171             [-1, 197, 768]               0
+     ResidualAdd-172             [-1, 197, 768]               0
+       LayerNorm-173             [-1, 197, 768]           1,536
+          Linear-174            [-1, 197, 3072]       2,362,368
+            GELU-175            [-1, 197, 3072]               0
+         Dropout-176            [-1, 197, 3072]               0
+          Linear-177             [-1, 197, 768]       2,360,064
+         Dropout-178             [-1, 197, 768]               0
+     ResidualAdd-179             [-1, 197, 768]               0
+       LayerNorm-180             [-1, 197, 768]           1,536
+          Linear-181             [-1, 197, 768]         590,592
+          Linear-182             [-1, 197, 768]         590,592
+          Linear-183             [-1, 197, 768]         590,592
+         Dropout-184         [-1, 12, 197, 197]               0
+          Linear-185             [-1, 197, 768]         590,592
+MultiHeadAttention-186             [-1, 197, 768]               0
+         Dropout-187             [-1, 197, 768]               0
+     ResidualAdd-188             [-1, 197, 768]               0
+       LayerNorm-189             [-1, 197, 768]           1,536
+          Linear-190            [-1, 197, 3072]       2,362,368
+            GELU-191            [-1, 197, 3072]               0
+         Dropout-192            [-1, 197, 3072]               0
+          Linear-193             [-1, 197, 768]       2,360,064
+         Dropout-194             [-1, 197, 768]               0
+     ResidualAdd-195             [-1, 197, 768]               0
+          Reduce-196                  [-1, 768]               0
+       LayerNorm-197                  [-1, 768]           1,536
+          Linear-198                 [-1, 1000]         769,000
+================================================================
+Total params: 86,415,592
+Trainable params: 86,415,592
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.57
+Forward/backward pass size (MB): 378.54
+Params size (MB): 329.65
+Estimated Total Size (MB): 708.77
+----------------------------------------------------------------
+```
+
+
+# 사전 학습된 모델 사용하기
+
+사전 학습된 모델을 사용하기 위해 `timm` 라이브러리를 사용한다.
+
+```python
+!pip install timm
+```
+
+
+`timm` 에서 지원하는 ViT 모델들이다.
+
+```python
+import timm
+timm.list_models('vit*')
+
+['vit_base_patch8_224',
+ 'vit_base_patch8_224_dino',
+ 'vit_base_patch8_224_in21k',
+ 'vit_base_patch16_18x2_224',
+ 'vit_base_patch16_224',
+ 'vit_base_patch16_224_dino',
+ 'vit_base_patch16_224_in21k',
+ 'vit_base_patch16_224_miil',
+ 'vit_base_patch16_224_miil_in21k',
+ 'vit_base_patch16_224_sam',
+ 'vit_base_patch16_384',
+ 'vit_base_patch16_plus_240',
+ 'vit_base_patch16_rpn_224',
+ 'vit_base_patch32_224',
+ 'vit_base_patch32_224_clip_laion2b',
+ 'vit_base_patch32_224_in21k',
+ 'vit_base_patch32_224_sam',
+ 'vit_base_patch32_384',
+ 'vit_base_patch32_plus_256',
+ 'vit_base_r26_s32_224',
+ 'vit_base_r50_s16_224',
+ 'vit_base_r50_s16_224_in21k',
+ 'vit_base_r50_s16_384',
+ 'vit_base_resnet26d_224',
+ 'vit_base_resnet50_224_in21k',
+ 'vit_base_resnet50_384',
+ 'vit_base_resnet50d_224',
+ 'vit_giant_patch14_224',
+ 'vit_giant_patch14_224_clip_laion2b',
+ 'vit_gigantic_patch14_224',
+ 'vit_huge_patch14_224',
+ 'vit_huge_patch14_224_clip_laion2b',
+ 'vit_huge_patch14_224_in21k',
+ 'vit_large_patch14_224',
+ 'vit_large_patch14_224_clip_laion2b',
+ 'vit_large_patch16_224',
+ 'vit_large_patch16_224_in21k',
+ 'vit_large_patch16_384',
+ 'vit_large_patch32_224',
+ 'vit_large_patch32_224_in21k',
+ 'vit_large_patch32_384',
+ 'vit_large_r50_s32_224',
+ 'vit_large_r50_s32_224_in21k',
+ 'vit_large_r50_s32_384',
+ 'vit_relpos_base_patch16_224',
+ 'vit_relpos_base_patch16_cls_224',
+ 'vit_relpos_base_patch16_clsgap_224',
+ 'vit_relpos_base_patch16_plus_240',
+ 'vit_relpos_base_patch16_rpn_224',
+ 'vit_relpos_base_patch32_plus_rpn_256',
+ 'vit_relpos_medium_patch16_224',
+ 'vit_relpos_medium_patch16_cls_224',
+ 'vit_relpos_medium_patch16_rpn_224',
+ 'vit_relpos_small_patch16_224',
+ 'vit_relpos_small_patch16_rpn_224',
+ 'vit_small_patch8_224_dino',
+ 'vit_small_patch16_18x2_224',
+ 'vit_small_patch16_36x1_224',
+ 'vit_small_patch16_224',
+ 'vit_small_patch16_224_dino',
+ 'vit_small_patch16_224_in21k',
+ 'vit_small_patch16_384',
+ 'vit_small_patch32_224',
+ 'vit_small_patch32_224_in21k',
+ 'vit_small_patch32_384',
+ 'vit_small_r26_s32_224',
+ 'vit_small_r26_s32_224_in21k',
+ 'vit_small_r26_s32_384',
+ 'vit_small_resnet26d_224',
+ 'vit_small_resnet50d_s16_224',
+ 'vit_srelpos_medium_patch16_224',
+ 'vit_srelpos_small_patch16_224',
+ 'vit_tiny_patch16_224',
+ 'vit_tiny_patch16_224_in21k',
+ 'vit_tiny_patch16_384',
+ 'vit_tiny_r_s16_p8_224',
+ 'vit_tiny_r_s16_p8_224_in21k',
+ 'vit_tiny_r_s16_p8_384']
+```
+
+
+`vit_base_patch16_224` 모델을 불러온다.
+
+```python
+model = timm.create_model('vit_base_patch16_224', pretrained=True)
+model.eval()
+```
+
+
+모델 사전 학습시에 사용했던 데이터 변환 설정을 가져온 후, `create_transform` 메서드를 사용하여 `transform` 콜백을 만든다.
+
+이미지를 변환 한 후 `unsqueeze()` 메서드를 통하여 이미지의 배치축을 늘려준다.
+
+```python
+import urllib
+from PIL import Image
+from timm.data import resolve_data_config
+from timm.data.transforms_factory import create_transform
+import IPython.display as display
+
+config = resolve_data_config({}, model=model)
+transform = create_transform(**config)
+
+url, filename = ("https://github.com/pytorch/hub/raw/master/images/dog.jpg", "dog.jpg")
+urllib.request.urlretrieve(url, filename)
+img = Image.open(filename).convert('RGB')
+tensor = transform(img).unsqueeze(0)
+```
+
+우리가 분류할 이미지이다.
+
+```python
+from IPython import display
+display.display(img)
+```
+
+![](/markdown-memo/legacy/images/904c6910-4762-4d0b-881a-bc69463ebaa6.png)
+
+
+입력 데이터를 모델에 통과시킨다. 통과시킨 데이터를 소프트맥스 함수에 넣어 클래스의 확률을 구한다.
+
+```python
+with torch.no_grad():
+  out = model(tensor)
+probabilities = F.softmax(out[0], dim=0)
+print(probabilities.shape)
+
+torch.Size([1000])
+```
+
+
+출력 텐서의 인덱스를 각 클래스에 매칭 시켜줘야 되므로 imagenet의 클래스들이 저장되어 있는 파일을 카테고리로 바꾼다.
+
+출력 값 중 상위 5개의 확률과 인덱스를 카테고리에 대응시켜 모델이 어떤 종류의 카테고리로 분류했는지 출력한다.
+
+```python
+url, filename = ("https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt", "imagenet_classes.txt")
+urllib.request.urlretrieve(url, filename)
+with open('imagenet_classes.txt', 'r') as f:
+  categories = [s.strip() for s in f.readlines()]
+top5_prob, top5_catid = torch.topk(probabilities, 5)
+for i in range(top5_prob.size(0)):
+  print(categories[top5_catid[i]], top5_prob[i].item())
+
+Samoyed 0.5055651664733887
+Pomeranian 0.3121601641178131
+keeshond 0.06001167371869087
+Pekinese 0.015970630571246147
+white wolf 0.012953993864357471
+```
+
+개 품종 중 하나인 사모예드가 가장 높은 확률을 보였다.
+
+

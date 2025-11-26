@@ -1,0 +1,65 @@
+---
+title: "kmp"
+description: ""
+tags: ["Algorithm"]
+date: "2023-04-05"
+thumbnail: ""
+---
+
+# 개요
+
+문자열 검색 알고리즘으로 문자열 S에서 문자열 H를 찾는 naive한 알고리즘을 짠다면 각각의 길이를 N, M이라고 할 때 시간 복잡도는 **O(NM)**이 걸리게 됩니다.
+
+그러나 kmp 알고리즘은 어떤 경우라도 **O(N+M)**의 시간복잡도로 문자열 H를 찾을 수 있습니다.
+
+
+# 전처리
+
+kmp 알고리즘을 사용하기 위해서는 **pi**배열이라고 불리는 특수한 테이블이 필요합니다.
+
+이것은 문자열 중 접두사와 접미사가 같게 될 수 있는 문자열 중에서 가장 긴 것의 길이를 담는 배열입니다.
+
+**문자열 abaabaab 로 pi 배열을 만들어 보겠습니다.**
+
+> 💡 pi[0] → a → 0
+pi[1] → ab → 0
+pi[2] → aba → 1 (a)
+pi[3] → abaa → 1 (a)
+pi[4] → abaab → 2 (ab)
+pi[5] → abaaba → 3 (aba)
+pi[6] → abaabaa → 4 (abaa)
+pi[7] → abaabaab → 5 (abaab)
+
+
+```c++
+vector<int> pi(P.size(), 0);
+    int begin = 1, matched = 0;
+    while(begin + matched < P.size()) {
+        if(P[begin+matched] == P[matched]) {
+            ++matched;
+            pi[begin+matched-1] = matched;
+        }
+        else {
+            if(matched == 0) ++begin;
+            else {
+                begin += (matched - pi[matched-1]);
+                matched = pi[matched-1];
+            }
+        }
+    }
+```
+
+# 코드
+
+
+# 예제
+
+[https://www.acmicpc.net/problem/1786](https://www.acmicpc.net/problem/1786)
+
+kmp의 기본 문제.
+
+
+[https://www.acmicpc.net/problem/1305](https://www.acmicpc.net/problem/1305)
+
+pi 테이블을 이용하는 문제입니다.
+

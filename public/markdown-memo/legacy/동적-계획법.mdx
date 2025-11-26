@@ -1,0 +1,146 @@
+---
+title: "동적 계획법"
+description: ""
+tags: ["Algorithm","Dynamic Programming"]
+date: "2023-01-29"
+thumbnail: "/markdown-memo/legacy/images/bad545bd-2d1f-49c3-b93b-715e80897333.png"
+---
+
+# 더 다양한 유형들
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: link_to_page -->
+
+# 개요
+
+최적화 이론의 한 기술로, **특정 범위**까지의 값을 구하기 위해서 **그것과 다른 범위까지의 값을 이용하여 **효율적으로 값을 구하는 알고리즘 설계 기법이다.
+
+
+# 접근
+
+동적 계획법을 사용하기 위해 이를 구체적으로 적용시킬 수 있는 예시를 들겠다.
+
+어떤 함수 $f$에 대해서 다음과 같은 성질을 가진다.
+
+$$
+f(a, b) = f(a-1, b)+f(a, b-1)\quad a>=1, b>=1
+$$
+
+$$
+f(0, 0)=1, \quad 임의의\;자연수\;n에 \;대해\;f(n,0)=f(0,n)=1
+$$
+
+# 예시
+
+## 피보나치 수열
+
+동적 계획법을 사용하지 않은 간단한 피보나치 구현 코드는 다음과 같다.
+
+```python
+def fibonacci(n):
+  if n<2:
+    return 1
+  return fibonacci(n-1) + fibonacci(n-2)
+```
+
+![](/markdown-memo/legacy/images/bad545bd-2d1f-49c3-b93b-715e80897333.png)
+
+
+## 동적계획법 피보나치 수열
+
+동적 계획법에서는 탑다운 방식과 바텀업 방식이 있는데 구현한 해당 코드는 큰 문제를 해결하기 위해 점점 작은 문제로 분할해 나가는 탑다운 방식으로 구현하였다.
+
+```python
+def fibonacci(n):
+  if dp[n] != 0:
+    return dp[n]
+  dp[n] = fibonacci(n-1) + fibonacci(n-2)
+  return dp[n]
+```
+
+
+바텀업 방식은 다음과 같다.
+
+```python
+def fibonacci(n):
+  dp = [0] * (n+1)
+  dp[0] = dp[1] = 1
+  for i in range(2, n+1):
+    dp[i] = dp[i-1] + dp[i-2]
+  return dp[n]
+```
+
+
+# 0-1 배낭 문제
+
+조합 최적화 문제의 일종으로 담을 수 있는 최대 무게가 정해진 배낭과 함께 각각의 무게와 가치가 주어진 아이템의 집합이 주어졌을 때, 배낭에 담은 아이템들의 가치의 합이 최대가 되도록 하는 아이템들의 부분집합을 찾는 문제이다.
+
+```python
+items = [(12, 4), (1, 2), (4, 10), (1, 1), (2, 2)]
+max_weight = 15
+k = len(items)
+dp = [[0] * (max_weight+1) for _ in range(k+1)]
+
+for i in range(1, k+1):
+  for j in range(1, max_weight+1):
+    W, V = items[i-1]
+    if W >= j:
+      dp[i][j] = dp[i-1][j]
+    else:
+      dp[i][j] = max(dp[i-1][j], dp[i-1][j-W] + V)
+```
+
+
+# LCS
+
+LCS(Longest Common Subseqeunce) 최장 공통 부분 수열 문제로 겉보기에는 쉬운 문제같지만 DP를 사용해서 풀어야 하는 문제이다.
+
+백준에 대표적인 문제로 9251: LCS 가 있다.
+
+[https://www.acmicpc.net/problem/9251](https://www.acmicpc.net/problem/9251)
+
+
+# 테크닉
+
+
+
+## 동적계획법 역추적
+
+[https://velog.io/@flowersayo/%EB%8F%99%EC%A0%81%EA%B3%84%ED%9A%8D%EB%B2%95-%EC%97%AD%EC%B6%94%EC%A0%81](https://velog.io/@flowersayo/%EB%8F%99%EC%A0%81%EA%B3%84%ED%9A%8D%EB%B2%95-%EC%97%AD%EC%B6%94%EC%A0%81)
+
+# references
+
+[https://namu.wiki/w/동적 계획법](https://namu.wiki/w/%EB%8F%99%EC%A0%81%20%EA%B3%84%ED%9A%8D%EB%B2%95)
+
+
+
+# 예제
+
+
+[https://www.acmicpc.net/problem/5557](https://www.acmicpc.net/problem/5557)
+
+dp 테이블 설계를 위한 다양한 접근법을 연습해볼 수 있다.
+
+
+[https://www.acmicpc.net/problem/2225](https://www.acmicpc.net/problem/2225)
+
+2차원 배열을 떠올렸다면 쉽게 풀 수 있는 문제이다. 출력 값으로 나머지를 출력해야 된다는 점만 주의 할 것
+
+
+[https://www.acmicpc.net/problem/1126](https://www.acmicpc.net/problem/1126)
+
+naive 하게 양쪽 탑의 높이를 dp 테이블의 크기로 설정하면 500000 * 500000 * 50의 배열이 필요하다. 따라서 배열 크기를 최소화하여 dp를 설계하는 아이디어를 떠올리면 된다.
+
+
+[https://www.acmicpc.net/problem/1102](https://www.acmicpc.net/problem/1102)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+

@@ -1,0 +1,56 @@
+---
+title: "이분매칭"
+description: ""
+tags: ["Algorithm","Graph"]
+date: "2023-04-09"
+thumbnail: ""
+---
+
+# 이분매칭
+
+
+# 기본 코드
+
+```c++
+#include <bits/stdc++.h>
+
+using namespace std;
+int aMatch[51];
+int bMatch[51];
+int dis[51];
+
+bool dfs(int cur) {
+	if(dis[cur]) return false;
+	dis[cur] = true;
+	for(int next : adj[cur]) {
+		if(bMatch[next] == -1 || dfs(bMatch[next])) {
+			bMatch[next] = cur;
+			aMatch[cur] = next;
+			return true;
+		}
+	}
+	return false;
+}
+
+int main() {
+	// create adj
+
+	// initialize match table to -1
+	
+	// loop and bipartite matching	
+	int ans = 0; // match count
+	for(int i=0; i<N; i++) {
+		memset(dis, -1, sizeof(dis));
+		if(dfs(i)) ++ans;
+	}
+}
+```
+
+
+
+# 예제
+
+[https://www.acmicpc.net/problem/1671](https://www.acmicpc.net/problem/1671)
+
+2번 매칭해야 된다는 점 + 상어 간의 먹이 사슬 계산을 추가로 해줘야 한다. 또한 정점 간 사이클이 없도록 매칭해줘야 된다는 점이 주의 할 점
+

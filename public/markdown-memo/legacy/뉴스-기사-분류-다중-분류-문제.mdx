@@ -1,0 +1,288 @@
+---
+title: "뉴스 기사 분류: 다중 분류 문제"
+description: ""
+tags: ["Tensorflow","Tutorial","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/45f1fbde-1bb5-4150-a208-d2cbdeaa0124.png"
+---
+
+
+케라스의 로이터 뉴스 데이터셋은 46개의 카테고리로 나뉘어져 있다.
+
+해당 데이터는 **다중 분류 문제**에 속하며, 각 데이터 포인트들이 정확히 하나의 범주로 분류되기 때문에 **단일 레이블 다중 분류** 문제이다.
+
+
+```python
+from tensorflow.keras.datasets import reuters
+
+(train_data, train_labels), (test_data, test_labels) = reuters.load_data(num_words=10000)
+
+len(train_data) # 훈련 데이터의 총 개수
+8982
+
+max(train_labels) # 훈련 데이터의 최대 레이블
+45
+```
+
+훈련 데이터들의 개수는 8982개, 최대 레이블은 45임을 확인하였다.
+
+
+입력 데이터들이 어떻게 생겼는지 한번 보자
+
+```python
+np.asarray(train_data[0])
+
+array([   1,    2,    2,    8,   43,   10,  447,    5,   25,  207,  270,
+          5, 3095,  111,   16,  369,  186,   90,   67,    7,   89,    5,
+         19,  102,    6,   19,  124,   15,   90,   67,   84,   22,  482,
+         26,    7,   48,    4,   49,    8,  864,   39,  209,  154,    6,
+        151,    6,   83,   11,   15,   22,  155,   11,   15,    7,   48,
+          9, 4579, 1005,  504,    6,  258,    6,  272,   11,   15,   22,
+        134,   44,   11,   15,   16,    8,  197, 1245,   90,   67,   52,
+         29,  209,   30,   32,  132,    6,  109,   15,   17,   12])
+```
+
+훈련 데이터의 첫번째 인덱스를 출력한 결과이다.
+
+각 단어들이 모두 정수 리스트임을 확인 할 수 있다.
+
+
+케라스의 reuter 데이터 셋은 get_word_index()를 통하여 단어 별로 매핑되는 정수 값을 얻을 수 있다.
+
+우리는 정수로 이루어져 있는 문장을 디코딩하여 우리가 읽을 수 있는 문장으로 한 번 만들어 보자.
+
+```python
+word_index = reuters.get_word_index()
+
+reverse_word_index = dict([(value, key) for (key, value) in word_index.items()])
+decoded = " ".join(
+	[reverse_word_index.get(i-3, "?") for i in train_data[0]] 
+)
+"""
+0, 1, 2는 각각 '패딩', '문서시작', '사전에 없음'을 위해 예약된 인덱스이므로 3을 빼준다.
+"""
+
+print(decoded)
+
+? ? ? said as a result of its december acquisition of space co it expects earnings per share in 1987 of 1 15 to 1 30 dlrs per share up from 70 cts in 1986 the company said pretax net should rise to nine to 10 mln dlrs from six mln dlrs in 1986 and rental operation revenues to 19 to 22 mln dlrs from 12 5 mln dlrs it said cash flow per share this year should be 2 50 to three dlrs reuter 3
+```
+
+
+기존의 데이터는 신경망에 학습하기에 부적절하므로 멀티-핫 인코딩 기법을 사용하여 벡터로 만들어 준다.
+
+```python
+import numpy as np
+def vectorize_sequences(sequences, dimension=10000):
+	results = np.zeros((len(sequences), dimension))
+	for i, sequence in enumerate(sequences):
+		for j in sequence:
+			results[i, j] = 1
+	return results
+
+x_train = vectorize_sequences(x_train)
+x_test = vectorize_sequences(x_test)
+
+x_train[0]
+array([0., 1., 1., ..., 0., 0., 0.])
+```
+
+
+기존의 레이블 데이터는 정수 형태로 되어 있다. 레이블을 벡터 형태로 바꾸는 방법은 두 가지가 있다.
+
+1. 레이블의 리스트를 정수 텐서로 변환하는 것
+1. 원-핫 인코딩을 사용하는 것
+여기서 우리는 원-핫 인코딩 기법을 사용해 볼 것이다.
+
+
+원-핫 인코딩은 간단히 말하면 레이블의 인덱스 자리가 1이고 나머지가 모두 0인 벡터로 만드는 것이다.
+
+여기서 벡터의 길이는 범주의 개수이다.
+
+```python
+def to_one_hot(labels, dimension=46):
+	results = np.zeros((len(labels), dimension))
+	for i, label in enumerate(labels):
+		results[i, label] = 1
+	return results
+
+y_train = to_one_hot(train_labels)
+y_test = to_one_hot(test_labels)
+```
+
+
+케라스의 to_categorical 메서드를 통하여 직접 구현하지 않고도 사용 할 수 있다.
+
+```python
+from keras.utils.np_utils import to_categorical
+
+y_train = to_categorical(train_labels)
+y_test = to_categorical(test_labels)
+```
+
+```python
+train_labels[0]
+3
+
+y_train[0]
+array([0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.], dtype=float32)
+```
+
+
+# 훈련 및 검증 데이터 나누기
+
+
+모델 학습 과정을 모니터링 하기 위하여 데이터를 훈련과 검증, 두 종류로 나눌 것이다.
+
+사이킷런의 train_test_split 메서드를 사용하였다.
+
+```python
+from sklearn.model_selection import train_test_split
+
+partial_x_train,
+ x_val,
+ partial_y_train,
+ y_val = train_test_split(x_train, y_train, test_size=0.2, shuffle=True, stratify=y_train)
+```
+
+
+# 모델 설계하기
+
+해당 모델은 데이터를 받아 46개의 클래스로 분류하는 문제이므로 중간 층의 차원이 너무 작으면 46개의 클래스로 분류할 때 큰 제약이 걸릴 것으로 보인다.
+
+[정보 병목이 발생한다면?](https://www.notion.so/1a3cacc723b6454c8f14391e06d3636e#b761dbb94d0c41548e73a19e3cdf4d7e) 
+
+따라서 중간 층의 차원을 분류하는 클래스 수보다 많은 64로 설정하였다.
+
+```python
+from tensorflow import keras
+from tensorflow.keras import layers
+
+model = keras.Sequential([
+	layers.Dense(64, activation='relu'),
+	layers.Dense(64, activation='relu'),
+	layers.Dense(46, activation='softmax')
+])
+```
+
+마지막 층의 활성화 함수로 softmax를 사용하였다. softmax 함수는 46개의 출력 클래스에 대해 확률 분포를 출력한다.
+
+여기서 가장 높은 확률을 가지는 레이블을 정답이라고 예측한다.
+
+
+```python
+model.compile(
+	optimizer='rmsprop',
+	loss='categorical_crossentropy',
+	metrics=['accuracy']
+)
+```
+
+손실 함수로 categorical_crossentropy를 사용하였다. 이는 모델이 출력한 확률 분포와 정답 레이블의 분포 사이의 거리를 계산한다. 해당 계산을 통하여 두 분포 사이의 거리를 최소화 하는 방향으로 학습한다.
+
+
+```python
+history = model.fit(partial_x_train, partial_y_train, epochs=20, batch_size=512,
+	validation_data=(x_val, y_val))
+
+Epoch 1/20
+15/15 [==============================] - 1s 30ms/step - loss: 0.1163 - accuracy: 0.9578 - val_loss: 0.1352 - val_accuracy: 0.9494
+Epoch 2/20
+15/15 [==============================] - 0s 17ms/step - loss: 0.0840 - accuracy: 0.9613 - val_loss: 0.2069 - val_accuracy: 0.9416
+Epoch 3/20
+15/15 [==============================] - 0s 17ms/step - loss: 0.0835 - accuracy: 0.9609 - val_loss: 0.2160 - val_accuracy: 0.9432
+.
+.
+.
+Epoch 20/20
+15/15 [==============================] - 0s 17ms/step - loss: 0.0682 - accuracy: 0.9645 - val_loss: 0.4046 - val_accuracy: 0.9349
+```
+
+
+모델을 평가해보자
+
+```python
+model.evaluate(x_test, y_test)
+
+71/71 [==============================] - 0s 3ms/step - loss: 1.6384 - accuracy: 0.7925
+[1.6384154558181763, 0.7925200462341309]
+```
+
+해당 모델은 약 79%의 정확도로 평가되었다.
+
+
+# 손실 및 정확도 시각화하기
+
+
+matplotlib 라이브러리를 통하여 손실 및 정확도를 시각화 해보자
+
+```python
+import matplotlib.pyplot as plt
+
+hd = history.history
+loss = hd['loss']
+val_loss = hd['val_loss']
+epochs = range(1, len(loss) + 1)
+plt.plot(epochs, loss, 'bo', label='Training Loss')
+plt.plot(epochs, val_loss, 'r-', label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.title('Training And Validation Loss')
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/45f1fbde-1bb5-4150-a208-d2cbdeaa0124.png)
+
+```python
+acc = hd['accuracy']
+val_acc = hd['val_accuracy']
+
+plt.plot(epochs, acc, "bo", label='Training Accuracy')
+plt.plot(epochs, val_acc, "r-", label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.title('Traning And Validation Accuracy')
+plt.legend()
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/7e450030-5ef0-416d-b586-513839816e0f.png)
+
+
+그래프를 통하여 7~10 에포크 사이에서 과대적합이 진행되는 것을 알 수 있다.
+
+
+# 정보 병목이 발생한다면?
+
+```python
+model = keras.Sequential([
+    layers.Dense(64, activation='relu'),
+    layers.Dense(4, activation='relu'),
+    layers.Dense(46, activation='softmax')
+])
+
+Epoch 20/20
+15/15 [==============================] - 0s 16ms/step - loss: 0.6634 - accuracy: 0.8200 - val_loss: 1.4325 - val_accuracy: 0.6917
+
+model.evaluate(x_test, y_test)
+71/71 [==============================] - 0s 3ms/step - loss: 1.5425 - accuracy: 0.6759
+[1.5425459146499634, 0.6758682131767273]
+```
+
+중간층의 차원을 4로 두어 정보 병목이 발생하도록 한 결과, 모델 평가 정확도가 67%가 나타났다.
+
+해당 정확도가 나타난 이유는 46개의 레이블을 분류하는 데 필요한 정보들이 저차원으로 압축하면서 데이터에 손실이 일어났기 때문이다.
+
+따라서 모델이 좋은 예측을 할 수 있도록 중간 층에서 충분한 정보를 줄 수 있도록 적절한 차원을 설정해야 한다.
+
+
+# 매듭짓기
+
+- n개의 클래스로 데이터 포인트를 분류하려면 마지막 Dense층이 n 차원을 가져야 됨을 알 수 있었다.
+- 단일 레이블, 다중 분류 문제에서는 n개의 클래스에 대한 확률 분포를 출력하기 위하여 마지막 층의 활성화 함수로 softmax를 사용해야 한다.
+- 해당 종류의 문제는 항상 손실 함수로 범주형 크로스엔트로피를 사용해야 한다.
+- 다중 분류에서 레이블을 다루는 방법은 원-핫 인코딩을 수행한 후 손실 함수로 categorical_crossentropy를 사용하거나 정수 텐서를 사용한 후 손실 함수로 sparse_categorical_crossentropy를 사용해야 한다.
+- 많은 수의 범주를 분류할 때 정보의 병목이 생기지 않도록 중간 층의 차원을 적절히 조절해야 한다.
+

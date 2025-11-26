@@ -1,0 +1,269 @@
+---
+title: "커넥션 프로파일 다이내믹 프로그래밍"
+description: ""
+tags: ["Algorithm","Dynamic Programming"]
+date: "2023-05-05"
+thumbnail: "/markdown-memo/legacy/images/680c4c48-836f-4cba-854d-8bccd4d0ee88.png"
+---
+
+<!-- Table of Contents -->
+
+# 사전지식
+
+[https://www.acmicpc.net/problem/1648](https://www.acmicpc.net/problem/1648)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+격자에서 비트마스크 DP를 돌리는 기본적인 문제로 좌상단을 기준으로 왼쪽에서 오른쪽, 위에서 아래로 훑으며 계산합니다.
+
+이때 격자의 현재 위치에 도미노가 설치될 수 있는지는 현재 위치로부터 M번째 위치까지 칸이 채워졌는지에 대한 정보를 바탕으로 알 수 있습니다. 여기서 M은 14보다 작거나 같으므로 $2^{14}$의 상태로 알 수 있습니다.
+
+# 커넥션 프로파일 DP
+
+[https://www.acmicpc.net/problem/1144](https://www.acmicpc.net/problem/1144)
+
+해당 문제는 격자에서 연결된 가장 싼 집합을 찾는 문제로, 상단의 격자판 채우기 문제에서 사용하였던 비트마스크DP를 돌리는 기법을 사용하여 해결 할 수 있는 것처럼 보입니다.
+
+비트마스크에 가장 최근 M개의 정보를 저장하여 바로 왼쪽의 집합과 위의 집합을 참고하며 현재 칸에 어떤 상태를 설정하지 정하게 되는데 이때 집합에 속한다는 것을 1, 속하지 않는 것을 0으로 표현한다면 다음과 같은 문제점이 발생하게 됩니다.
+
+
+![](/markdown-memo/legacy/images/680c4c48-836f-4cba-854d-8bccd4d0ee88.png)
+
+
+주어진 정보는 가장 최근의 M개이지만 우리는 이 정보만을 통하여 선택된 집합들이 같은 집합인지 알 방법이 없습니다.
+
+그렇다고 격자의 모든 상태를 저장할 수는 없는 노릇입니다.
+
+해법은 이러합니다.
+
+
+![](/markdown-memo/legacy/images/2f396301-7a0f-4695-bfdd-eca0ed736654.png)
+
+격자의 칸 마다 어떤 집합에 속해 있는지 번호를 붙입니다. 이제 M개의 최근 정보를 통해 현재 상태를 정할 수 있습니다.
+
+# 현재 상태 선택하기
+
+## 집합을 선택하지 않는다
+
+현재 상태에서 집합에 속하는 것을 선택하지 않는 다면 상태 정보는 한 칸씩 밀린 후 현재 위치에는 0을 저장합니다.
+
+그러나 특정한 경우에 집합을 선택하면 안되는 경우가 있습니다.
+
+### 바로 위 칸이 어떤 집합에 속해있고 해당 칸이 다른 칸과 연결되어 있지 않은 경우
+
+해당 상황에서 만약 현재 상태의 집합을 선택하지 않는다면 다음과 같은 일이 일어납니다.
+
+- 최근 M-1개의 정보에 대해 집합에 속해있는 칸이 존재하는 경우, 윗 칸은 다른 집합과 결합에 실패하게 됩니다.
+- 최근 M-1개의 정보에 대해 집합에 속해있는 칸이 존재하지 않는 경우, 윗 칸은 하나의 결합 요소를 만드는데 성공하였으나, 이미 하나의 결합 요소가 있었다는 사실을 망각하게 됩니다. 그래서 현재 칸 이후 새로운 집합을 만들지 말지 여부를 선택할 수 없습니다.
+
+## 집합을 선택한다
+
+### 왼쪽, 위값이 모두 집합에 포함되어 있지 않을 경우
+
+해당 경우에는 새로운 집합을 생성하여 추가합니다
+
+### 왼쪽 혹은 위쪽 둘 중 하나만 집합에 포함되어 있을 경우
+
+해당 경우에는 집합에 포함되어 있는 쪽으로 해당 상태가 정의됩니다.
+
+### 왼쪽, 위쪽 둘 다 집합에 포함되어 있을 경우
+
+해당 경우에는 M개의 정보에 정의된 집합들 중 왼쪽과 위쪽의 집합에 포함되어 있는 모든 집합이 하나의 집합으로 합쳐집니다.
+
+
+## 답 정의하기
+
+집합에 포함된 칸들이 연결 요소를 이룰떄 마다 답을 갱신합니다. 이때 연결 요소를 판별하는 방법은 서로 다른 집합의 개수가 1 이하일 경우입니다.
+
+> 💡 서로 다른 집합의 개수가 1 초과 일 경우 답을 갱신하게 되면 집합에 포함된 칸들이 연결 요소를 이루지 않는다면 둘 이상의 집합에 대한 비용이 답으로 적용될 수 있기 때문입니다.
+
+## 코드
+
+```c++
+#include <bits/stdc++.h>
+
+using namespace std;
+int N, M;
+int arr[81];
+unordered_map<int, int> dp[81];
+int ans = 0;
+int solve(int cur, int val) {
+    if(cur >= N*M) {
+        vector<int> state(M, 0);
+        for(int i=0; i<M && val; i++) {
+            state[i] = val % 10;
+            val /= 10;
+        }
+        unordered_set<int> us;
+        for(int x : state) {
+        if(x) us.insert(x);
+        }
+        if(us.size() <= 1) return 0;
+        return 987654321;
+    };
+
+    if(dp[cur].find(val) != dp[cur].end()) return dp[cur][val];
+    dp[cur][val] = 987654321;
+    int &ret = dp[cur][val];
+
+    vector<int> state(M, 0);
+    for(int i=0; i<M && val; i++) {
+        state[i] = val % 10;
+        val /= 10;
+    }
+
+    // 현재 칸에 추가하는 경우
+    vector<int> nextArr(M, 0);
+    for(int i=1; i<M; i++) nextArr[i] = state[i-1];
+    int up = state[M-1];
+    int left = cur % M ? state[0] : 0;
+    // 윗칸이랑 합칠때
+    if(up) {
+        nextArr[0] = up;
+        // 옆칸도 있으면 같은 칸으로 결합
+        if(left) for(int i=1; i<M; i++) if(nextArr[i] == left) nextArr[i] = up;
+    }
+    else if(left) {
+        nextArr[0] = left;
+    }
+    else {
+        nextArr[0] = 99;
+    }
+
+    // renumbering
+    unordered_map<int, int> sq;
+    for(int i=0, t=1; i<M; i++) {
+        if(nextArr[i] == 0) continue;
+        if(sq.find(nextArr[i]) == sq.end()) sq[nextArr[i]] = t++;
+        nextArr[i] = sq[nextArr[i]];
+    }
+
+    // 재결합
+    int nextVal = 0;
+    for(int i=0, c=1; i<M; i++, c*=10) {
+        nextVal += nextArr[i] * c;
+    }
+
+    ret = min(ret, solve(cur + 1, nextVal) + arr[cur]);
+
+    // 현재 칸에 추가하지 않는 경우
+    // 제일 윗칸이 혼자 있을 경우
+    bool UpAlone = true;
+    for(int i=0; i<M-1; i++) {
+        if(state[i] == state.back()) {
+            UpAlone = false;
+            break;
+        }
+    }
+
+    if(!(state[M-1] && UpAlone)) {
+        for(int i=1; i<M; i++) nextArr[i] = state[i-1];
+        nextArr[0] = 0;
+        unordered_map<int, int> sq2;
+        for(int i=0, t=1; i<M; i++) {
+            if(nextArr[i] == 0) continue;
+            if(sq2.find(nextArr[i]) == sq2.end()) sq2[nextArr[i]] = t++;
+            nextArr[i] = sq2[nextArr[i]];
+        }
+        nextVal = 0;
+        for(int i=0, c=1; i<M; i++, c*=10) {
+            nextVal += nextArr[i] * c;
+        }
+        ret = min(ret, solve(cur + 1, nextVal));
+    }   
+
+    unordered_set<int> us;
+    for(int x : state) {
+        if(x) us.insert(x);
+    }
+    if(us.size() <= 1) ret = min(ret, 0);
+
+    return ret;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);
+    cin >> N >> M;
+    for(int i=0; i<N*M; i++) {
+        cin >> arr[i];
+    }
+    cout << solve(0, 0);
+}
+```
+
+
+# 예제
+
+## 배관공 김선영
+
+[https://www.acmicpc.net/problem/2850](https://www.acmicpc.net/problem/2850)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+프로파일들을 저장할 때 다음과 같은 정보를 저장해야 합니다
+
+`1번째 이전부터 M번째 이전까지 수도관을 위쪽으로 연결가능한 각 커넥션들의 집합 번호 + 1번째 이전의 수도관을 왼쪽으로 연결가능한 각 커넥션들의 집합 번호`
+
+
+![](/markdown-memo/legacy/images/ca29e974-ba9d-445a-9461-e6d95c4b5bf8.png)
+
+
+해당 프로파일을 담은 배열 `profile`을 다음과 같이 표현할 수 있습니다
+
+### 현재 상태 정의하기
+
+현재 상태는 위쪽 혹은 왼쪽의 수도관 연결 여부에 따라 결정됩니다.
+
+왼쪽 수도관의 프로파일을 `left` 위쪽 수도관의 프로파일을 `up` 이라고 하면,
+
+
+`left > 0 and up == 0` 인 경우
+
+─ 을 연결 할 때
+
+- 다음 칸의 `left` 값이 현재 `left`를 따라가며, 다음 칸의 `up` 값은 `0` 입니다
+**┓**을 연결 할 떄
+
+- 다음 칸의 `up` 값이 현재 `left`를 따라가며 ,다음 칸의 `left` 값은 `0` 입니다
+
+`left == 0 and up > 0` 인 경우
+
+**│ **을 연결 할 때
+
+- 다음 칸의 `up` 값이 현재 `up` 를 따라가며, 다음 칸의`left` 값은 `0` 입니다.
+└ 을 연결할 때
+
+- 다음 칸의 `left` 값이 현재 `up` 를 따라가며, 다음 칸의 `up` 값은 `0` 입니다.
+
+`left > 0 and up > 0` 인 경우
+
+아무 것도 연결하지 않을 떄
+
+- 다음 칸의 `up`값과 `left` 값이 모두 0입니다.
+┌ 을 연결할 떄
+
+- 다음 칸의 `up` 값과 `left` 값이 새로운 집합으로 정의됩니다.
+
+현재 위치가 `#` 인 경우
+
+해당 경우에서는 수도관을 새로 설치 할 수 없으므로 다음 칸의 `up` 값과 `left` 값이 모두 `0` 이 됩니다.
+
+### 기저조건 
+
+- 현재 위치가 `#`인 경우
+- 현재 위치가 새로운 줄의 첫번째 칸인데 이전 칸에서의 수도관이 오른쪽을 보고있을 경우
+### 성립조건
+
+수도관이 오른쪽 아래에 잘 이어졌는지 확인하는 방법은 프로파일이 다음과 같을 떄 확인할 수 있습니다
+
+# References
+
+[https://jh05013.github.io/%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98/Connection%20profile%20DP/](https://jh05013.github.io/%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98/Connection%20profile%20DP/)
+
+

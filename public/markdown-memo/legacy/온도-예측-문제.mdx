@@ -1,0 +1,317 @@
+---
+title: "온도 예측 문제"
+description: ""
+tags: ["Tutorial","Tensorflow"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/c93f3170-29ca-4011-bdac-e1f1484e70ba.png"
+---
+
+온도 예측 문제는 대표적인 시계열(time series) 문제로 이번 문제에서는 매시간 측정값이 주어졌을 때 24시간 뒤의 온도를 예측해 보겠습니다.
+
+데이터 셋은 독일 예나시에 있는 막스 플랑크 생물지구화학연구소의 기상 관측소에서 수집한 데이터를 사용하겠습니다.
+
+해당 데이터는 온도, 풍향, 기압, 습도등 14개의 관측치가 10분 간격으로 기록되어 있습니다.
+
+```powershell
+!wget https://s3.amazonaws.com/keras-datasets/jena_climate_2009_2016.csv.zip
+!unzip jena_climate_2009_2016.csv.zip
+```
+
+데이터를 한번 살펴보겠습니다
+
+```python
+import os
+fname = os.path.join('jena_climate_2009_2016.csv')
+with open(fname) as f:
+	data = f.read()
+
+lines = data.split('\n')
+header = lines[0].split(',')
+lines = lines[1:]
+print(header)
+print(len(lines)
+
+['"Date Time"', '"p (mbar)"', '"T (degC)"', '"Tpot (K)"', '"Tdew (degC)"', '"rh (%)"', '"VPmax (mbar)"', '"VPact (mbar)"', '"VPdef (mbar)"', '"sh (g/kg)"', '"H2OC (mmol/mol)"', '"rho (g/m**3)"', '"wv (m/s)"', '"max. wv (m/s)"', '"wd (deg)"']
+420451
+```
+
+
+```python
+import numpy as np
+
+temperatures = np.zeros((len(lines), ))
+raw_data = np.zeros((len(lines), len(header) - 1))
+
+for i, line in enumerate(lines):
+  values = [float(x) for x in line.split(',')[1:]]
+  temperatures[i] = values[1]
+  raw_data[i, :] = values[:]
+
+import matplotlib.pyplot as plt
+
+plt.plot(range(len(temperatures)), temperatures)
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/c93f3170-29ca-4011-bdac-e1f1484e70ba.png)
+
+그래프를 통해 매년 온도에 주기성이 있다는 것을 볼 수 있습니다.
+
+
+# 데이터 샘플링 및 전처리
+
+데이터를 샘플링하기 전에 전처리를 진행하겠습니다.
+
+전처리는 동일한 특성에 대한 표준화만을 진행하겠습니다.
+
+```python
+num_train_samples = int(raw_data_length * 0.5) 
+num_val_samples = int(raw_data_length * 0.25)
+num_test_samples = raw_data_length - num_train_samples - num_val_samples
+
+mean = raw_data[:num_train_samples].mean(axis=0)
+std = raw_data[:num_train_samples].std(axis=0)
+raw_data -= mean
+raw_data /= std
+```
+
+
+시계열 데이터 샘플링은 케라스의 timeseries_dataset_from_array() 메서드를 활용하여 진행해보겠습니다.
+
+해당 메서드는 인풋과 타겟 어레이에 대해서 시계열 신경망에 적절하게 주입할 수 있도록 도와줍니다.
+
+```python
+from tensorflow import keras
+from tensorflow.keras import layers
+
+"""
+해당 메서드에 대한 예시이다.
+
+data = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+delay = 3
+sequence_length = 3
+sampling_rate = 1
+
+dataset = timeseries_dataset_from_array(
+	data=data[:-delay],
+	targets=data[delay:],
+	sequence_length=sequence_length
+	delay=delay,
+	sampling_rate=sampling_rate,
+)
+
+for samples, targets in dataset:
+	for i in range(samples.shape[0]):
+		print(f"{[int(x) for x in samples[i]]} {int(targets[i])}")
+
+[1, 2, 3] 4
+[2, 3, 4] 5
+[3, 4, 5] 6
+[4, 5, 6] 7
+[5, 6, 7] 8
+[6, 7, 8] 9
+
+""" 
+
+sampling_rate = 6
+# 6개 중 하나의 데이터 포인트를 샘플링 한다.
+# 해당 데이터 셋은 10분 간격의 시계열 데이터셋 이므로
+# 즉, 한 시간 당 하나의 데이터 포인트를 샘플링 한다는 뜻
+sequence_length = 120
+# 1개의 데이터는 1시간의 정보를 대표하므로 120시간의 정보를 샘플링 하겠다는 뜻
+# 120 / 24 -> 5 : 5일간의 데이터를 사용한다.
+delay = sampling_rate * (sequence_length + 24 - 1)
+# 시퀀스의 타깃은 시퀀스의 시작으로부터 24시간 후이다.
+
+
+train_dataset = keras.utils.timeseries_dataset_from_array( # 원본 시계열에서 추출한 윈도우 제공
+    data=raw_data[:-delay], 
+    targets=temperatures[delay:],
+    sequence_length=sequence_length,
+    sampling_rate=sampling_rate,
+    batch_size=256,
+    start_index=0,
+    end_index=num_train_samples
+)
+
+val_dataset = keras.utils.timeseries_dataset_from_array(
+    data=raw_data[:-delay],
+    targets=temperatures[delay:],
+    sequence_length=sequence_length,
+    sampling_rate=sampling_rate,
+    batch_size=256,
+    start_index=num_train_samples,
+    end_index=num_train_samples + num_val_samples
+)
+
+test_dataset = keras.utils.timeseries_dataset_from_array(
+    data=raw_data[:-delay],
+    targets=temperatures[delay:],
+    sequence_length=sequence_length,
+    sampling_rate=sampling_rate,
+    batch_size=256,
+    start_index=num_val_samples + num_val_samples
+)
+```
+
+
+샘플링 된 데이터의 크기를 알아보겠습니다.
+
+```python
+for samples, targets in train_dataset:
+	print('size of samples: ', samples.shape)
+	print('size of targets: ', targets.shape)
+	break
+
+size of samples:  (256, 120, 14)
+size of targets:  (256,)
+```
+
+배치사이즈로 설정한 256, 시퀀스 길이로 설정한 120이 잘 설정 된 것을 볼 수 있습니다.
+
+
+# 상식 수준의 기준점?
+
+시계열 데이터의 경우 연속성이 있고 일자별로 주기성을 가집니다.
+
+해당 데이터 셋의 경우 오늘 온도는 내일 온도와 비슷할 가능성이 높다고 판단할 수 있으므로 상식 수준의 기준점은 현재로부터 24시간 뒤의 온도는 현재와 동일하다고 예측하는 것입니다.
+
+평가 지표는 평균 절댓값 오차로 설정해보겠습니다.
+
+```python
+def evaluate_naive_method(dataset):
+	total_abs_err = 0
+	samples_seen = 0
+	for samples, targets in dataset:
+		preds = samples[:, -1, 1] * std[1] + mean[1]
+		# 샘플의 모든 배치에 대해 마지막 타임스탬프의 온도 특성에 표준편차를 곱하고
+		# 평균을 더한다.
+		total_abs_err += np.sum(np.abs(pred - targets))
+		sample_seen += samples.shape[0]
+	return total_abs_err / samples_seen
+
+print(f"validation mae: {evaluate_naive_method(val_dataset)}")
+print(f"test mae:  {evaluate_naive_method(test_dataset)}")
+
+validation mae: 2.4417357485655184
+test mae:  2.53016923076923
+```
+
+상식 수준의 모델은 검증 데이터로 2.4의 MAE를 테스트 데이터로 2.5의 MAE를 가집니다.
+
+
+# 기본적인 순환 신경망 시도하기
+
+일반적인 밀집 연결 신경망이나 합성곱 신경망 같은 경우는 시계열 문제에서 가장 중요한 순서 정보를 잃어버립니다.
+
+따라서 순서 정보를 신경 쓸 수 있도록 하는 모델을 이용하는데 이러한 문제를 해결하기 위해 고안된 구조가 순환 신경망입니다.
+
+```python
+from tensorflow import keras
+from tensorflow.keras import layers
+
+inputs = keras.Input(shape=(sequence_length, raw_data.shape[-1]))
+x = layers.LSTM(16)(x)
+outputs = layers.Dense(1)(x)
+model = keras.Model(inputs=inputs, outputs=outputs)
+
+model.compile(
+	optimizer='rmsprop',
+	loss='mse',
+	metrics=['mae']
+)
+
+callbacks = [
+	keras.callbacks.ModelCheckpoint(
+		'jena_lstm.keras',
+		save_best_only=True
+	)
+]
+
+history = model.fit(
+	train_dataset,
+	epochs=10,
+	validation_data=val_dataset,
+	callbacks=callbacks
+)
+```
+
+평가 점수가 가장 높은 모델을 불러와 테스트 데이터에 대한 MAE를 구해보겠습니다
+
+```python
+model = keras.models.load_model('jena_lstm.keras')
+print(f"test mae: {model.evaluate(test_dataset)[1]:.2f}")
+
+816/816 [==============================] - 29s 34ms/step - loss: 11.0055 - mae: 2.5821
+test mae: 2.58
+```
+
+
+상식 수준의 기준점과 비슷한 점수를 냅니다. 해당 모델이 유의미한 성과를 낸다는 것을 보여주는 군요!
+
+```python
+import matplotlib.pyplot as plt
+
+def show_history(history):
+  val_mae = history.history['val_mae']
+  mae = history.history['mae']
+  epochs = range(1, len(mae) + 1)
+  plt.plot(epochs, val_mae, 'b-', label='Validation MAE')
+  plt.plot(epochs, mae, 'bo', label='Training MAE')
+  plt.legend()
+  plt.show()
+
+show_history(history)
+```
+
+![](/markdown-memo/legacy/images/c6e50594-454d-4d06-ab03-b498e142dcbe.png)
+
+에포크 별 손실 값은 다음과 같습니다
+
+
+# 순환 드롭아웃을 사용해보기
+
+드롭아웃은 모델의 과대적합을 최대한 늦춰 신경망이 조금 더 일반화 되도록 만들 수 있는 기법입니다.
+
+그러나 머신러닝 학계에서는 경험적으로 순환 층 이전에 드롭아웃을 사용하면 규제에 도움이 되는 것보다 학습에 더 방해되는 것으로 오랫동안 알려졌습니다.
+
+드롭아웃은 타임스텝마다 랜덤하게 유닛들이 드롭되기 때문에 이는 순환 신경망의 특성상 다음 타임스텝으로 셀 상태가 전파되는 것을 방해하기 때문입니다.
+
+순환 신경망에서는 순환 드롭아웃을 이용하여 일반적인 모델에서의 드롭아웃과 같은 효과를 볼 수 있습니다.
+
+순환 드롭아웃은 모든 타임스텝에 대하여 동일한 드롭아웃 마스크를 활용하여 신경망이 적절하게 학습할 수 있도록 돕습니다.
+
+
+```python
+inputs = keras.Input(shape=(sequence_length, raw_data.shape[-1]))
+x = layers.LSTM(32, recurrent_dropout=0.25, unroll=True)(inputs)
+x = layers.Dropout(0.5)(x) # Dense 층에 드롭아웃 적용!
+outputs = layers.Dense(1)(x)
+model = keras.Model(inputs=inputs, outputs=outputs)
+callbacks=[
+    keras.callbacks.ModelCheckpoint(
+        'jena_lstm.keras',
+        save_best_only=True
+    )
+]
+model.compile(
+    optimizer='rmsprop',
+    loss='mse',
+    metrics=['mae']
+)
+history = model.fit(train_dataset, epochs=50, validation_data=val_dataset, callbacks=callbacks)
+```
+
+```python
+model = keras.models.load_model('jena_lstm.keras')
+print(f"test mae: {model.evaluate(test_dataset)[1]:.2f}")
+
+816/816 [==============================] - 57s 62ms/step - loss: 10.4475 - mae: 2.5246
+test mse: 2.52
+```
+
+![](/markdown-memo/legacy/images/ae70873e-797a-4275-957d-28b728831199.png)
+
+검증 데이터에 대한 MAE는 2.4, 테스트 데이터에 대한 MAE는 2.5가 나왔습니다.
+
+

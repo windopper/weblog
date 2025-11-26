@@ -1,0 +1,146 @@
+---
+title: "React + Firebase 유저 연동해보기"
+description: ""
+tags: ["Firebase","React"]
+date: "2024-02-01"
+thumbnail: ""
+---
+
+<!-- Table of Contents -->
+
+# Firebase 인스턴스 선언
+
+```typescript
+// firebaseApp.ts
+
+import { initializeApp, FirebaseApp, getApp } from "firebase/app";
+import "firebase/auth";
+
+export let app: FirebaseApp;
+
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJET_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
+};
+
+try {
+  app = getApp("app");
+} catch (e) {
+  app = initializeApp(firebaseConfig, "app");
+}
+```
+
+`firebase` 인스턴스를 초기화한다.
+
+
+# 회원 가입 할 때
+
+```typescript
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { app } from "firebaseApp";
+
+const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	e.preventDefault();
+	try {
+		const auth = getAuth(app);
+		const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+    );
+		// when success
+	} catch (error: any) {
+		// when error
+	}
+}
+```
+
+
+# 로그인 시
+
+```typescript
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from 'firebaseApp';
+
+const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	e.preventDefault();
+	try {
+		const auth = getAuth(app);
+		const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+    );
+	  // when success
+	} catch (error: any) {
+		// when error
+	}
+}
+```
+
+
+# 로그아웃 시
+
+```typescript
+import { getAuth, signOut } from "firebase/auth";
+import { app } from "firebaseApp";
+
+const onSignOut = async () => {
+	try {
+		const auth = getAuth(app);
+		await signOut(auth);
+		// when success
+	} catch (error: any) {
+		// when error
+	}
+}
+```
+
+
+# 유저 인증 정보 확인
+
+```typescript
+import { useEffect, useState } from "react";
+import { app } from "firebaseApp";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Router from "components/Router";
+import Loader from "components/Loader";
+
+function App() {
+  const auth = getAuth(app);
+
+  // auth를 체크하기 전에 loader를 띄우기 위한 state
+  const [init, setInit] = useState<boolean>(false);
+
+  // auth의 currentUser가 있으면 true, 없으면 false
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    !!auth?.currentUser
+  );
+
+  console.log(isAuthenticated);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+      setInit(true);
+    });
+  }, [auth]);
+
+  return (
+    <>
+      {init ? <Router isAuthenticated={isAuthenticated} /> : <Loader />}
+    </>
+  );
+}
+
+export default App;
+```
+

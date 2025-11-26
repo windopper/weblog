@@ -1,0 +1,202 @@
+---
+title: "Segment Tree Beats"
+description: ""
+tags: ["Algorithm","Segment Tree"]
+date: "2023-04-28"
+thumbnail: ""
+---
+
+# 세그비츠 개요
+
+> 1 L R X: 모든 L ≤ i ≤ R에 대해 A_i = min(A_i, X)를 적용
+2 L R: max(A_L, A_L+1, …, A_R-1 + A_R)를 출력
+3 L R: A_L + A_L+1 + … + A_R-1 + A_R를 출력
+
+상단과 같은 쿼리를 효율적으로 수행하기 위한 세그먼트 트리 테크닉에 대한 것입니다.
+
+세그비츠는 해당 문제를 O((N+Q)logN) 만에 해결합니다.
+
+# 업데이트 함수 
+
+기존 레이지 세그의 업데이트 함수는 다음과 같습니다.
+
+```c++
+void update(int s, int e, int i, int l, int r, int v) {
+	propagate(s, e, i);
+	if(s > r || e < l) return;
+	if(s >= l && e <= r) {
+		lazyUpdate(v);
+		propagate(s, e, i);
+		return;
+	}
+	int m = (s+e)/2;
+	update(s, m, i*2, l, r, v);
+	update(m+1, e, l*2+1, l, r, v);
+	tree[i] = f(tree[i*2], tree[i*2+1]);
+}
+```
+
+
+여기서 `return` 을 해주는 부분과 `lazyUpdate` 를 해주는 분기문을 보면 다음과 같습니다.
+
+
+해당 분기문이 의미하는 경우를 살펴봤습니다. 이것을 통해 얻은 통찰을 토대로 `A_i = min(A_i, X)` 를 적용하는 쿼리를 작성해보겠습니다.
+
+
+현재 정점을 루트로 하는 서브트리에서 가장 큰 값을 `mx[i]` 라고 하고 두번째로 가장 큰 값을 `mx2[i]` 라고 하겠습니다.
+
+만약 `mx[i] <= v` 인 경우 `v` 와 `min` 연산을 해도 바뀌는게 없으므로 갱신되지 않는 분기문에 포함합니다.
+
+만약 `mx2[i] < v < mx[i]` 일 경우 현재 노드를 루트로 하는 서브 트리의 모든 `mx[?]` 값이 `v`로 갱신 될 것입니다. 따라서 해당 조건문을 갱신되는 분기문에 포함합니다.
+
+
+해당 조건문을 적용한 구현은 다음과 같습니다.
+
+```c++
+void update(int s, int e, int i, int l, int r, int v) {
+	propagate(s, e, i);
+	if(s > r || e < l || tree[i].mx <= v) return;
+	if(s >= l && e <= r && tree[i].mx2 < v) {
+		lazyUpdate(v);
+		propagate(s, e, i);
+		return;
+	}
+	int m = (s+e)/2;
+	update(s, m, i*2, l, r, v);
+	update(m+1, e, l*2+1, l, r, v);
+	tree[i] = f(tree[i*2], tree[i*2+1]);
+}
+```
+
+# queryMax 함수
+
+구간의 최댓값을 구하는 방법은 단순히 `mx[i]` 을 반환하여 쉽게 구할 수 있습니다.
+
+```c++
+long long queryMax(int s, int e, int i, int l, int r) {
+	propagate(s, e, i);
+	if(s > r || e < l) return 0;
+	if(s >= l && e <= r) return tree[i].mx;
+	int m = (s+e)/2;
+	return max(queryMax(s, m, i*2, l, r), queryMax(m+1, e, i*2+1, l, r));
+}
+```
+
+
+# querySum 함수
+
+구간의 합을 구하는 방법은 `mx, mx2` 외에도 `mxCnt, sum` 이라는 정보를 추가로 저장해야 합니다.
+
+`mxCnt` : 노드의 구간에 있는 최댓값의 개수
+
+`sum` : 노드의 구간의 합
+
+`update` 함수에서 해당 노드가 갱신이 필요할 때 (즉, `mx2 < v < mx` 일 때) `mx` 를 `v` 로 바꾸기 떄문에, `sum` 값은 `(mx - x) * mxcnt` 만큼 감소합니다.
+
+```c++
+.
+.
+if(s >= l && e <= r && tree[i].mx2 < v) {
+	tree[i].sum -= (tree[i].mx - v) * tree[i].mxcnt;
+	tree[i].mx = v;
+	propagate(s, e, i);
+	return;
+}
+.
+.
+```
+
+
+이제 `querySum` 함수를 구현할 수 있습니다.
+
+```c++
+long long querySum(int s, int e, int i, int l, int r) {
+	propagate(s, e, i);
+	if(s > r || e < l) return 0;
+	if(s >= l && e <= r) return tree[i].sum;
+	int m = (s+e)/2;
+	return querySum(s, m, i*2, l, r) + querySum(m+1, e, i*2, l, r);
+}
+```
+
+# Propagate 함수
+
+부모의 `mx`가 자식의 `mx`보다 작은 경우에 갱신합니다.
+
+```c++
+void propagate(s, e, i) {
+	if(s == e) return;
+	for(auto next : {node*2, node*2+1}) {
+		if(tree[i].mx < tree[next].mx) {
+			tree[next].sum = (tree[next].mx - tree[i].mx) * tree[next].mxcnt;
+			tree[next].mx = tree[i].mx;
+		}
+	}
+}
+```
+
+
+# 트리 노드 합치기
+
+`update` 함수 하단에 `tree[i] = f(tree[i*2], tree[i*2+1])` 코드가 있는데 이는 트리의 노드를 합쳐주는 함수 입니다.
+
+트리의 노드를 합칠 때 `mx` 값이 같은 경우와 다른 경우 두 케이스로 나눌 수 있습니다.
+
+왼쪽 노드를 `l` , 오른쪽 노드를 `r` 이라고 정의하겠습니다.
+
+  <details>
+  <summary>`mx` 값이 같을 경우</summary>
+
+  <details>
+  <summary>`mx2` 값이 같을 경우</summary>
+
+  </details>
+
+
+```c++
+Node f(Node l, Node r) {
+	if(l.mx == r.mx) return {l.mx, max(l.mx2, r.mx2), l.mxcnt + r.mxcnt, l.sum + r.sum};
+	if(l.mx > r.mx) swap(l, r);
+	return {r.mx, max(l.mx, r.mx2), r.mxcnt, l.sum + r.sum};
+}
+```
+
+
+# 세그트리 초기화
+
+```c++
+Node init(int s, int e, int i) {
+	if(s == e) tree[i] = {arr[s], -1, 1, arr[s]};
+	int m = (s+e)/2;
+	return tree[i] = f(tree[i*2], tree[i*2+1]);
+}
+```
+
+
+# 다른 유형은?
+
+## Min Update Query
+
+
+## Divide Query
+
+
+## Historical Information
+
+# 예제
+
+[https://www.acmicpc.net/problem/17474](https://www.acmicpc.net/problem/17474)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+상단에서 제시했던 예시가 그대로 나와있는 문제입니다.
+
+# References
+
+[https://justicehui.github.io/hard-algorithm/2019/10/10/segment-tree-beats/](https://justicehui.github.io/hard-algorithm/2019/10/10/segment-tree-beats/)
+
+[https://gina65.tistory.com/33](https://gina65.tistory.com/33)
+

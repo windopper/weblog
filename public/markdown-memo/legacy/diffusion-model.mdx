@@ -1,0 +1,42 @@
+---
+title: "Diffusion Model"
+description: ""
+tags: ["Generative Model","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/5664060f-3c0c-4fe1-89f9-1ba3c1380606.png"
+---
+
+![](/markdown-memo/legacy/images/5664060f-3c0c-4fe1-89f9-1ba3c1380606.png)
+
+*DDPM 논문으로부터 발췌* *(*[*https://arxiv.org/abs/2006.11239*](https://arxiv.org/abs/2006.11239)*).*
+
+
+디퓨전 모델은 특정 분야에서 유명한 생성모델인 GAN의 성능을 뛰어넘었다고 평가되어 주목을 받은 모델입니다.
+
+해당 모델은 최종 결과물을 랜덤 노이즈 상태로 시작하여 스텝을 지날 때마다 최종 이미지가 도출될 때까지 노이즈를 정제하여 만들어 냅니다.
+
+매 스텝마다 훈련된 모델은 완전한 노이즈 상태에서 최종 출력 이미지(즉, 완전히 노이즈가 없는)로 갈 수 있는 경로를 예상하여 값을 조정합니다.
+
+
+디퓨전 모델을 훈련하는 것은 다른 유형의 생성 모델(ex: GAN)에 비하여 비교적 간단합니다.
+
+1. 훈련 데이터를 로드합니다
+1. 노이즈를 입력 데이터에 매번 다른 값으로 더합니다. 우리는 해당 모델에서 모델이 굉장히 noisy한 이미지를 예측한 출력 이미지가 원래 이미지와 똑같도록 만들어야 한다는 사실을 기억해야 합니다.
+1. 노이즈가 추가된 입력 데이터를 모델에 집어넣습니다.
+1. 모델이 입력 데이터에 대해 얼마나 노이즈를 잘 제거하는지 평가합니다
+1. 평가를 통해 획득한 정보를 모델 가중치 업데이트에 사용합니다
+
+훈련된 모델을 통하여 새로운 이미지를 생성하기 위해서는 완전한 랜덤 노이즈를 모델에 집어넣은 후, 예측 값을 토대로 조금씩 업데이트 시킵니다.
+
+
+<!-- Unknown block type: child_page -->
+
+
+# References
+
+[https://github.com/huggingface/diffusion-models-class/tree/main/unit1](https://github.com/huggingface/diffusion-models-class/tree/main/unit1)
+
+<!-- Unknown block type: child_page -->
+
+<!-- Unknown block type: child_page -->
+

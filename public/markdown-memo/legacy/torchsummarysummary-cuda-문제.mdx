@@ -1,0 +1,78 @@
+---
+title: "torchsummary.summary() cuda 문제"
+description: ""
+tags: ["Pytorch"]
+date: "2023-01-20"
+thumbnail: ""
+---
+
+
+간단한 UNet을 구성하여 torchsummary 모듈로 구조를 확인하기 위하여 summary() 메서드를 사용하던 중 발생하였다.
+
+```python
+net = BasicUNet()
+
+import torchsummary
+torchsummary.summary(net, input_size=(1, 28, 28), batch_size=8)
+
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+<ipython-input-43-d388c8ff234b> in <module>
+      1 import torchsummary
+----> 2 torchsummary.summary(net, input_size=(1, 28, 28), batch_size=8)
+
+5 frames
+/usr/local/lib/python3.8/dist-packages/torch/nn/modules/conv.py in _conv_forward(self, input, weight, bias)
+    457                             weight, bias, self.stride,
+    458                             _pair(0), self.dilation, self.groups)
+--> 459         return F.conv2d(input, weight, bias, self.stride,
+    460                         self.padding, self.dilation, self.groups)
+    461 
+
+RuntimeError: Input type (torch.cuda.FloatTensor) and weight type (torch.FloatTensor) should be the same
+```
+
+
+해당 오류는 모델이나 데이터들을 모두 gpu에 혹은 cpu에 올리지 않고 학습을 진행했을 때 발생하는 것으로 알고 있었지만 torchsummary 모듈의 summary() 메서드에도 해당 오류가 뜨는 것은 처음보았다.
+
+
+알고보니 summary() 메서드에는 device를 설정하는 매개변수가 있었다. default 값이 ‘cuda’로 되어있어 cpu에 있는 신경망 인스턴스를 찾지 못한 것이었다.
+
+
+이렇게 고쳐주면 이상없이 잘 출력된다.
+
+```python
+torchsummary.summary(net, input_size=(1, 28, 28), batch_size=8, device='cpu')
+
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1            [8, 32, 28, 28]             832
+              SiLU-2            [8, 32, 28, 28]               0
+         MaxPool2d-3            [8, 32, 14, 14]               0
+            Conv2d-4            [8, 64, 14, 14]          51,264
+              SiLU-5            [8, 64, 14, 14]               0
+         MaxPool2d-6              [8, 64, 7, 7]               0
+            Conv2d-7              [8, 64, 7, 7]         102,464
+              SiLU-8              [8, 64, 7, 7]               0
+            Conv2d-9              [8, 64, 7, 7]         102,464
+             SiLU-10              [8, 64, 7, 7]               0
+         Upsample-11            [8, 64, 14, 14]               0
+           Conv2d-12            [8, 32, 14, 14]          51,232
+             SiLU-13            [8, 32, 14, 14]               0
+         Upsample-14            [8, 32, 28, 28]               0
+           Conv2d-15             [8, 1, 28, 28]             801
+             SiLU-16             [8, 1, 28, 28]               0
+================================================================
+Total params: 309,057
+Trainable params: 309,057
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.02
+Forward/backward pass size (MB): 9.09
+Params size (MB): 1.18
+Estimated Total Size (MB): 10.29
+----------------------------------------------------------------
+```
+
+

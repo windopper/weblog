@@ -1,0 +1,58 @@
+---
+title: "SPFA (Shortest Path Faster Algorithm)"
+description: ""
+tags: ["Algorithm","Graph"]
+date: "2023-04-15"
+thumbnail: ""
+---
+
+# 개요
+
+벨만-포드 알고리즘의 성능을 향상시킨 알고리즘으로 매 반복마다 모든 간선을 확인하는 것인 아닌 갱신된 정점에 대해서만 업데이트를 진행한다.
+
+시간 복잡도는 **O(V+E) **로 동작한다.
+
+# 코드 
+
+```c++
+#include <bits/stdc++.h>
+
+using namespace std;
+const int MAXN = 100000;
+vector<vector<pair<int, int>>> adj;
+int N;
+const int INF = 987654321;
+int spfa(int start) {
+    vector<int> dist(MAXN, INF);
+    vector<int> cycle(MAXN, 0);
+    vector<bool> inQ(MAXN, false);
+    queue<int> q;
+    q.push(start);
+    inQ[start] = true;
+    dist[start] = 0;
+
+    while(!q.empty()) {
+        int cur = q.front();
+        q.pop();
+        inQ[cur] = false;
+        for(pair<int, int> p : adj[cur]) {
+            int next = p.first;
+            int cost = p.second;
+            int alt = cost + dist[cur];
+            if(dist[next] > alt) {
+                dist[next] = alt;
+                if(!inQ[next]) {
+                    cycle[next]++;
+                    if(cycle[next] >= N) {
+                        return -1; // find cycle
+                    }
+                    q.push(next);
+                    inQ[next] = true;
+                }
+            }
+        }
+    }
+}
+```
+
+

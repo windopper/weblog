@@ -1,0 +1,439 @@
+---
+title: "영화 리뷰 분류: 이진 분류 문제"
+description: ""
+tags: ["Tensorflow","Tutorial","ML"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/77bd42ea-2b9b-4bd6-8c36-1517ce24381c.png"
+---
+
+
+케라스의 imdb 데이터셋을 활용한 이진 분류 문제를 풀어보자.
+
+```python
+from tensorflow.keras.datasets import imdb
+
+(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
+```
+
+```python
+len(train_data) # 25000
+train_data.shape # (25000, )
+max([max(sequence) for sequence in train_data]) # 9999
+min([len(sequence) for sequence in train_data]) # 11
+```
+
+
+케라스의 imdb 데이터 셋 같은 경우 단어 시퀀스가 인코딩되어 있으므로 사람이 읽을 수 있도록 디코딩을 해줘야 한다.
+
+```python
+word_index = imdb.get_word_index()
+reverse_word_index = dict([(value, key) for (key, value) in word_index.items()])
+decoded_review = " ".join(
+	[reverse_word_index.get(i-3, "?") for i in train_data[0]]
+)
+"""
+0, 1, 2 는 각각 '패딩', '문서시작', '사전에 없음' 을 위해 예약되어 있는 인덱스이므로
+인덱스에서 3을 뺀다.
+
+decoded_review ->
+? this film was just brilliant casting location scenery story direction everyone's really suited the part they played and you could just imagine being there robert ? is an amazing actor and now the same being director ? father came from the same scottish island as myself so i loved the fact there was a real connection with this film the witty remarks throughout the film were great it was just brilliant so much that i bought the film as soon as it was released for ? and would recommend it to everyone to watch and the fly fishing was amazing really cried at the end it was so sad and you know what they say if you cry at a film it must have been good and this definitely was also ? to the two little boy's that played the ? of norman and paul they were just brilliant children are often left out of the ? list i think because the stars that play them all grown up are such a big profile for the whole film but these children are amazing and should be praised for what they have done don't you thi
+"""
+```
+
+
+# 멀티 핫 인코딩
+
+```python
+import numpy as np
+def vectorize_sequences(sequences, dimension = 10000):
+	results = np.zeros((len(sequences), dimension))
+	# 크기가 (25000, 10000)이고 모든 원소가 0인 행렬을 만든다.
+	for i, sequence in enumerate(sequences):
+		# i는 문장 위치
+		for j in sequence:
+			# j는 인코딩 된 단어
+			results[i, j] = 1
+
+	return results
+
+x_train = vectorize_sequences(train_data)
+x_test = vectorize_sequences(test_data)
+y_train = np.asarray(train_labels).astype('float32') # 넘파이 객체로 바꾸기
+y_test = np.asarray(test_labels).astype('float32')
+
+"""
+x_train[0]
+array([0., 1., 1., ..., 0., 0., 0.])
+
+x_train.shape
+(25000, 10000)
+
+"""
+```
+
+
+# 모델 정의하기
+
+```python
+from tensorflow import keras
+from tensorflow.keras import layers
+
+model = keras.Sequential([
+	layers.Dense(16, activation='relu'), # (25000, 16)
+	layers.Dense(16, activation='relu'), # (16, 16)
+	layers.Dense(1, activation='sigmoid') # (16, 1)
+])
+
+model.compile(
+	optimizer='rmsprop',
+	loss='binary_crossentropy', 
+	metrics=['accuracy']
+)
+
+```
+
+
+model.summary() 함수를 통하여 모델의 구조를 알 수 있다.
+
+그러나 현재에는 입력 크기를 설정하지 않았으므로 model.summary() 메서드를 사용하면 해당 오류가 뜬다.
+
+```python
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-26-5f15418b3570> in <module>
+----> 1 model.summary()
+
+/usr/local/lib/python3.8/dist-packages/keras/engine/training.py in summary(self, line_length, positions, print_fn, expand_nested, show_trainable)
+   2867     """
+   2868     if not self.built:
+-> 2869       raise ValueError(
+   2870           'This model has not yet been built. '
+   2871           'Build the model first by calling `build()` or by calling '
+
+ValueError: This model has not yet been built. Build the model first by calling `build()` or by calling the model on a batch of data.
+```
+
+
+따라서 model.build(input_shape=(None, 10000)) 을 통하여 크기를 설정해 줘야 한다.
+
+```python
+model.build(input_shape=(None, 10000))
+model.summary()
+
+
+
+Model: "sequential_2"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_6 (Dense)             (None, 16)                160016    
+                                                                 
+ dense_7 (Dense)             (None, 16)                272       
+                                                                 
+ dense_8 (Dense)             (None, 1)                 17        
+                                                                 
+=================================================================
+Total params: 160,305
+Trainable params: 160,305
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+
+# 모델 검증
+
+딥러닝 모델은 반드시 훈련 데이터에서 검증해서는 안된다. 
+
+훈련 데이터을 활용하여 학습하고 검증할 시 모델이 훈련데이터에 대해 과대적합되는 현상이 일어날 수 있다.
+
+따라서 데이터를 훈련 데이터와 검증 데이터로 나누어 모델을 학습시킬 때는 훈련 데이터만을 이용하여 학습하는 것이 관행이다.
+
+
+검증 세트를 준비해보자.
+
+```python
+x_val = x_train[:10000]
+partial_x_train = x_train[10000:]
+y_val = y_train[:10000]
+partial_y_train = y_train[10000:]
+```
+
+
+사이킷런을 활용하여 같은 작업을 더 쉽게 할 수 있다.
+
+```python
+from sklearn.model_selection import train_test_split
+partial_x_train, x_val,
+ partial_y_train, y_val = train_test_split(x_train, y_train, test_size=0.4)
+```
+
+
+# 모델 학습시키기
+
+```python
+history = model.fit(partial_x_train,
+										partial_y_train,
+										epochs=20,
+										batch_size=512,
+										validation_data=(x_val, y_val))
+
+
+Epoch 1/20
+30/30 [==============================] - 3s 52ms/step - loss: 0.5090 - accuracy: 0.7921 - val_loss: 0.4099 - val_accuracy: 0.8461
+Epoch 2/20
+30/30 [==============================] - 1s 38ms/step - loss: 0.3050 - accuracy: 0.9049 - val_loss: 0.3237 - val_accuracy: 0.8729
+Epoch 3/20
+30/30 [==============================] - 1s 37ms/step - loss: 0.2263 - accuracy: 0.9292 - val_loss: 0.2942 - val_accuracy: 0.8829
+.
+.
+.
+.
+Epoch 20/20
+30/30 [==============================] - 1s 37ms/step - loss: 0.0055 - accuracy: 0.9989 - val_loss: 0.7048 - val_accuracy: 0.8683
+```
+
+
+에포크는 20, 배치 사이즈는 512로 설정하여 모델을 훈련시켰다.
+
+
+# 모델 훈련과 검증 손실 및 정확도 시각화하기
+
+
+model.fit() 메서드를 통해 획득한 history 객체는 학습이 진행되며 각 에포크마다 얻어진 loss 및 accuracy를 보유하고 있다.
+
+
+우리는 해당 값들을 시각화하여 해당 모델이 과대적합 또는 값을 잘 예측하는 지 판단할 수 있다.
+
+```python
+history.history.keys()
+
+dict_keys(['loss', 'accuracy', 'val_loss', 'val_accuracy'])
+```
+
+
+```python
+import matplotlib.pyplot as plt
+
+history_dict = history.history
+loss_values = history_dict['loss']
+val_loss_values = history_dict['val_loss']
+epochs = range(1, len(loss_values) + 1)
+plt.plot(epochs, loss_values, "bo", label='Training Loss')
+plt.plot(epochs, val_loss_values, "r-", label='Validation Loss')
+plt.title('Training And Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/77bd42ea-2b9b-4bd6-8c36-1517ce24381c.png)
+
+
+```python
+acc = history_dict['accuracy']
+val_acc = history_dict['val_accuracy']
+epochs = range(1, len(acc) + 1)
+plt.plot(epochs, acc, 'bo', label='Training Accuracy')
+plt.plot(epochs, val_acc, 'r-', label='Validation Accuracy')
+plt.legend()
+plt.xlabel('Training Accuracy')
+plt.ylabel('Validation Accuracy')
+plt.title('Training And Validation Accuracy')
+plt.show()
+```
+
+![](/markdown-memo/legacy/images/e0a54db6-e7ed-463c-ab7b-f115765abb85.png)
+
+
+그래프에서 볼 수 있듯이 훈련 데이터들을 사용하였을때는 잘 작동하던 모델이 검증 데이터들을 이용하여 모델을 평가하였을 떄 4~5 에포크 즈음에서 정확도는 감소하고 loss 값은 상승하는 것을 볼 수 있다.
+
+이는 훈련 데이터에서 잘 작동하는 모델이 처음보는 데이터에서 잘 동작하지 않았다는 뜻이다.
+
+정확한 용어로 이는 **“과대적합” **이라고 하며 모델이 훈련 데이터에서 과도하게 최적화되어 훈련 세트 이외의 데이터에는 일반화되지 못한다는 것이다.
+
+
+과대적합을 완화할 수 있는 여러가지 기술이 있지만 그래프 상으로 4 에포크가 최적의 훈련 상태라고 판단되므로 모델을 다시 4 에포크 까지만 학습시켜 보도록 하겠다.
+
+
+```python
+model = keras.Sequential([
+	layers.Dense(16, activation='relu'),
+	layers.Dense(16, activation='relu'),
+	layers.Dense(1, activation='sigmoid')
+])
+
+model.compile(
+	optimizer='rmsprop',
+	loss='binary_crossentropy',
+	metrics=['accuracy']
+)
+
+model.fit(x_train, y_train, epochs=4, batch_size=512)
+results = model.evaluate(x_test, y_test)
+
+Epoch 1/4
+49/49 [==============================] - 2s 28ms/step - loss: 0.4471 - accuracy: 0.8142
+Epoch 2/4
+49/49 [==============================] - 1s 28ms/step - loss: 0.2585 - accuracy: 0.9094
+Epoch 3/4
+49/49 [==============================] - 1s 28ms/step - loss: 0.1995 - accuracy: 0.9292
+Epoch 4/4
+49/49 [==============================] - 1s 27ms/step - loss: 0.1643 - accuracy: 0.9416
+
+782/782 [==============================] - 2s 3ms/step - loss: 0.3005 - accuracy: 0.8832
+```
+
+```python
+results
+
+[0.30052462220191956, 0.8831599950790405]
+```
+
+
+테스트 데이터에 대한 모델의 정확도가 88%가 나왔다.
+
+
+# 더 나아가기
+
+## Dense층을 1층 혹은 3층으로 바꿔보자
+
+1층일때
+
+```python
+.
+.
+.
+model = keras.Sequential([
+    layers.Dense(16, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+.
+.
+Epoch 1/4
+49/49 [==============================] - 3s 38ms/step - loss: 0.4411 - accuracy: 0.8294
+Epoch 2/4
+49/49 [==============================] - 1s 29ms/step - loss: 0.2684 - accuracy: 0.9097
+Epoch 3/4
+49/49 [==============================] - 1s 29ms/step - loss: 0.2152 - accuracy: 0.9246
+Epoch 4/4
+49/49 [==============================] - 1s 28ms/step - loss: 0.1830 - accuracy: 0.9381
+
+782/782 [==============================] - 2s 3ms/step - loss: 0.2882 - accuracy: 0.8844
+```
+
+
+3층일때
+
+```python
+.
+.
+.
+model = keras.Sequential([
+    layers.Dense(16, activation='relu'),
+    layers.Dense(16, activation='relu'),
+    layers.Dense(16, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+.
+.
+.
+Epoch 1/4
+49/49 [==============================] - 2s 29ms/step - loss: 0.5157 - accuracy: 0.7861
+Epoch 2/4
+49/49 [==============================] - 1s 29ms/step - loss: 0.2882 - accuracy: 0.9053
+Epoch 3/4
+49/49 [==============================] - 1s 29ms/step - loss: 0.2098 - accuracy: 0.9277
+Epoch 4/4
+49/49 [==============================] - 1s 28ms/step - loss: 0.1726 - accuracy: 0.9390
+
+782/782 [==============================] - 2s 3ms/step - loss: 0.3125 - accuracy: 0.8794
+```
+
+
+## 층의 유닛을 32 혹은 64로 바꿔보자
+
+유닛이 32라면?
+
+```python
+.
+.
+model = keras.Sequential([
+    layers.Dense(32, activation='relu'),
+    layers.Dense(32, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+.
+.
+
+Epoch 1/4
+49/49 [==============================] - 3s 38ms/step - loss: 0.4251 - accuracy: 0.8232
+Epoch 2/4
+49/49 [==============================] - 2s 36ms/step - loss: 0.2449 - accuracy: 0.9087
+Epoch 3/4
+49/49 [==============================] - 2s 35ms/step - loss: 0.1866 - accuracy: 0.9319
+Epoch 4/4
+49/49 [==============================] - 2s 36ms/step - loss: 0.1570 - accuracy: 0.9430
+782/782 [==============================] - 2s 3ms/step - loss: 0.3203 - accuracy: 0.8766
+```
+
+
+유닛이 64라면?
+
+```python
+.
+.
+model = keras.Sequential([
+    layers.Dense(64, activation='relu'),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+.
+.
+
+Epoch 1/4
+49/49 [==============================] - 3s 53ms/step - loss: 0.4240 - accuracy: 0.8090
+Epoch 2/4
+49/49 [==============================] - 2s 51ms/step - loss: 0.2374 - accuracy: 0.9083
+Epoch 3/4
+49/49 [==============================] - 3s 54ms/step - loss: 0.1839 - accuracy: 0.9304
+Epoch 4/4
+49/49 [==============================] - 3s 52ms/step - loss: 0.1464 - accuracy: 0.9458
+782/782 [==============================] - 3s 4ms/step - loss: 0.3208 - accuracy: 0.8773
+```
+
+
+## 손실 함수를 binary_crossentropy 대신에 mse를 사용해보자
+
+```python
+.
+.
+model.compile(
+    optimizer='rmsprop',
+    loss='mse',
+    metrics=['accuracy']
+)
+.
+.
+
+Epoch 1/4
+49/49 [==============================] - 4s 59ms/step - loss: 0.1389 - accuracy: 0.8178
+Epoch 2/4
+49/49 [==============================] - 3s 56ms/step - loss: 0.0722 - accuracy: 0.9113
+Epoch 3/4
+49/49 [==============================] - 2s 35ms/step - loss: 0.0548 - accuracy: 0.9340
+Epoch 4/4
+49/49 [==============================] - 2s 35ms/step - loss: 0.0456 - accuracy: 0.9437
+782/782 [==============================] - 3s 3ms/step - loss: 0.0887 - accuracy: 0.8805
+```
+
+
+
+# 매듭짓기
+
+- 자연어처리같은 경우 원본데이터를 신경망으로 학습시키기 위해서는 **꽤 많은 전처리**가 필요하다.
+- 클래스가 2개인 이진 분류의 경우 하나의 유닛과 sigmoid 활성화 함수를 가진 Dense 층으로 끝나야 한다. 해당 모델의 출력은 확률을 나타내는 0과 1사이의 값이다.
+- 이진 분류 문제에서 스칼라 시그모이드 출력에 대해 사용할 손실 함수는 binary_crossentropy 손실 함수이다.
+- rmsprop 옵티마이저는 문제에 상관없이 준수한 성능을 뽑아낸다.
+- 훈련 데이터에 대해 성능이 향상됨에 따라 **신경망은 과대적합**하기 시작하고, 검증 데이터 같이 이전에 본적 없는 데이터에 대해서는 결과가 점점 나빠지기 시작한다. 항상 훈련 데이터 **이외의 데이터에서의 성능을 모니터링** 해야 한다.
+

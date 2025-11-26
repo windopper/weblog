@@ -1,0 +1,295 @@
+---
+title: "Generative Agent: Interactive Simulacra of Human Behavior"
+description: ""
+tags: ["AI","Paper Review"]
+date: "2023-06-30"
+thumbnail: "/markdown-memo/legacy/images/c33234bc-ad84-4c94-b704-46a110c27204.png"
+---
+
+<!-- Table of Contents -->
+
+
+해당 논문에서 생성 에이전트를 만들기 위해서 사용했던 방법에 대해 요약하고자 정리한 글이다.
+
+
+![](/markdown-memo/legacy/images/c33234bc-ad84-4c94-b704-46a110c27204.png)
+
+# Memory and Retrival
+
+언어 모델의 한계점인 **제한된 컨텍스트 길이**때문에 에이전트가 가진 모든 경험을 바탕으로 다음 행동을 추론하는 것은 현재의 기술로 불가능하다.
+
+따라서 에이전트의 경험을 요약하는 등의 방법을 사용하여 **에이전트의 경험의 질은 유지하고 크기를 줄이고자 하는 방법**등을 사용한다.
+
+또한 에이전트의 경험을 기록하는 방법에 대해서 해당 논문에서는 다음과 같이 접근했다.
+
+> 에이전트의 경험에 대한 종합적인 기록을 메모리 스트림이라고 정의하였다.
+
+메모리 스트림은 메모리 객체의 목록으로 구성되며, 각 객체는 **자연어로 된 설명**, **생성 시각**과 **가장 최근 접근 시각**이 포함되어 있다.
+
+메모리 스트림의 가장 기본적인 요소는 **관찰**. 관찰은 에이전트가 직접 인식하는 사건.
+예시로 에이전트 **자신이 수행한 행동**이나 **다른 에이전트 **또는 **비 에이전트 객체가 수행하는 행동**을 인식하는 것이 있다.
+
+논문의 아키텍쳐는 에이전트의 현재 상황으로 입력으로 사용하고, 메모리 스트림의 부분 집합을 언어 모델에 전달하는 검색기능을 구현하였다.
+
+해당 검색 기능은 다음과 같이 접근했다.
+
+> **Recency**
+최근성은 **최근에 접근한 메모리 객체에 더 높은 점수를 부여한다.** 논문에서는 시간에 따른 지수적 감쇠 인자를 *0.99*로 설정하였다.
+
+> I**mportance
+**중요성은 일상적인 기억과 핵심 기억을 구별하여 에이전트가 중요하다고 생각하는 메모리 객체에 더 높은 점수를 부여하였다. 이를 구현하기 위해 언어 모델에게 정수 점수를 직접 출력하도록 요청하도록 하였다.
+전체 프롬프트는 다음과 같다:
+
+```plain text
+On the scale of 1 to 10, where 1 is purely mundane
+(e.g., brushing teeth, making bed) and 10 is
+extremely poignant (e.g., a break up, college
+acceptance), rate the likely poignancy of the
+following piece of memory.
+Memory: buying groceries at The Willows Market
+and Pharmacy
+Rating: <fill in>
+```
+
+> **Relevance
+**관련성은 현재 상황과 관련된 메모리 객체에 높은 점수를 부여한다. 관련성에 대해서는 **쿼리**에 달려있으므로 **쿼리에 대한 임베딩 벡터와 각 메모리의 임베딩 벡터에 대한 코사인 유사도**를 활용하여 관련성을 계산한다.
+
+최종 점수를 계산하기 위해서 모든 점수를 최소-최대 스케일링을 이용하여 정규화하였다.
+
+그런 다음, 세 요소에 가중치를 곱하여 모든 메모리를 점수화 하였다.
+
+논문에서는 모든 $\alpha$에 대해 1로 설정하였다.
+
+$$
+score=\alpha_{recency}\cdot{recency}+\alpha_{importance}\cdot{importance}+\alpha_{relevance}\cdot{relevance}
+$$
+
+**해당 계산을 통해 얻은 점수를 토대로 언어 모델의 컨텍스트 윈도우에 맞는 상위 순위의 메모리가 프롬프트에 포함된다.**
+
+# Reflection
+
+**관찰** 메모리 만을 갖춘 생성 에이전트는 정보를 일반화하거나 추론하는데 어려움을 겪는다.
+
+논문에서는 독자에게 *Reflection*이 필요한 이유를 해당 시나리오를 바탕으로 이해를 돕는다:
+
+> 사용자가 클라우스 뮐러에게 다음과 같은 질문을 하는 시나리오입니다.
+
+”만약 당신이 알고 있는 사람들 중 한 시간을 보낼 한 명의 사람을 선택해야 한다면, 누구를 선택하겠습니까?”
+
+관찰 메모리에만 접근할 수 있는 에이전트는 클라우스와 가장 빈번한 상호 작용이 있는 사람을 단순히 선택합니다. 이는 대학 기숙사 이웃인 볼프강입니다.
+그러나 볼프강과 클라우스는 지나다니는 동안에만 서로를 볼 뿐이고 깊은 상호 작용이 없습니다.
+보다 바람직한 응답은 클라우스가 연구 프로젝트에 몇 시간을 보내는 메모리에서 일반화하여 클라우스가 연구에 열정적이라는 **상위 수준의 성찰을 생성**하고, 마찬가지로 마리아가 자신의 연구에 노력을 기울이는 것을 **인식하여 공통의 관심사를 공유한다는 성찰**을 가능하게 하는 것입니다.
+
+
+---
+
+
+논문에서는 ***Reflection(성찰)***이라고 부르는 두 번째 유형의 메모리를 도입하였다. 성찰은 에이전트가 생성하는 상위 수준의 보다 추상적인 생각이다.
+
+“메모리” 이기 때문에 위에서 언급했던 “관찰”이 발생할 때 함께 포함되어 계산된다.
+
+성찰은 주기적으로 생성되며, 논문 구현에서는 에이전트가 인식한 최신 이벤트의 중요도 점수 합계가 **특정 임계값을 초과**할 때 성찰을 생성한다.
+
+구현에서는 실제로, 에이전트가 하루에 대략 두 번 또는 세 번 정도 성찰한 것이 확인되었다.
+
+
+성찰의 첫 번째 단계는 에이전트가 최근 경험을 바탕으로 할 수 있는 질문을 식별함으로써 무엇을 성찰할지 결정하는 것이다.
+
+논문에서는 에이전트의 메모리 스트림에서 가장 최근의 100개 기록을 사용하여 대용량 언어 모델을 쿼리하고 언어 모델에 
+
+**“위의 정보만을 바탕으로, 문장에 나타난 주제에 대해 답할 수 있는 가장 높은 수준의 질문 3가지는 무엇입니까?”**
+
+**“Given only the information above, what are 3 most salient high-level questions we can answer about the subjects in the statements?”** 라고 요청한다.
+
+이를 통해 생성된 질문을 쿼리로 사용하여 각 질문에 대한 관련 메모리(다른 성찰 포함)를 수집한다.
+
+그런 후, 언어 모델을 이용하여 통찰에 대해 추출한 후 이에 대한 증거로 사용된 특정 기록을 인용하도록 요청한다.
+
+```plain text
+Statements about Klaus Mueller
+1. Klaus Mueller is writing a research paper
+2. Klaus Mueller enjoys reading a book
+on gentrification
+3. Klaus Mueller is conversing with Ayesha Khan
+about exercising [...]
+What 5 high-level insights can you infer from
+the above statements? (example format: insight
+(because of 1, 5, 3))
+```
+
+
+*Reflecting(반영)*은 에이전트가 관찰뿐 만 아니라 다른 반영에 대해서도 명시적으로 반영하게 한다.
+
+# Planning and Reacting
+
+거대 언어 모델(LLM)은 주어진 정보에 대한 반응으로 그럴듯한 행동을 생성할 수 있지만, 에이전트는 일련의 행동이 일관되고 믿을 수 있도록 **더 긴 시간 동안 계획**해야 한다.
+
+클라우스의 배경을 프롬프트로 사용하여 시간을 설명하고 주어진 순간에 어떤 행동을 취해야 하는지 물으면, 클라우스는 오후 12시에 점심을 먹고 다시 오후 12시 30분과 오후 1시에 두 번 점심을 먹는다.
+
+**이는 순간의 신뢰성을 최적화하면 시간이 지남에 따른 신뢰성이 희생된다는 것을 보여준다.**
+
+이 문제를 극복하기 위해서는 *Planning(계획)*이 필수적이다.
+
+아래에 설명된 방식을 사용하면 클라우스의 오후 계획은 다음과 같이 변한다.
+
+> 오후 12시에 호브스 카페에서 독서하며 점심을 먹음.
+오후 1시에 학교 도서관에서 연구 논문을 작성함.
+오후 3시에 공원에서 산책을 취함.
+…
+
+
+---
+
+
+계획은 에이전트에 대한 **미래의 일련의 행동을 설명**하며 시간이 지남에 따라 **에이전트의 행동을 일관되게 유지**하는 데 도움이 된다.
+
+계획에는 위치, 시작 시간, 지속 시간이 포함된다.
+
+> 예시:
+for 180 minutes from 9am, February 12th, 2023, at Oak Hill College Dorm: Klaus Mueller’s room: desk, read and take notes for research paper.
+
+계획은 반영과 마찬가지로 **메모리 스트림에 저장**되며 **검색 과정에 포함**된다.
+
+이를 통해 에이전트는 행동을 결정할 때 관찰, 반영, 계획을 모두 고려할 수 있다. 또한 필요한 경우 계획을 변경할 수도 있다.
+
+
+에이전트의 구체적인 계획을 생성하기 위해서 **탑-다운 구조를 사용하여 재귀적으로 자세한 내용을 생성**한다.
+
+첫 번째 단계는 에이전트의 요약 설명(ex: 이름, 특성, 최근 경험 요약)과 이전 날의 요약을 사용하여 하루 일정을 개략적으로 설계한다.
+
+전체 예시 프롬프트는 다음과 같으며, 언어 모델이 작업을 마무리 할 수 있도록 하단이 비워져 있다:
+
+```plain text
+Name: Eddy Lin (age: 19)
+Innate traits: friendly, outgoing, hospitable
+Eddy Lin is a student at Oak Hill College studying
+music theory and composition.
+He loves to explore different musical styles and is always looking
+for ways to expand his knowledge. 
+Eddy Lin is working on a composition project for his college class. 
+He is also taking classes to learn more about music theory. 
+Eddy Lin is excited about the new composition he is working on but he wants to dedicate more
+hours in the day to work on it in the coming days
+On Tuesday February 12, Eddy 
+1) woke up and completed the morning routine at 7:00 am, 
+[. . . ]
+6) got ready to sleep around 10 pm.
+Today is Wednesday February 13. Here is Eddy’s
+plan today in broad strokes: 1)
+```
+
+
+에이전트의 하루 계획을 대략적으로 나누면 다음과 같다:
+
+```plain text
+1. 오전 8시에 일어나 아침 루틴을 완료한다.
+2. 오전 10시에 시작하는 Oak Hill College에서 수업을 듣는다.
+
+…
+
+1. 오후 1시부터 오후 5시까지 새로운 음악 작품 작업을 한다.
+2. 오후 5시 30분에 저녁을 먹는다
+3. 학교 과제를 완료하고 밤 11시까지 잠자리에 든다.
+```
+
+
+에이전트는 이 계획을 메모리 스트림에 저장한 후, **재귀적으로 분해하여 보다 세밀한 작업을 생성**한다.
+
+먼저 시간 단위의 작업 덩어리로 분해한다.
+
+그런 다음 이를 다시 5-15분 단위의 덩어리로 재귀적으로 분해한다.
+
+해당 과정은 원하는 세부 정도에 맞게 조정할 수 있다.
+
+# Reacting and Updating Plans
+
+생성적 에이전트들은 각 타임스텝마다 주변 세계를 인식하며, 그 결과들이 메모리 스트림에 저장된다.
+
+논문에서는 언어 모델에 이러한 관찰 결과를 제시하여 에이전트가 기존 계획을 계속할지 또는 반응할지 결정하도록 한다.
+
+아래 프롬프트에서 [Agent’s Summary Description]은 에이전트의 전체 목표와 성격에 대한 동적으로 생성된 문단 길이를 가진 요약을 대신한다.
+
+해당 내용은 [**부록A**](/aae114a7faae4b288af110bf13734675#5e1d005d975d428b81c170c14d99158a)에 설명되어 있다.
+
+```plain text
+[Agent’s Summary Description]
+It is February 13, 2023, 4:56 pm.
+John Lin’s status: John is back home early from
+work.
+Observation: John saw Eddy taking a short walk
+around his workplace.
+Summary of relevant context from John’s memory:
+Eddy Lin is John’s Lin’s son. Eddy Lin has been
+working on a music composition for his class. Eddy
+Lin likes to walk around the garden when he is
+thinking about or listening to music.
+Should John react to the observation, and if so,
+what would be an appropriate reaction?
+```
+
+해당 맥락 요약은 **“What is [observer]’s relationship with the [observed entity]?” and “[Observed entity] is [action status of the observed entity]”** 라는 두 프롬프트를 이용하여 메모리를 검색하여 얻어진 답변을 요약함으로써 얻을 수 있다.
+
+그런 후, 반응이 일어난 시점부터 에이전트의 기존 계획을 재생성한다.
+
+마지막으로, **행동이 에이전트 간 상호작용**을 나타낸다면, 대화를 생성한다.
+
+# Dialogue
+
+에이전트들은 서로에 대한 기억에 따라 대화를 생성한다.
+
+해당 프롬프트는 John의 첫 번째 발언을 Eddy에 대한 요약된 기억과 음악 작곡 프로젝트에 대해 물어볼 때의 예정된 반응을 사용하여 생성하는 것이다.
+
+```plain text
+[Agent’s Summary Description]
+It is February 13, 2023, 4:56 pm.
+John Lin’s status: John is back home early from
+work.
+Observation: John saw Eddy taking a short walk
+around his workplace.
+Summary of relevant context from John’s memory:
+Eddy Lin is John’s Lin’s son. Eddy Lin has been
+working on a music composition for his class. Eddy
+Lin likes to walk around the garden when he is
+thinking about or listening to music.
+John is asking Eddy about his music composition
+project. What would he say to Eddy?
+```
+
+결과는 다음과 같다:
+
+Eddy의 관점에서, John이 대화를 시작하는 것은 그가 반응하고 싶을 수 있는 사건으로 여겨진다.
+
+따라서 John이 했던 것처럼, Eddy는 John과의 관계에 대한 **기억을 검색하고 요약**하며, 대화에서 존의 마지막 발언과 관련이 있을 수 있는 기억을 찾는다.
+
+만약 응답하기로 결정한다면, 우리는 Eddy의 발언을 그의 요약된 기억과 현재 대화 내용을 사용하여 생성한다.
+
+```plain text
+[Agent’s Summary Description]
+It is February 13, 2023, 4:56 pm.
+Eddy Lin’s status: Eddy is taking a short walk
+around his workplace.
+Observation: John is initiating a conversation
+with Eddy.
+Summary of relevant context from Eddy’s memory:
+Jonn Lin is Eddy Lin’s father. John Lin is caring
+and is interested to learn more about Eddy Lin’s
+school work. John Lin knows that Eddy Lin is
+working on a music composition.
+Here is the dialogue history:
+John: Hey Eddy, how’s the music composition project
+for your class coming along?
+How would Eddy respond to John?
+```
+
+결과는 다음과 같다:
+
+이 대화는 연속해서 같은 메커니즘을 사용하며, 두 에이전트 중 하나가 대화를 종료하기로 결정할 때까지 생성된다.
+
+# Appendix A.
+
+# References
+
+[https://arxiv.org/pdf/2304.03442.pdf](https://arxiv.org/pdf/2304.03442.pdf)
+
+
+

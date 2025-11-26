@@ -1,0 +1,110 @@
+---
+title: "In-Context Learning"
+description: ""
+tags: ["Paper Review","Knowledge","AI"]
+date: "2023-07-06"
+thumbnail: "/markdown-memo/legacy/images/e4e2168a-0299-4606-ae2a-a59c6ce46410.png"
+---
+
+<!-- Table of Contents -->
+
+# 개요
+
+In-Context Learning(이하 ICL)은 프롬프트를 통해 몇 가지 예제를 입력시키고 요구사항을 던져주면 모델이 마치 **파인 튜닝**을 한 것처럼 원하는 답변을 정확히 출력하는 현상을 말하는 것이다.
+
+ICL은 다른 말로 Zero-Shot Learning 혹은 Few-Shot Learning 이라고도 부르는데 이는 프롬프트를 통하여 오직 요구사항 만을(제로샷) 혹은 몇 가지 예제를 포함하여(퓨샷) 모델의 입력을 넣었을 때 좋은 성능을 보이는 기법을 의미한다.
+
+
+ICL이 주목을 받는 이유는 다음과 같다:
+
+- FT는 모델 훈련을 하기 위해 일정 전문 지식이 필요함
+- ICL은 그에 비해 오직 자연어만 필요함.
+- ICL은 사전 훈련된 모델을 조작할 필요가 없어서 재사용 가능함
+- 반면, FT는 parameter-efficient 방법을 사용한 모델을 제외하고 재사용 불가능함.
+
+이 글에서는 ICL과 관련된 논문과 이를 통해 얻을 수 있는 아이디어와 인사이트를 정리해보도록 하겠다.
+
+# A Survey on In-context Learning
+
+[https://arxiv.org/pdf/2301.00234.pdf](https://arxiv.org/pdf/2301.00234.pdf)
+
+
+# Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?
+
+우리가 ICL을 할 때 사용한 입력 예제들이 정답이 아니어도 모델의 추론 능력에 거의 영향을 주지 않는다는 것을 보여준 논문.
+
+[https://arxiv.org/pdf/2202.12837.pdf](https://arxiv.org/pdf/2202.12837.pdf)
+
+Few-Shot Learning을 할 때 주어지는 예제들에 대한 정답 여부가 모델의 추론 능력에 거의 영향을 주지 않음.
+
+모델의 추론 능력에 영향을 주는 것은 입력 텍스트의 임베딩 상의 위치, 라벨의 공간 그리고 프롬프트의 구조임. 
+
+즉, 몇 가지 예제를 줄 때 사실이 아닌 틀린 문장을 써도 모델이 답을 내는데 영향을 별로 주지 않는 다는 것.
+
+
+# **Why Can GPT Learn In-Context? Language Models Secretly Perform Gradient Descent as Meta-Optimizers**
+
+ICL과 모델을 미세 조정하는 과정이 수학적으로 닮은 꼴임을 보여주는 놀라운 인사이트를 보여주는 논문.
+
+[https://arxiv.org/pdf/2212.10559.pdf](https://arxiv.org/pdf/2212.10559.pdf)
+
+![](/markdown-memo/legacy/images/e4e2168a-0299-4606-ae2a-a59c6ce46410.png)
+
+트랜스포머의 어텐션 매커니즘에서 발생하는 ICL이 경사하강법과 수학적으로 닮은 꼴임.
+
+저자는 ICL과 Fine-Tuning(이하 FT)의 비교를 위하여 FT의 세팅을 ICL에 맞도록 제한하였음.
+
+이를 통하여 알아낸 ICL과 FT 특징을 나열하면 다음과 같음:
+
+- ICL은 메타-그레디언트를 순전파 과정에서 획득하지만 FT는 역전파를 통하여 그레디언트를 획득함.
+- ICL의 메타-그레디언트는 demonstration examples (입력 예제) 에서 발생하였고, FT의 그레디언트 또한 같은 examples에서 발생함. 이것은 ICL과 FT이 훈련 과정에서 얻는 정보의 원천을 공유한다는 것을 알려줌.
+- ICL은 현재 토큰이 이전의 값에 영향을 주지 않았고, FT도 훈련시에 causal 하게 학습하므로 현재 토큰이 이전의 값에 영향을 주지 않음. 저자는 FT시에 epoch를 1로 설정하여 현재 토큰에 대해 미래의 토큰의 영향을 일체 받지 않도록 하였음.
+- ICL은 모델이 고정된 상태에서 입력 정보를 K, V로 인코딩하여 어텐션을 바꿈. FT는 훈련 데이터가 어텐션 K, V에 사영되어 유도됨. 이는 ICL과 FT가 어텐션에 의존한다는 것을 보여줌.
+ICL의 프롬프트와 똑같이 구성하여 만든 데이터셋을 이용하여 FT한 결과는 다음과 같음.
+
+- ICL은 FT를 통하여 얻은 모델이 올바르게 예측 한 값을 대부분 맞춤.
+- ICL은 FT를 통하여 어텐션 출력을 바꾸는 것과 같은 방향으로 바꿈.
+- ICL은 FT과 비슷하게 어텐션 가중치를 만들어냄.
+- ICL은 FT가 토큰 트레이닝에 비슷한 어텐션을 하는 경향이 있음.
+**따라서, ICL은 수학적으로나 경험적으로나 많은 면에서 FT와 비슷하게 작동함.**
+
+번외로, 경사하강법에 모멘텀을 적용하였듯이 수학적으로 닮은 꼴인 어텐션 메커니즘에도 적용할 수 있지 않을까라는 아이디어에서 착안하여 모멘텀 기반의 어텐션을 만들어서 실험.
+
+6가지 데이터셋에서 이전의 바닐라 트랜스포머보다 평균 2.8%의 정확도가 향상됨.
+
+
+# Few-shot Fine-tuning vs. In-context Learning: A Fair Comparison and Evaluation
+
+[https://arxiv.org/pdf/2305.16938.pdf](https://arxiv.org/pdf/2305.16938.pdf)
+
+125M부터 30B크기까지의 모델에서 ICL과 FT에 대한 비교와 평가를 한 논문.
+
+FT 언어 모델이 ICL보다 OOD(Out-Of-Domain)에서 더 잘 일반화를 함을 보임.
+
+![FT와 ICL을 비교한 표.](/markdown-memo/legacy/images/b8e628a4-89ee-4bae-baac-8b21b2337a49.png)
+
+
+# An Explanation of In-Context Learning as Implicit Bayesian Inference
+
+언어 모델이 프롬프트의 예제 사이의 공유되어 있는 개념을 참조할 때 ICL이 발생함. 사전 학습 분포가 히든 마르코프 체인이 혼합된 환경에서 프롬프트와 사전 학습 데이터 간의 분포 불일치에도 불구하고 ICL이 발생하는 경우를 증명하였음.
+
+ICL이 발생하는 원리를 베이지안 추론에 기반하여 설명한 논문.
+
+[https://arxiv.org/pdf/2111.02080.pdf](https://arxiv.org/pdf/2111.02080.pdf)
+
+# Dissecting Recall of Factual Associations in Auto-Regressive Language Models
+
+주제와 관련된 쿼리가 주어졌을 때, 모델이 올바른 값을 예측하기 위해서 핵심과 단어간의 관계에 대한 정보를 어떻게 가져오는지 원리를 설명한 논문.
+
+논문에서는 정보를 출력 값으로 전파하는 과정에서 관계 위치에서 가져오는 것과 객체 위치에서 가져오는 두 가지 핵심을 발견함.
+
+가져온 정보를 분석함으로써, 핵심 속성을 추출하는 내부 작용을 3단계에 걸쳐 설명함.
+
+1. 마지막 객체 위치에 대한 표현은 초기 MLP 서브레이어에 의해 구동되는 강화 프로세스들을 걸쳐 객체와 관련된 많은 속성들을 인코딩함.
+1. “관계”와 관련된 정보를 예측에 전파.
+1. 예측 표현이 강화된 객체에 “쿼리” 하여 속성을 추출함.
+[https://arxiv.org/pdf/2304.14767.pdf](https://arxiv.org/pdf/2304.14767.pdf)
+
+![](/markdown-memo/legacy/images/1e017c2d-8e6e-4d4e-94e2-97df2f57dea3.png)
+
+

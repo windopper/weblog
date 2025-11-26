@@ -1,0 +1,161 @@
+---
+title: "Parameter Vector Transfer"
+description: ""
+tags: ["AI"]
+date: "2024-04-29"
+thumbnail: ""
+---
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Load Models
+informative_model_name = "gradientai/Llama-3-8B-Instruct-262k" 
+base_model_name = "kuotient/Meta-Llama-3-8B-Instruct"
+target_model_name = "beomi/Llama-3-Open-Ko-8B-Instruct-preview"  # target model.
+
+informative_model = AutoModelForCausalLM.from_pretrained(informative_model_name)
+base_model = AutoModelForCausalLM.from_pretrained(base_model_name)
+target_model = AutoModelForCausalLM.from_pretrained(target_model_name)
+
+def calculate_weight_diff(a, b):
+    return a - b
+
+def calculate_model_diffs(model_a, model_b):
+    model_a_dict = model_a.state_dict()
+    model_b_dict = model_b.state_dict()
+    model_diffs = {}
+    for key in model_a_dict.keys():
+        if key in model_b_dict:
+            model_diffs[key] = calculate_weight_diff(model_a_dict[key], model_b_dict[key])
+            print(f"Diff calculated for {key}")
+    return model_diffs
+
+def calculate_sigmoid_ratios(base_model, target_model, epsilon=1e-6):
+    sigmoid_ratios = {}
+    target_diff = calculate_model_diffs(target_model, base_model) # Order doesn't matter #
+    for key in target_diff.keys():
+        diff_tensor = abs(target_diff[key]) # abs
+        diff_min = diff_tensor.min().item()
+        diff_max = diff_tensor.max().item()
+        print(f"Key: {key}")
+        print(f"  Diff Min: {diff_min}")
+        print(f"  Diff Max: {diff_max}")
+
+        # # Displaying histogram for the tensor distribution
+        # plt.hist(diff_tensor.cpu().numpy().flatten(), bins=50)
+        # plt.title(f"Histogram of differences for {key}")
+        # plt.xlabel("Difference")
+        # plt.ylabel("Frequency")
+        # plt.show()
+        
+        if abs(diff_max - diff_min) < epsilon:
+            print(f"  All values are the same. Setting sigmoid_diff to 0.")
+            sigmoid_diff = torch.zeros_like(diff_tensor)
+        else:
+            normalized_diff = (diff_tensor - diff_min) / (diff_max - diff_min)
+            sigmoid_diff = torch.sigmoid(normalized_diff * 12 - 6)
+        sigmoid_ratios[key] = sigmoid_diff
+        print(f"  Sigmoid Diff Min: {sigmoid_diff.min().item()}")
+        print(f"  Sigmoid Diff Max: {sigmoid_diff.max().item()}")
+    return sigmoid_ratios
+
+def apply_model_diffs(target_model, model_diffs, sigmoid_ratios):
+    target_state_dict = target_model.state_dict()
+    for key in model_diffs.keys():
+        print(key)
+        print(model_diffs[key])
+        ratio = sigmoid_ratios[key]
+        print(ratio)
+        scaled_diff = model_diffs[key] * (1 - ratio)
+        target_state_dict[key] += scaled_diff
+        print(f"Diff applied for {key}")
+    target_model.load_state_dict(target_state_dict)
+
+print("Calculating model diffs...")
+model_diffs = calculate_model_diffs(informative_model, base_model) # informative - base
+print("Model diffs calculated.")
+
+print("Calculating sigmoid ratios...")
+sigmoid_ratios = calculate_sigmoid_ratios(base_model, target_model) # Order doesn't matter since we're gonna do abs
+print("Sigmoid ratios calculated.")
+
+print("Applying model diffs...")
+apply_model_diffs(target_model, model_diffs, sigmoid_ratios)
+print("Model diffs applied.")
+
+print("Saving target model...")
+target_model.save_pretrained('./done')
+print("Target model saved.")
+     
+```
+
+
+# Abstract
+
+Long Context Model에서 Base Model 파라미터를 빼서 벡터를 구함 ( 여기서 구한 벡터는 긴 컨텍스트를 지원하는 정보를 내포한 피쳐가 됨 )
+
+Chat Instruct Model에서 Base Model 파라미터를 차이를 계산하여 정규화 후 시그모이드 함수를 통해 얼마나 변했는지 ratio를 계산함.
+
+Chat Instruct Model에 `diff * (1 - ratio)` 만큼 계산한 결과를 더해서 새로운 파라미터로 저장.
+
+`diff` 가 크다는 것은 파라미터에 정보 (컨텍스트 확장)를 입힐 수 있지만 타겟 모델의 원래 정보 (Instruct 기능)을 잊을 가능성이 있음.
+
+`ratio` 를 계산하여 Base Model에서 Chat Instruct Model로 파라미터가 얼마나 변했는지 (Instruct 정보)를 계산하여 후에 타겟 모델에 `diff`를 계산할 때 타겟 모델의 정보를 최대한 보존하고자 `ratio`가 높은 값은 `diff`를 작게 조정하여 적용.
+
+이를 통해 Long Context Model과 Instruct Model 둘의 기능을 모두 적용 가능.
+
+
+# Methology
+
+$I$= Informative model parameters
+
+$B$= Base model parameters
+
+$T$= target model parameters
+
+
+$diff_{IB}=I-B$
+
+$diff_{TB}=abs(T-B)$
+
+$ratio = sigmoid(normalize(diff_{TB}))$
+
+$T=T+diff_{IB}\times(1-ratio)$
+
+# Pros
+
+Fine-tuning이 전혀 필요 없음.
+
+Ram만을 사용.
+
+
+# Evaluation
+
+<!-- Unknown block type: table -->
+
+
+# Application
+
+  <details>
+  <summary>RolePlay 모델 전이</summary>
+
+</details>
+
+# Future work
+
+다양한 activation function을 사용하여 성능 비교
+
+N개 모델에 대해서 vector transfer가 가능한지 테스트
+
+
+
+# Ref.
+
+[https://arca.live/b/alpaca/104827551?p=1](https://arca.live/b/alpaca/104827551?p=1)
+
+

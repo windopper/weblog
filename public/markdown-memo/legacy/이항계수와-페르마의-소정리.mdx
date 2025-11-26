@@ -1,0 +1,51 @@
+---
+title: "이항계수와 페르마의 소정리"
+description: ""
+tags: ["Algorithm"]
+date: "2023-04-11"
+thumbnail: "/markdown-memo/legacy/images/6e46f648-1d67-481b-870e-e3df68e6bdf5.png"
+---
+
+# 개요
+
+$$
+\binom{n}{k}=nCk=\frac{n!}{(n-k)!k!}( 단, 0\le k \le n)
+$$
+
+$$
+(\frac{n!}{k!(n-k)!})\% P \ne \frac{n!\% P}{k!(n-k)!\%P}
+$$
+
+## 페르마의 소정리
+
+> *p*가 소수이고 a가 p의 배수가 아니면, $a^{p-1}\equiv{1(mod\ p)}$이다.
+즉, $a^{p-1}$를 p로 나눈 나머지는 1이다.
+
+
+![](/markdown-memo/legacy/images/6e46f648-1d67-481b-870e-e3df68e6bdf5.png)
+
+
+![](/markdown-memo/legacy/images/c69fec28-0f41-40d9-89bc-92d50e213b06.png)
+
+
+# 예제
+
+[https://www.acmicpc.net/problem/11401](https://www.acmicpc.net/problem/11401)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+기본적인 이항 계수 최적화 문제. 상단에 제시한 페르마의 소정리와 분할 정복을 이용한 거듭제곱을 사용하면 해결 할 수 있다.
+
+[https://www.acmicpc.net/problem/13977](https://www.acmicpc.net/problem/13977)
+
+  <details>
+  <summary>코드</summary>
+
+</details>
+
+이항계수3 문제에서 식을 페르마의 소정리를 이용하여 약간 더 변형한 후, 팩토리얼 메모이제이션만 해주면 풀린다.
+
+

@@ -1,0 +1,251 @@
+---
+title: "React로 전역 변수 관리하는 간단한 예제"
+description: ""
+tags: ["React","Redux"]
+date: "2024-02-02"
+thumbnail: ""
+---
+
+<!-- Table of Contents -->
+
+# Context API
+
+```typescript
+import { Dispatch, ReactNode, createContext, useReducer } from "react";
+
+// 액션 타입 선언
+type CountState = number;
+
+type CountAction =
+  | { type: "increment" }
+  | { type: "decrement" }
+  | { type: "modifiedBy"; payload: number };
+
+type CountContextType = {
+  state: CountState;
+  dispatch: Dispatch<CountAction>;
+};
+
+// 초기 값
+const initialState: number = 0;
+
+// 컨텍스트 선언
+export const CountContext = createContext<CountContextType>({
+  state: initialState,
+  dispatch: () => {},
+});
+
+// 리듀서 선언
+function reducer(state: CountState, action: CountAction): CountState {
+  switch (action.type) {
+    case "increment": {
+      return state + 1;
+    }
+    case "decrement": {
+      return state - 1;
+    }
+    case "modifiedBy": {
+      return state + action.payload;
+    }
+    default: {
+      throw new Error();
+    }
+  }
+}
+
+// 컨텍스트 프로바이더 선언
+export function CountContextProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <CountContext.Provider value={{ state, dispatch }}>
+      {children}
+    </CountContext.Provider>
+  );
+}
+```
+
+컨텍스트 내부의 `state`는 `useContext`를 통해 접근할 수 있다.
+
+```typescript
+export default function App() {
+	return (
+		<CountContextProvider>
+			<Component />
+		</CountContextProvider>
+	)
+}
+```
+
+```typescript
+export default function Component() {
+  const { state, dispatch } = useContext(CountContext);
+
+  return (
+    <CountComponent
+      count={state}
+      decrement={() => dispatch({ type: "decrement" })}
+      increment={() => dispatch({ type: "increment" })}
+      modifiedBy={(value: number) => dispatch({ type: "modifiedBy", payload: value})}
+    />
+  );
+}
+```
+
+
+# Redux
+
+```typescript
+// countReducer.ts
+const INCREASE = 'INCREASE' as const;
+const DECREASE = 'DECREASE' as const;
+const MODIFIEDBY = 'MODIFIEDBY' as const;
+
+// 액션 선언
+export const increase = () => ({
+    type: INCREASE
+})
+
+export const decrease = () => ({
+    type: DECREASE
+})
+
+export const modifiedBy = (diff: number) => ({
+    type: MODIFIEDBY,
+    payload: diff,
+})
+
+// 액션 타입 선언
+type CountAction = 
+    | ReturnType<typeof increase>
+    | ReturnType<typeof decrease>
+    | ReturnType<typeof modifiedBy>
+
+// 초기 값 선언
+const initialState: number = 0;
+
+// 리듀서 선언
+function reducer(
+    state: number = initialState,
+    action: CountAction
+): number {
+    switch(action.type) {
+        case INCREASE:
+            return state + 1;
+        case DECREASE:
+            return state - 1;
+        case MODIFIEDBY:
+            return state + action.payload;
+        default:
+            return state;
+    }
+}
+
+export default reducer;
+```
+
+```typescript
+const rootReducer = combineReducers({ // 여러 리듀서들 합치기
+  countReducer,
+});
+
+export default rootReducer;
+
+export type RootState = ReturnType<typeof rootReducer>;
+```
+
+```typescript
+const store = createStore(rootReducer);
+
+function App() {
+  return (
+    <>
+      <Provider store={store}>
+        <Component />
+      </Provider>
+    </>
+  );
+}
+```
+
+# Redux-Toolkit
+
+```typescript
+import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = 0;
+
+export const counterSlice = createSlice({
+    name: 'counter',
+    initialState,
+    reducers: {
+        increase: state => state + 1,
+        decrease: state => state - 1,
+        modifiedBy: (state, action) => state + action.payload
+    }
+})
+
+export const { decrease, increase, modifiedBy } = counterSlice.actions;
+
+export default counterSlice.reducer;
+```
+
+```typescript
+const rootReducer = combineReducers({
+  counterSlice,
+});
+
+export default rootReducer;
+
+export type RootState = ReturnType<typeof rootReducer>;
+```
+
+```typescript
+const store = configureStore({
+  reducer: rootReducer
+});
+
+function App() {
+  return (
+    <>
+      <Provider store={store}>
+        <Component />
+      </Provider>
+    </>
+  );
+}
+
+export default App;
+```
+
+# Recoil
+
+```typescript
+import { atom, selector } from "recoil";
+
+export const CountState = atom({
+    key: 'countState',
+    default: 0,
+})
+```
+
+```typescript
+import React from 'react';
+import logo from './logo.svg';
+import { RecoilRoot } from 'recoil';
+import RecoilApi from './component/RecoilApi';
+
+function App() {
+  return (
+    <>
+      <RecoilRoot>
+        <RecoilApi />
+      </RecoilRoot>
+    </>
+  );
+}
+
+export default App;
+```
+
+

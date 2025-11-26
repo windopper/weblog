@@ -1,0 +1,287 @@
+---
+title: "Synchronize & Deadlock"
+description: ""
+tags: ["CS"]
+date: "2023-12-07"
+thumbnail: "/markdown-memo/legacy/images/5f11bf1a-ea2d-4925-b967-dc8ed6d7f6c3.png"
+---
+
+<!-- Unknown block type: link_to_page -->
+
+
+<!-- Table of Contents -->
+
+# 간단한 예제
+
+멀티 스레드 환경에서 스레드는 프로세스의 데이터, 힙 영역을 공유하게 된다.
+
+여기서 다음 코드와 같은 문제가 발생할 수 있다.
+
+```java
+public class ReproduceRaceCondition {
+    public static void main(String[] args) {
+        Number number = new Number();
+
+        Thread thread1 = new Thread() {
+            public void run() {
+                for (int i = 0; i < 1000000; i++) {
+                    number.inc();
+                }
+            };
+        };
+
+        Thread thread2 = new Thread() {
+            public void run() {
+                for (int i = 0; i < 1000000; i++) {
+                    number.dec();
+                }
+            };
+        };
+
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+        }
+
+        System.out.println(number.getNum());
+    }
+
+    static class Number {
+        private int num = 0;
+
+        public void inc() {
+            num++;
+        }
+
+        public void dec() {
+            num--;
+        }
+
+        public int getNum() {
+            return num;
+        }
+    }
+}
+```
+
+프로그램의 출력 값이 `0` 이라고 생각할 수 있겠지만 출력 값은 `685499` 이 나오게 된다. *( 실행 마다 다름 )*
+
+이렇게 둘 이상의 스레드가 공유 변수에 접근해 발생할 수 있는 문제를 **경쟁 상태 (race condition)** 이라고 한다.
+
+1. `thread1` 에서 `num++`를 진행하고 결과를 메인 메모리에 반영하기 전에 `thread2`로 컨텍스트 스위칭이 일어나 `num--`의 결과를 저장.
+1. 다시 `thread1`로 컨텍스트 스위칭이 되어 이전에 마저 못한 작업을 메인 메모리에 이어서 반영.
+**따라서 제대로 연산이 되지 않는다**
+
+# 임계영역 동기화하기
+
+임계영역은 공유 자원(여기서는 `num` )이 참조 가능한 코드 영역을 말한다. 임계영역을 동기화하면 `thread1` 이 임계영역에 진입하는 순간 다른 스레드에서 임계영역 내의 코드를 실행하지 못하게 할 수 있다. 즉, **상호 배제(Mutual Exclusion) **가 필요하다.
+
+자바에서는 synchronized 키워드를 통해 스레드 동기화를 할 수 있다. 
+
+# Synchronized 키워드
+
+synchronized 키워드는 두 가지 방법을 사용할 수 있다.
+
+1. 메서드 전체를 임계 영역으로 설정
+1. 특정 영역을 임계 영역으로 설정
+## 메서드 전체를 임계 영역으로 설정
+
+예제의 `Number` 클래스의 메서드를 임계 영역으로 사용하면 다음과 같다.
+
+```java
+public static class Number {
+	private int num = 0;
+	
+	public synchronized void inc() {
+		num++;
+	}
+
+	public synchronized void dcc() {
+		num--;
+	}
+
+	public int getNum() {
+		return num;
+	}
+}
+```
+
+`synchronized` 로 설정한 메서드가 호출되면 이를 실행한 스레드는 **메서드가 포함된 객체의 락(Lock)을 획득**하게 되며, 다시 **락을 반납하기 전까지는 다른 스레드가 메서드를 실행**하지 못한다.
+
+
+## 특정 영역을 임계 영역으로 설정
+
+임계 영역으로 지정할 코드를 `synchronized` 키워드와 중괄호로 감싼 후 락을 획득할 객체의 참조를 입력하면 임계 영역으로 설정된다.
+
+```java
+synchronized (객체의 참조) {
+	...
+}
+```
+
+```java
+public static class Number {
+	private int num = 0;
+	
+	public void inc() {
+		synchronized (this) {
+			num++;
+		}
+	}
+
+	public void dcc() {
+		synchronized (this) {
+			num--;
+		}
+	}
+
+	public int getNum() {
+		return num;
+	}
+}
+```
+
+
+이전 코드를 개선하면 다음과 같다.
+
+```java
+public class MutualExclusion {
+
+    public static void main(String[] args) {
+        Number number = new Number();
+
+        Thread thread1 = new Thread() {
+            public void run() {
+                for (int i = 0; i < 1000000; i++) {
+                    number.inc();
+                }
+            };
+        };
+
+        Thread thread2 = new Thread() {
+            public void run() {
+                for (int i = 0; i < 1000000; i++) {
+                    number.dec();
+                }
+            };
+        };
+
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+        }
+
+        System.out.println(number.getNum());
+    }
+
+    static class Number {
+        private int num = 0;
+
+        public synchronized void inc() {
+            num++;
+        }
+
+        public synchronized void dec() {
+            num--;
+        }
+
+        public int getNum() {
+            return num;
+        }
+    }
+}
+```
+
+`Number` 클래스의 `inc`와 `dec` 메서드에 임계 영역을 만들어서 `num`이 올바르게 계산 될 수 있도록 하였다. 출력 결과는 0이 나온다.
+
+# 교착상태 (Deadlock)
+
+교착 상태란 **둘 이상의 스레드가 서로의 작업이 끝나기만을 기다리며** 작업을 더 이상 진행하지 못하는 상태를 의미한다.
+
+## 조건
+
+교착상태는 다음 4가지 조건을 모두 충족해야 발생한다.
+
+### 상호배제 (Mutual Exclusion)
+
+한 스레드가 접근하는 공유자원은 다른 스레드가 접근하지 못하게 막아야 한다.
+
+### 비선점 (No Preemption)
+
+한 스레드가 사용 중인 자원은 중간에 다른 스레드가 빼앗을 수 없다.
+
+### 점유와 대기 (Hold and Wait)
+
+스레드가 어떤 자원을 할당받은 상태에서 다른 자원을 기다리는 상태여야 한다.
+
+### 환형 대기 (Circular Wait)
+
+점유와 대기를 하는 스레드 간의 관계가 원을 이루어야 한다.
+
+## 교착상태 예제
+
+```java
+public class ReproduceDeadLock {
+    public static Object object1 = new Object();
+    public static Object object2 = new Object();
+
+    public static void main(String[] args) {
+        Thread thread1 = new FirstThread();
+        Thread thread2 = new SecondThread();
+
+        thread1.start();
+        thread2.start();
+    }
+
+    private static class FirstThread extends Thread {
+        @Override
+        public void run() {
+            synchronized (object1) {
+                System.out.println("thread1이 object1의 락을 획득하였습니다");
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("thread1이 object2의 락을 획득하고 싶어서 대기합니다");
+
+                synchronized (object2) {
+                    System.out.println("thread1이 object2의 락 또한 획득합니다");
+                }
+            }
+        }
+    }
+
+    private static class SecondThread extends Thread {
+        @Override
+        public void run() {
+            synchronized (object2) {
+                System.out.println("thread2이 object2의 락을 획득하였습니다");
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("thread2이 object1의 락을 획득하고 싶어서 대기합니다");
+
+                synchronized (object1) {
+                    System.out.println("thread2이 object1의 락 또한 획득합니다");
+                }
+            }
+        }
+    }
+}
+```
+
+![](/markdown-memo/legacy/images/5f11bf1a-ea2d-4925-b967-dc8ed6d7f6c3.png)
+

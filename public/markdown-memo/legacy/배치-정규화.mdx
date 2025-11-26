@@ -1,0 +1,100 @@
+---
+title: "배치 정규화"
+description: ""
+tags: ["ML","Tutorial","Knowledge"]
+date: "2023-01-20"
+thumbnail: "/markdown-memo/legacy/images/063b1ae6-2a4e-4df1-962b-e628a4bc8c05.png"
+---
+
+# 개요
+
+기울기 소실 또는 기울기 폭주 현상을 방지하고 학습과정을 안정화 그리고 속도를 가속 시키도록 하는 방법입니다.
+
+
+# 과정
+
+
+![](/markdown-memo/legacy/images/063b1ae6-2a4e-4df1-962b-e628a4bc8c05.png)
+
+
+$\mu_\mathcal{B}\leftarrow{1\over{m}}\Sigma^m_{i=1}x_i$ 미니 배치의 평균
+
+$x_1, x_2, ... , x_i$의 모든 합을 구한다음 $m$으로 나누어 평균을 구합니다.
+
+
+$\sigma^2_\Beta\leftarrow{1\over{m}}\Sigma^m_{i=1}{(x_i-\mu_\Beta)^2}$
+
+입력값 $x_1, x_2, ... , x_i$에 대하여 평균 값 $\mu_\Beta$로 뺀 후 제곱에 대한 합을 구한다. 이는 미니배치의 분산입니다.
+
+
+$\hat{x_i}\leftarrow{{x_i-\mu_\Beta}\over{\sqrt{\mu^2_\Beta+\epsilon}}}$ 정규화식입니다.
+
+입력 값을 평균으로 뺀 후 분산에 아주 미세한 값인 $\epsilon$을 넣어 나눕니다.
+
+> 💡 $\epsilon$은 아주 작은 숫자로 1e-5의 값을 가집니다.
+
+$\epsilon$ 은 분산이 0이 될 때 정규화된 값이 무한으로 발산하므로 이를 방지하기 위해 추가하였습니다.
+
+
+$y_i\leftarrow\gamma\hat{x_i}+\beta\equiv{BN_{r,\beta}(x_i)}$
+
+$\gamma$와 $\beta$는 학습 가능한 파라미터로 $\gamma$를 통하여 스케일링, $\beta$를 통하여 쉬프트 할 수 있습니다.
+
+
+학습 가능한 파라미터들이 있으므로 역전파를 통하여 $\gamma$값과 $\beta$값을 업데이트 할 수 있습니다.
+
+![감마, 베타에 대한 역전파](/markdown-memo/legacy/images/5e1da967-2279-49dd-a974-46c11b3254e0.png)
+
+# 구현체
+
+배치 정규화는 파이토치, 텐서플로우 그리고 케라스와 같은 유명 라이브러리들에 구현되어있습니다.
+
+**Pytorch : torch.nn.BatchNorm1d, torch.nn.BatchNorm2d, torch.nn.BatchNorm3d**
+
+**Tensorflow / Keras : tf.nn.batch_normalization, tf.keras.layers.BatchNormalization**
+
+
+# 그래서 이게 작동하는가?
+
+![](/markdown-memo/legacy/images/89f4e1e0-e2a3-4cdd-b63c-1e2798283616.png)
+
+배치 정규화가 같은 모델에 영향을 미치는 것을 보여줍니다.
+
+ImageNet의 검증 데이터 셋에서의 정확도를 보여주며 모두 Inception 모델을 사용하였습니다.
+
+BN-X는 배치 정규화 층을 사용한 Inception 모델입니다.
+
+
+기존 Inception 모델이 오랜 시간 학습해야 도달했던 정확도를 배치 정규화 층을 적용한 모델에서는 해당 정확도에 도달하기까지의 시간이 매우 감소한 것을 확인 할 수 있습니다.
+
+
+# 배치 정규화 층의 위치?
+
+경험적으로, 배치 정규화 층은 비선형 함수 이전에 놓는 것이 성능이 좋다고 알려져 왔습니다.
+
+```plain text
+Dense
+	↓
+BatchNormalization
+	↓
+ReLU, ELU, PReLU, RReLU 등등
+```
+
+
+그러나 반례 또한 존재한다.
+
+[https://github.com/ducha-aiki/caffenet-benchmark/blob/master/batchnorm.md#bn----before-or-after-relu](https://github.com/ducha-aiki/caffenet-benchmark/blob/master/batchnorm.md#bn----before-or-after-relu)
+
+
+
+# 정리
+
+- 배치 정규화는 은닉 레이어들의 파라미터들의 값들을 안정화 시켜 모델이 잘 학습되도록 돕습니다.
+- 입력 데이터에 제한이 없기 때문에 어디든 삽입될 수 있습니다.
+- 경험적으로, 활성화 층 이전에 삽입되는 것이 이후에 삽입되는 것보다 좋다고 알려져 있습니다.
+# References
+
+[https://eehoeskrap.tistory.com/430](https://eehoeskrap.tistory.com/430)
+
+[https://towardsdatascience.com/batch-normalization-in-3-levels-of-understanding-14c2da90a338](https://towardsdatascience.com/batch-normalization-in-3-levels-of-understanding-14c2da90a338)
+

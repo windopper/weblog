@@ -1,0 +1,334 @@
+---
+title: "AWS Nodejs 애플리케이션 CI/CD 구축 경험"
+description: ""
+tags: ["aws"]
+date: "2023-12-21"
+thumbnail: "/markdown-memo/legacy/images/f76bb774-54c5-4b9a-9f2d-2c65849bd147.png"
+---
+
+<!-- Table of Contents -->
+
+
+[**디스코드 봇**](https://github.com/windopper/samtaegi)을 amazon ec2에 자동 배포하는 시스템을 만들고 싶어서 구축하게 되었다.
+
+# CI 구축하기
+
+CI 과정은 Github Actions를 통해 진행한다.
+
+## Github 환경변수 등록
+
+github 레포지토리에 .env 파일을 올리지 않기 때문에 사용할 키 값들을 깃허브에 등록해 줘야 한다.
+
+Repository > Settings > Secrets and variables > Actions 의 Repository secrets에 등록할 수 있다.
+
+![](/markdown-memo/legacy/images/f76bb774-54c5-4b9a-9f2d-2c65849bd147.png)
+
+## Github Actions Workflow 생성
+
+프로젝트 루트 경로에 ./.github/workflows/deploy.yml 파일을 생성해 준다.
+
+```yaml
+name: deploy to samtaegi server
+
+on:
+  push:
+    branches: [ "master" ] # master 브랜치에 push 할 때 실행
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest # 사용할 가상 환경의 인스턴스 지정
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: create env file # .env 파일을 만들어서 붙여준다
+      working-directory: ./
+      run: |
+        pwd
+        touch .env
+        echo token=${{ secrets.SAMTAEGI_BOT_TOKEN }} >> .env
+        echo clientId=${{ secrets.SAMTAEGI_CLIENT_ID }} >> .env
+        echo devGuildId=${{ secrets.SAMTAEGI_DEV_GUILD_ID }} >> .env
+        echo openaiApiKey=${{ secrets.SAMTAEGI_OPENAI_API_KEY }} >> .env
+        echo youtubeApiKey=${{ secrets.SAMTAEGI_YOUTUBE_API_KEY }} >> .env
+        cat .env
+
+    - name: build server # 파일을 빌드 후
+      working-directory: ./
+      run: |
+        npm i
+        npm run build
+
+    - name: zip file # 파일을 지정하여 압축해준다
+      run: zip -r samtaegi.zip ./dist ./scripts ./appspec.yml ./.env ./package.json ./ecosystem.config.js
+```
+
+## Github Action 확인
+
+파일 추가 후 push 하면 워크플로우가 실행되는 것을 볼 수 있다.
+
+![](/markdown-memo/legacy/images/89082a2d-f87e-4358-bfe8-aaea2f6af90b.png)
+
+
+# CD 구축하기
+
+CD 과정은 AWS CodeDeploy를 활용한다.
+
+## AWS S3 버킷 생성
+
+Github Action을 통해 빌드한 파일을 AWS에 저장하기 위한 S3 버킷이 필요하다.
+
+![](/markdown-memo/legacy/images/6b1b687a-fa2d-4930-ba10-459d4a9a1317.png)
+
+버킷 이름만 지정한 후 버킷 만들기를 누른다.
+
+## EC2 IAM 설정
+
+EC2가 S3와 CodeDeploy를 이용할 수 있도록 권한 설정을 해줘야 한다.
+
+IAM > 역할에서 역할 생성을 눌러준다.
+
+![](/markdown-memo/legacy/images/0146c116-b1a2-499c-9217-f0dd64ec3bc2.png)
+
+
+사용사례를 EC2로 변경 후 다음.
+
+
+![](/markdown-memo/legacy/images/824a3ee5-e223-4bbb-afcb-7c4a985e0975.png)
+
+
+AWSCodeDeployFullAccess, AmazonS3FullAccess 두 권한을 선택하고 다음을 눌러준다.
+
+
+![](/markdown-memo/legacy/images/8ae7fadb-6b66-4733-b3ee-cf9e51a626bb.png)
+
+
+적절한 역할 이름을 선택 후 역할 생성한다.
+
+
+생성한 IAM을 EC2에 연결해준다.
+
+
+![](/markdown-memo/legacy/images/18fac8db-ed18-4384-95b6-b3455cb1827a.png)
+
+
+EC2 인스턴스 우클릭 > 보안 > IAM 역할 수정
+
+
+![](/markdown-memo/legacy/images/df7670be-465c-4f67-bba9-98b625842959.png)
+
+
+역할 설정 후 업데이트 눌러준다
+
+
+## CodeDeploy IAM 설정
+
+EC2 IAM 설정과 비슷하나 사용 사례를 CodeDeploy로 바꾸면 자동으로 권한이 설정되므로 이름만 적절하게 바꿔준다.
+
+## CodeDeploy  애플리케이션 생성
+
+CodeDeploy > 애플리케이션에서 생성 버튼을 눌러준다.
+
+![](/markdown-memo/legacy/images/1c89011b-5a0d-4197-88dd-4e5e18843111.png)
+
+이름을 적절하게 설정 후 컴퓨틴 플랫폼을 **EC2/온프레미스**로 바꿔준다.
+
+
+생성한 애플리케이션에 들어가면 배포 그룹 생성이 있다.
+
+![](/markdown-memo/legacy/images/fc49be37-2554-4e6a-abb7-69d4edb74b13.png)
+
+
+그룹 이름을 적절하게 입력 후 서비스 역할로 설정한 역할을 지정해 준다.
+
+
+![](/markdown-memo/legacy/images/05a55962-2433-4c23-8e4a-270a5804e3ff.png)
+
+
+환경 구성으로 Amazon EC2 인스턴스를 선택 후 태그 그룹으로 배포할 인스턴스를 지정해준다.
+
+
+![](/markdown-memo/legacy/images/df2defeb-7829-427f-a2fc-cfe1af416f70.png)
+
+
+로드 밸런서 비활성화 후 배포 그룹 생성을 누른다.
+
+
+## AWS IAM 사용자 추가
+
+Github Action에서 S3에 접근하여 파일을 업로드 할 수 있도록 IAM 사용자를 추가해 준다.
+
+![](/markdown-memo/legacy/images/ceac2201-5af2-4ced-8bb0-c3276bfff3e2.png)
+
+
+이름 지정 후 다음을 눌러준다.
+
+
+![](/markdown-memo/legacy/images/50c86e2e-63ef-497c-8b5f-a5c12a17c849.png)
+
+
+권한 정책으로 AmazonS3FullAccess, AWSCodeDeployFullAccess 지정 후 다음을 눌러준다
+
+
+생성한 사용자에 접근 후 **보안 자격 증명** **> 액세스 키 만들기** 를 눌러준다.
+
+![](/markdown-memo/legacy/images/bd43d983-bdd2-4ca4-ba91-9c60743d69b6.png)
+
+
+액세스 키와 비밀 액세스 키를 저장 후 Github Secrets에 기입 해 준다.
+
+![](/markdown-memo/legacy/images/9457ade4-df9c-49cf-a529-d942ba6486eb.png)
+
+
+## EC2 CodeDeploy Agent 설치
+
+**AWS CodeDeploy**를 사용하기 위해서는 **EC2**에 **CodeDeploy Agent**를 설치해야 한다.
+
+[https://docs.aws.amazon.com/ko_kr/codedeploy/latest/userguide/codedeploy-agent-operations-install-ubuntu.html](https://docs.aws.amazon.com/ko_kr/codedeploy/latest/userguide/codedeploy-agent-operations-install-ubuntu.html)
+
+
+또한 인스턴시 부팅 시 codedeploy-agent가 자동으로 재시작되도록 쉘 스크립트를 작성한다.
+
+```plain text
+$ sudo vim /etc/init.d/codedeploy-startup.sh
+
+i로 편집모드 진입 
+
+#!/bin
+sudo service codedeploy-agent restart
+
+esc -> :wq 저장 후 나가기
+```
+
+작성한 스크립트 파일에 실행 권한을 추가한다.
+
+```bash
+$ sudo chmod +x /etc/init.d/codedeploy-startup.sh
+```
+
+
+## appspec.yml 파일 추가
+
+프로젝트의 루트 경로에 appspec.yml 파일을 추가한다.
+
+이 파일은 CodeDeploy가 배포를 관리하는 애플리케이션의 사양 파일이다.
+
+CodeDeploy가 EC2에 파일을 옮기고 나면, EC2에 이루어질 작업을 정의할 수 있다.
+
+```yaml
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/samtaegi # CodeDeploy가 EC2에 배포할 위치
+    overwrite: yes
+file_exists_behavior: OVERWRITE # 파일이 겹칠 때 덮어쓰기
+permissions:
+  - object: /home/ubuntu
+    pattern: '**'
+    owner: ubuntu
+    group: ubuntu
+
+hooks:
+  AfterInstall:
+    - location: scripts/after-deploy.sh # 파일이 옮겨지고 나서 실행할 작업
+      timeout: 300
+      runas: ubuntu
+```
+
+
+## after-deploy.sh 파일 추가
+
+```shell
+#!/bin/bash
+REPOSITORY=/home/ubuntu/samtaegi
+
+cd $REPOSITORY
+
+sudo npm i
+sudo pm2 start ecosystem.config.js
+```
+
+CodeDeploy가 EC2에 파일을 옮기고 난 후 실행되는 명령어 집합이다. 
+
+프로젝트 폴더로 가서 변경된 dependency들을 설치 후 서버를 다시 시작해 주는 역할을 한다.
+
+## deploy.yml 파일 수정
+
+CI 과정을 위해 생성했던 deploy.yml 파일에 프로젝트 파일을 S3로 옮긴 후 CodeDeploy를 작동하는 명령을 정의해 준다.
+
+```yaml
+name: deploy to samtaegi server
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: create env file
+      working-directory: ./
+      run: |
+        pwd
+        touch .env
+        echo token=${{ secrets.SAMTAEGI_BOT_TOKEN }} >> .env
+        echo clientId=${{ secrets.SAMTAEGI_CLIENT_ID }} >> .env
+        echo devGuildId=${{ secrets.SAMTAEGI_DEV_GUILD_ID }} >> .env
+        echo openaiApiKey=${{ secrets.SAMTAEGI_OPENAI_API_KEY }} >> .env
+        echo youtubeApiKey=${{ secrets.SAMTAEGI_YOUTUBE_API_KEY }} >> .env
+        cat .env
+
+    - name: build server
+      working-directory: ./
+      run: |
+        npm i
+        npm run build
+
+    - name: zip file
+      run: zip -r samtaegi.zip ./dist ./scripts ./appspec.yml ./.env ./package.json ./ecosystem.config.js
+
+# 새로 추가된 부분 ###
+
+    - name: configure AWS credentials # aws 권한 인증
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: upload to s3 # S3으로 압축한 파일을 옮긴다
+      run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./samtaegi.zip s3://samtaegi-bucket/deploy/
+
+    - name: deploy with AWS code deploy # codedeploy를 실행한다
+      run: aws deploy create-deployment
+        --application-name samtaegi-code-deploy
+        --deployment-config-name CodeDeployDefault.OneAtATime
+        --deployment-group-name samtaegi-code-deploy
+        --s3-location bucket=samtaegi-bucket,bundleType=zip,key=deploy/samtaegi.zip
+```
+
+
+# 결과
+
+![](/markdown-memo/legacy/images/ff8c02e8-32fd-4cf1-a032-ac228d548206.png)
+
+CI 결과
+
+![](/markdown-memo/legacy/images/22875342-019f-4bf3-81b3-96d9035cb94a.png)
+
+CD 결과
+
+![](/markdown-memo/legacy/images/bbb002f6-0eba-4399-80ac-c244b355e171.png)
+
+EC2 로그에도 잘 떴다.
+
+

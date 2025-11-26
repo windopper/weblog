@@ -1,0 +1,201 @@
+---
+title: "합성곱 신경망"
+description: ""
+tags: ["ML","Tutorial","Knowledge"]
+date: "2023-01-20"
+thumbnail: ""
+---
+
+합성곱 신경망은 이미지 관련 모델에서 엄청난 성능을 보여주면서 딥러닝 초창기에 가장 큰 성과를 낸 사례를 꼽힙니다.
+
+
+본격적으로 들어가기 전, 합성곱 신경망이 왜 엄청난 주목을 받았었는지 간단하게 모델을 구성하여 알아보겠습니다.
+
+
+데이터셋은 MNIST를 사용하였습니다.
+
+
+먼저 Dense 층을 활용하여 모델을 구성해보겠습니다.
+
+```python
+from tensorflow.keras.datasets import mnist
+from tensorflow import keras
+from tensorflow.keras import layers
+
+(train_data, train_targets), _ = mnist.load_data()
+
+dense_train_data = train_data.reshape((60000, 28*28)).astype('float32') / 255
+
+dense_model = keras.Sequential([
+    layers.Dense(512, activation='relu'),
+    layers.Dense(10, activation='softmax')
+])
+
+dense_model.compile(
+    optimizer='rmsprop',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+dense_model.fit(dense_train_data, train_targets, epochs=5, batch_size=64, validation_split=0.2)
+
+Epoch 1/5
+750/750 [==============================] - 3s 3ms/step - loss: 0.2497 - accuracy: 0.9262 - val_loss: 0.1211 - val_accuracy: 0.9646
+Epoch 2/5
+750/750 [==============================] - 3s 3ms/step - loss: 0.1014 - accuracy: 0.9701 - val_loss: 0.0987 - val_accuracy: 0.9703
+Epoch 3/5
+750/750 [==============================] - 2s 3ms/step - loss: 0.0674 - accuracy: 0.9799 - val_loss: 0.0907 - val_accuracy: 0.9721
+Epoch 4/5
+750/750 [==============================] - 3s 3ms/step - loss: 0.0488 - accuracy: 0.9854 - val_loss: 0.0909 - val_accuracy: 0.9757
+Epoch 5/5
+750/750 [==============================] - 2s 3ms/step - loss: 0.0376 - accuracy: 0.9888 - val_loss: 0.0868 - val_accuracy: 0.9752
+```
+
+최대 검증 정확도가 97.5%가 나왔습니다.
+
+
+이번에는 합성곱 신경망을 활용해 보겠습니다.
+
+```python
+conv_train_data = train_data.reshape((60000, 28, 28, 1)).astype('float32') / 255
+
+inputs = keras.Input(shape=(28, 28, 1))
+x = layers.Conv2D(filters=32, kernel_size=3, activation='relu')(inputs)
+x = layers.MaxPooling2D(pool_size=2)(x)
+x = layers.Conv2D(filters=64, kernel_size=3, activation='relu')(x)
+x = layers.MaxPooling2D(pool_size=2)(x)
+x = layers.Conv2D(filters=128, kernel_size=3, activation='relu')(x)
+x = layers.Flatten()(x)
+outputs = layers.Dense(10, activation='softmax')(x)
+conv_model = keras.Model(inputs=inputs, outputs=outputs)
+
+conv_model.summary()
+
+Model: "model_2"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_7 (InputLayer)        [(None, 28, 28, 1)]       0         
+                                                                 
+ conv2d_14 (Conv2D)          (None, 26, 26, 32)        320       
+                                                                 
+ max_pooling2d_10 (MaxPoolin  (None, 13, 13, 32)       0         
+ g2D)                                                            
+                                                                 
+ conv2d_15 (Conv2D)          (None, 11, 11, 64)        18496     
+                                                                 
+ max_pooling2d_11 (MaxPoolin  (None, 5, 5, 64)         0         
+ g2D)                                                            
+                                                                 
+ conv2d_16 (Conv2D)          (None, 3, 3, 128)         73856     
+                                                                 
+ flatten_2 (Flatten)         (None, 1152)              0         
+                                                                 
+ dense_28 (Dense)            (None, 10)                11530     
+                                                                 
+=================================================================
+Total params: 104,202
+Trainable params: 104,202
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+
+```javascript
+conv_model.compile(
+    optimizer='rmsprop',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+conv_model.fit(conv_train_data, train_targets, epochs=5, batch_size=64, validation_split=0.2)
+
+
+Epoch 1/5
+750/750 [==============================] - 9s 5ms/step - loss: 0.1792 - accuracy: 0.9439 - val_loss: 0.0681 - val_accuracy: 0.9798
+Epoch 2/5
+750/750 [==============================] - 3s 4ms/step - loss: 0.0487 - accuracy: 0.9849 - val_loss: 0.0483 - val_accuracy: 0.9856
+Epoch 3/5
+750/750 [==============================] - 3s 4ms/step - loss: 0.0328 - accuracy: 0.9903 - val_loss: 0.0430 - val_accuracy: 0.9871
+Epoch 4/5
+750/750 [==============================] - 3s 4ms/step - loss: 0.0247 - accuracy: 0.9924 - val_loss: 0.0375 - val_accuracy: 0.9912
+Epoch 5/5
+750/750 [==============================] - 3s 4ms/step - loss: 0.0186 - accuracy: 0.9942 - val_loss: 0.0508 - val_accuracy: 0.9871
+```
+
+최대 검증 정확도가 무려 99.1%로 밀집 층보다 1~2% 증가한 정확도를 보여주며 손실 값도 60% 정도 감소했습니다!
+
+
+# 합성곱 연산 파헤쳐보기
+
+완전 연결 층과 합성곱 층의 차이는 다음과 같습니다.
+
+- Dense 층은 입력공간에 있는 전역 패턴을 학습합니다
+- 합성곱 층을 지역 패턴을 학습합니다: 이미지의 경우 2D 윈도우를 슬라이딩하며 입력에서 패턴을 찾습니다.
+
+컨브넷이 지역 패턴을 학습한다는 사실은 두 가지 흥미로운 성질을 제공합니다.
+
+- **학습된 패턴은 평행 이동 불변성(translation invariant)을 가집니다. **컨브넷이 이미지의 오른쪽 아래 모서리에서 어떤 패턴을 학습했다면 다른 곳에서도 이 패턴을 인식 할 수 있습니다. 그러나 완전 연결 신경망은 새로운 위치에 나타난 패턴은 아예 새롭게 학습해야 합니다. 해당 성질은 컨브넷이 이미지를 효율적으로 학습 할 수 있도록 도와줍니다. 또한 이는 **적은 수의 훈련 데이터로도 일반화를 쉽게 도출**할 수 있다는 뜻으로 파악할 수 있습니다.
+- **컨브넷은 패턴의 공간적 계층 구조를 학습할 수 있습니다.** 첫 번째 합성곱 층이 에지 같은 지역 패턴을 학습합니다. 두 번째 합성곱 층은 첫 번째 층의 특성으로 구성된 더 큰 패턴을 학습하는 방식입니다. 이를 통하여 컨브넷은 매우 복잡하고 추상적인 시각적 개념을 더욱 효율적으로 학습 할 수 있습니다.
+
+# 최대 풀링 연산 이해하기
+
+앞의 컨브넷 예제에서 특성 맵의 크기가 MaxPooling2D 층마다 절반으로 줄어들었습니다.
+
+최대 풀링은 입력 특성 맵에서 윈도우에 맞는 패치를 추출한 후 각 채널별로 최댓값을 출력합니다.
+
+합성곱과 가장 큰 차이는 최대 풀링은 보통 2x2 윈도우와 스트라이드 2를 사용하여 특성 맵을 절반 크기로 다운 샘플링한다는 것입니다.
+
+
+그런데 왜 최대 풀링을 활용하여 특성 맵을 다운샘플링할까요?
+
+풀링을 뺀 모델을 직접 구성하여 살펴보겠습니다.
+
+```python
+inputs = keras.Input(shape=(28, 28, 1))
+x = layers.Conv2D(filters=32, kernel_size=3, activation='relu')(inputs)
+x = layers.Conv2D(filters=64, kernel_size=3, activation='relu')(x)
+x = layers.Conv2D(filters=128, kernel_size=3, activation='relu')(x)
+x = layers.Flatten()(x)
+outputs = layers.Dense(10, activation='softmax')(x)
+conv_model = keras.Model(inputs=inputs, outputs=outputs)
+
+conv_model.summary()
+
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 28, 28, 1)]       0         
+                                                                 
+ conv2d (Conv2D)             (None, 26, 26, 32)        320       
+                                                                 
+ conv2d_1 (Conv2D)           (None, 24, 24, 64)        18496     
+                                                                 
+ conv2d_2 (Conv2D)           (None, 22, 22, 128)       73856     
+                                                                 
+ flatten (Flatten)           (None, 61952)             0         
+                                                                 
+ dense (Dense)               (None, 10)                619530    
+                                                                 
+=================================================================
+Total params: 712,202
+Trainable params: 712,202
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+
+해당 설정에서의 문제점은 다음과 같습니다.
+
+- 특성의 공간적 계층 구조를 학습하는데 도움이 되지 않습니다.
+- 최종 특성 맵은 61952개의 원소를 가집니다. 해당 특성 맵을 10개의 유닛을 가진 Dense층과 연결한다면 619530개의 가중치가 발생합니다. 이 가중치는 작은 모델 치고는 매우 많습니다. 따라서 과대적합이 발생할 수 있습니다.
+
+최대 풀링을 이용하여 다운샘플링을 사용하는 이유는 가중치를 줄이기 위함이 가장 큰 이유입니다. 또한 신경망이 공간의 계층적 구조를 효과적으로 학습할 수 있도록 도와줍니다.
+
+
+# 최신 컨브넷 아키텍처 패턴
+
+
+
+
+

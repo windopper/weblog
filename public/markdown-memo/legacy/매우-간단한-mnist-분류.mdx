@@ -1,0 +1,175 @@
+---
+title: "매우 간단한 MNIST 분류"
+description: ""
+tags: ["Pytorch","ML","Tutorial"]
+date: "2023-01-20"
+thumbnail: ""
+---
+
+```python
+import torch
+import torchvision.datasets as dsets
+import torchvision.transforms as transforms
+import torch.nn.init
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+torch.manual_seed(777)
+
+if device == 'cuda':
+  torch.cuda.manual_seed(777)
+
+# 데이터 가져오기
+mnist_train = dsets.MNIST(
+    root='MNIST_data/',
+    train=True,
+    transform=transforms.ToTensor(),
+    download=True
+)
+
+mnist_test = dsets.MNIST(
+    root='MNIST_data/',
+    train=False,
+    transform=transforms.ToTensor(),
+    download=True
+)
+
+# 데이터 셋 데이터 로더로 올리기
+# DataLoader 객체는 파이토치 모델의 입력 파이프라인으로
+# 병렬 연산에 최적화 되어있다.
+data_loader = torch.utils.data.DataLoader(
+    dataset=mnist_train,
+    batch_size=64,
+    shuffle=True,
+    drop_last=True
+)
+
+# CNN 구성
+class CNN(torch.nn.Module):
+  def __init__(self):
+    super(CNN, self).__init__()
+    # 28, 28, 1
+    self.layer1 = torch.nn.Sequential(
+        torch.nn.Conv2d(1, 32, kernel_size=3), # 26, 26, 32
+        torch.nn.ReLU(),
+        torch.nn.MaxPool2d(kernel_size=2) # 13, 13, 32
+    )
+
+    self.layer2 = torch.nn.Sequential(
+        torch.nn.Conv2d(32, 64, kernel_size=3), # 11, 11, 64
+        torch.nn.ReLU(),
+        torch.nn.MaxPool2d(kernel_size=2) # 5, 5, 64
+    )
+
+    self.layer3 = torch.nn.Sequential(
+        torch.nn.Conv2d(64, 128, kernel_size=3), # 3, 3, 64
+        torch.nn.ReLU(),
+        torch.nn.Flatten(), # 1152
+        torch.nn.Linear(in_features=1152, out_features=10),
+    )
+
+  def forward(self, x):
+    out = self.layer1(x)
+    out = self.layer2(out)
+    return self.layer3(out)
+
+# 손실 함수 및 옵티마이저 설정
+model = CNN().to(device)
+loss = torch.nn.CrossEntropyLoss().to(device)
+optimizer = torch.optim.RMSprop(model.parameters())
+
+# 에포크를 15로 설정하여 학습을 해볼까요?
+for epoch in range(15):
+  avg_loss = 0
+  for inputs, targets in data_loader:
+    inputs = inputs.to(device)
+    targets = targets.to(device)
+    
+    optimizer.zero_grad()
+		# 옵티마이저로 변화시킨 그레디언트의 값을 0으로 초기화한다.
+		
+    pred = model(inputs)
+		# 모델의 예측값
+    cost = loss(pred, targets)
+		# 모델의 예측값과 타겟값 사이의 비용함수를 구하였다.
+    cost.backward()
+		# 모델의 가중치에 대한 그레디언트를 역전파로 구하였다.
+    optimizer.step()
+		# 역전파를 통하여 획득한 그레디언트를 최적화함수로 통과하여 모델의 가중치를 업데이트하였다.
+
+    avg_loss += cost / total_batch
+  print(f"[Epoch: {epoch}] avg_cost: {avg_loss}")
+
+[Epoch: 0] avg_cost: 4.413336277008057
+[Epoch: 1] avg_cost: 0.10770093649625778
+[Epoch: 2] avg_cost: 0.08522924780845642
+[Epoch: 3] avg_cost: 0.07123598456382751
+[Epoch: 4] avg_cost: 0.067470982670784
+[Epoch: 5] avg_cost: 0.0631989911198616
+[Epoch: 6] avg_cost: 0.06493248045444489
+[Epoch: 7] avg_cost: 0.059050627052783966
+[Epoch: 8] avg_cost: 0.05864483118057251
+[Epoch: 9] avg_cost: 0.059779416769742966
+[Epoch: 10] avg_cost: 0.0584106482565403
+[Epoch: 11] avg_cost: 0.057900320738554
+[Epoch: 12] avg_cost: 0.05998842790722847
+[Epoch: 13] avg_cost: 0.05708153545856476
+[Epoch: 14] avg_cost: 0.062421564012765884
+```
+
+
+테스트 데이터에 대해 모델을 평가해봅시다.
+
+```python
+with torch.no_grad():
+  test_data = mnist_test.test_data.reshape(shape=(-1, 1, 28, 28)).float().to(device)
+  test_target = mnist_test.test_labels.to(device)
+
+  pred = model(test_data)
+  pred_decode = torch.argmax(pred, 1) == test_target
+  accuracy = pred_decode.float().mean()
+  print('Accuracy: ', accuracy.item())
+
+Accuracy:  0.9398000240325928
+```
+
+테스트 데이터에 대한 정확도는 93.9%가 출력되었습니.다.
+
+# 더 알아보기: 구성한 모델 구조 출력하기
+
+```python
+import torchsummary
+torchsummary.summary(model, (1, 28, 28))
+
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1           [-1, 32, 26, 26]             320
+              ReLU-2           [-1, 32, 26, 26]               0
+         MaxPool2d-3           [-1, 32, 13, 13]               0
+            Conv2d-4           [-1, 64, 11, 11]          18,496
+              ReLU-5           [-1, 64, 11, 11]               0
+         MaxPool2d-6             [-1, 64, 5, 5]               0
+            Conv2d-7            [-1, 128, 3, 3]          73,856
+              ReLU-8            [-1, 128, 3, 3]               0
+           Flatten-9                 [-1, 1152]               0
+           Linear-10                   [-1, 10]          11,530
+================================================================
+Total params: 104,202
+Trainable params: 104,202
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.53
+Params size (MB): 0.40
+Estimated Total Size (MB): 0.93
+----------------------------------------------------------------
+```
+
+케라스의 summary() 메서드와 같은 역할이다.
+
+torchsummary 라이브러리의 summary() 메서드를 통하여 모델 구조를 출력할 수 있다.
+
+다른 점은 케라스는 모델을 입력데이터의 크기를 주입하고 모델을 build해야지 해당 메서드를 사용할 수 있지만, 파이토치는 summary() 메서드에 입력 데이터의 크기를 직접 입력한다는 점이 다르다.
+
+
