@@ -1,5 +1,8 @@
 import getPostThumbnailImage from "@/app/action/image";
-import { getMarkdownFile, getMarkdownFileWithFetch } from "@/app/action/markdown";
+import {
+  getMarkdownFile,
+  getMarkdownFileWithFetch,
+} from "@/app/action/markdown";
 import { prefixUrl } from "@/app/libs/constants";
 import { readFileSync } from "fs";
 import { ImageResponse } from "next/og";
@@ -37,7 +40,9 @@ export default async function OpengraphImage({
   const file = await getMarkdownFileWithFetch(slug);
   const { title, tags } = file || { title: "", tags: [] };
   const image = await fetch(
-    `${prefixUrl}/api/post/thumbnail?title=${encodeURIComponent(title)}&tags=${tags.map(encodeURIComponent).join(",")}`
+    `${prefixUrl}/api/post/thumbnail?title=${encodeURIComponent(
+      title
+    )}&tags=${tags.map(encodeURIComponent).join(",")}`
   );
 
   return image;

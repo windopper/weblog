@@ -31,7 +31,7 @@ LeNet-5를 기반으로 한 CNN 모델을 베이스라인으로 선정하였다.
 
 - **Epochs:** 20
 - **Batch Size:** 128
-- **Learning Rate:** 3e-4 (Andrej Karpathy는 "A Recipe for Training Neural Networks"를 통해 Adam 옵티마이저 사용 시 $3e-4$를 안전한 시작점으로 언급함)
+- **Learning Rate:** 3e-4 (Andrej Karpathy는 "A Recipe for Training Neural Networks"를 통해 Adam 옵티마이저 사용 시 3e-4를 안전한 시작점으로 언급함)
 - **Seed:** 42
 
 ### 실험 결과
@@ -181,7 +181,7 @@ LeNet-5를 기반으로 한 CNN 모델을 베이스라인으로 선정하였다.
 ResNet 구조 실험을 통해 깊이가 성능에 기여함을 확인했으나, 층이 너무 깊어지면 학습 속도가 저하되고 파라미터 효율이 떨어지는 문제가 있었다. 이를 해결하기 위해 **Wide Residual Network (WRN)**를 도입하였다.
 
 #### Pre-activation 및 구조
-He et al.(2016)이 제안한 **Pre-activation ResNet** 구조(BN $\rightarrow$ ReLU $\rightarrow$ Conv)를 따르며, 넓어진 채널로 인한 파라미터 과적합을 막기 위해 Dropout을 삽입하였다.
+He et al.(2016)이 제안한 **Pre-activation ResNet** 구조(BN -> ReLU -> Conv)를 따르며, 넓어진 채널로 인한 파라미터 과적합을 막기 위해 Dropout을 삽입하였다.
 
 ![WideResNet Pre-activation Block Diagram](./markdown/improve-cifar-10-classification-performance/wideresnet_block_diagram_placeholder.png)
 
@@ -253,7 +253,7 @@ CrossEntropy Loss 사용 시 정답 클래스에 대한 과도한 확신(Overcon
 ---
 
 ## 더 많은 아키텍처 탐색: PyramidNet
-채널 수를 급격하게 늘리는 것보다 선형적으로 늘리는 것이 유리하다는 연구(Han et al., 2017)에 기반하여 **PyramidNet-110** ($alpha=150$)을 도입하였다. 또한 차원 변화 시 $1 \times 1$ Convolution 대신 0으로 채우는 **Zero-padded Shortcut**을 사용한다.
+채널 수를 급격하게 늘리는 것보다 선형적으로 늘리는 것이 유리하다는 연구(Han et al., 2017)에 기반하여 **PyramidNet-110** (alpha=150)을 도입하였다. 또한 차원 변화 시 1x1 Convolution 대신 0으로 채우는 **Zero-padded Shortcut**을 사용한다.
 
 | Group Name | Output Size | Block Configuration | Channel Range |
 | :---: | :---: | :---: | :---: |
