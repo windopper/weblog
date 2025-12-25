@@ -10,7 +10,9 @@ import CompiledMDXPre from "../components/mdx/CompiledMDXPre";
 import InteractiveButton from "../components/mdx/InteractiveButton";
 import PreviewWeb from "../components/mdx/PreviewWeb";
 import MDXComponentWrapper from "../components/mdx/MDXComponentWrapper";
-import ConnectedComponent, { ConnectedComponentItem } from "../components/mdx/ConnectedComponent";
+import ConnectedComponent, {
+  ConnectedComponentItem,
+} from "../components/mdx/ConnectedComponent";
 import MDXToComponent from "../components/mdx/MDXToComponent";
 import FolderStructure from "../components/mdx/FolderStructure";
 import RawSource from "../components/mdx/RawSource";
@@ -71,15 +73,21 @@ export const defaultComponents = {
  * @param slug - MDX 파일의 slug
  * @returns 로드된 커스텀 컴포넌트 객체
  */
-function loadCustomComponents(slug: string): Record<string, React.ComponentType<any>> {
-  const customComponentDir = path.join(process.cwd(), "app/components/mdx", slug);
-  
+function loadCustomComponents(
+  slug: string
+): Record<string, React.ComponentType<any>> {
+  const customComponentDir = path.join(
+    process.cwd(),
+    "app/components/mdx",
+    slug
+  );
+
   if (!fs.existsSync(customComponentDir)) {
     return {};
   }
 
   const customComponentList = fs.readdirSync(customComponentDir);
-  
+
   return customComponentList.reduce((acc, file) => {
     const component = require(`../components/mdx/${slug}/${file}`).default;
     acc[file.replace(".tsx", "")] = component;
@@ -94,10 +102,9 @@ function loadCustomComponents(slug: string): Record<string, React.ComponentType<
  */
 export function getMdxComponents(slug: string) {
   const customComponents = loadCustomComponents(slug);
-  
+
   return {
     ...defaultComponents,
     ...customComponents,
   };
 }
-

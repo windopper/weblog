@@ -25,7 +25,7 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
       "utf8"
     );
     const markdownLists = await getMarkdownFiles();
-    
+
     const currentIndex = markdownLists.findIndex((file) => file.name === slug);
     const nextPost = markdownLists[currentIndex - 1];
     const prevPost = markdownLists[currentIndex + 1];

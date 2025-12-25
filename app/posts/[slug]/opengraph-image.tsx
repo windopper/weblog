@@ -1,5 +1,5 @@
 import getPostThumbnailImage from "@/app/action/image";
-import { getMarkdownFile } from "@/app/action/markdown";
+import { getMarkdownFileWithFetch } from "@/app/action/markdown";
 
 const size = {
   width: 1200,
@@ -32,7 +32,7 @@ export async function generateImageMetadata({
   const slug = resolveSlug(p);
   if (!slug) return [];
 
-  const file = await getMarkdownFile(slug);
+  const file = await getMarkdownFileWithFetch(slug);
 
   return [
     {
@@ -51,7 +51,7 @@ export default async function OpengraphImage({
 }) {
   const p = await params;
   const slug = resolveSlug(p);
-  const file = slug ? await getMarkdownFile(slug) : null;
+  const file = slug ? await getMarkdownFileWithFetch(slug) : null;
 
   const title = file?.title ?? "";
   const tags = (file?.tags ?? []).filter(Boolean);

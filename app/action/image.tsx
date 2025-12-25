@@ -1,8 +1,16 @@
-'use server';
+"use server";
 
 import { ImageResponse } from "next/og";
 
-export default async function getPostThumbnailImage({ title, tags, imageOptions }: { title: string, tags: string[], imageOptions: any }) {
+export default async function getPostThumbnailImage({
+  title,
+  tags,
+  imageOptions,
+}: {
+  title: string;
+  tags: string[];
+  imageOptions: any;
+}) {
   return new ImageResponse(
     (
       <div
