@@ -40,5 +40,20 @@
     "description": "블로그에 오신 것을 환영합니다",
     "thumbnail": "/image/weblog.png",
     "slicedContent": "\r\n# 환영합니다\r\n\r\n블로그에 오신 것을 환영합니다! \r\n\r\n여기서 다양한 기술 이야기와 개발 경험을 공유합니다.\r\n..."
+  },
+  {
+    "name": "zonegraph-disturbance-annotation",
+    "title": "ZoneGraph Disturbance Annotation FloatFitsIn 크래시 정리함",
+    "tags": [
+      "Unreal Engine",
+      "UE5",
+      "Bug"
+    ],
+    "createdAt": "2025-12-25T00:00:00.000Z",
+    "updatedAt": "2025-12-25T00:00:00.000Z",
+    "path": "/memos/zonegraph-disturbance-annotation",
+    "description": "UE5 Mass AI ZoneGraph Disturbance Annotation에서 FloatCastChecked/FloatFitsIn 어설션으로 바로 종료되는 크래시 원인/대응 정리",
+    "thumbnail": "/image/weblog.png",
+    "slicedContent": "\r\n# ZoneGraph Disturbance Annotation FloatFitsIn 크래시 문제\r\n\r\nZoneGraph Disturbance BP Library의 Trigger Danger 노드 실행 시 에디터가 **그 자리에서 바로 종료**되는 문제 발생.\r\n\r\n<UEBlueprint>\r\nBegin Object Class=/Script/Blueprin..."
   }
 ]

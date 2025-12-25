@@ -1,0 +1,119 @@
+---
+title: "ZoneGraph Disturbance Annotation FloatFitsIn 크래시 정리함"
+tags: ["Unreal Engine", "UE5", "Bug"]
+date: "2025-12-25"
+thumbnail: "/image/weblog.png"
+description: "UE5 Mass AI ZoneGraph Disturbance Annotation에서 FloatCastChecked/FloatFitsIn 어설션으로 바로 종료되는 크래시 원인/대응 정리"
+---
+
+# ZoneGraph Disturbance Annotation FloatFitsIn 크래시 문제
+
+ZoneGraph Disturbance BP Library의 Trigger Danger 노드 실행 시 에디터가 **그 자리에서 바로 종료**되는 문제 발생.
+
+<UEBlueprint>
+Begin Object Class=/Script/BlueprintGraph.K2Node_Event Name="K2Node_Event_1" ExportPath="/Script/BlueprintGraph.K2Node_Event'/Game/Za/Crowds/DisturbanceSource.DisturbanceSource:EventGraph.K2Node_Event_1'"
+   EventReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.Actor'",MemberName="ReceiveActorBeginOverlap")
+   bOverrideFunction=True
+   NodePosY=208
+   bCommentBubblePinned=True
+   NodeGuid=DF817E7C4E135639AF0BF7BE98131888
+   CustomProperties Pin (PinId=DC5BB6F44FDA7996EB2C2F9644DF1E4C,PinName="OutputDelegate",Direction="EGPD_Output",PinType.PinCategory="delegate",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(MemberParent="/Script/CoreUObject.Class'/Script/Engine.Actor'",MemberName="ReceiveActorBeginOverlap"),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=276F60D0464F854E6FE5098B8D811E65,PinName="then",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,LinkedTo=(K2Node_CallFunction_4 48FE8DAF4F5353CFA30697A6DEEF74F8,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=0570DC6040A247374847DCBF86802546,PinName="OtherActor",PinToolTip="Other Actor\n액터 오브젝트 레퍼런스",Direction="EGPD_Output",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.Class'/Script/Engine.Actor'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,LinkedTo=(K2Node_CallFunction_0 7BE5C50249D8972638303CB19FCBE138,K2Node_CallFunction_4 D866EDD244B5DFC52D0390B7FDB73B6A,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+End Object
+Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_0" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Za/Crowds/DisturbanceSource.DisturbanceSource:EventGraph.K2Node_CallFunction_0'"
+   bDefaultsToPureFunc=True
+   FunctionReference=(MemberName="K2_GetActorLocation",bSelfContext=True)
+   NodePosX=256
+   NodePosY=336
+   NodeGuid=1BAF3F214211B44B00C737BD3541DCEF
+   CustomProperties Pin (PinId=7BE5C50249D8972638303CB19FCBE138,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinToolTip="Target\n액터 오브젝트 레퍼런스",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.Class'/Script/Engine.Actor'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,LinkedTo=(K2Node_Event_1 0570DC6040A247374847DCBF86802546,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=A5E90B194905C7FFEA34CABA61058CCF,PinName="ReturnValue",PinToolTip="Return Value\n벡터\n\n이 액터의 루트 컴포넌트 위치를 반환합니다.",Direction="EGPD_Output",PinType.PinCategory="struct",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.ScriptStruct'/Script/CoreUObject.Vector'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,DefaultValue="0, 0, 0",AutogeneratedDefaultValue="0, 0, 0",LinkedTo=(K2Node_CallFunction_4 F24AF45042538675A090E9B879FA5B48,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+End Object
+Begin Object Class=/Script/BlueprintGraph.K2Node_CallFunction Name="K2Node_CallFunction_4" ExportPath="/Script/BlueprintGraph.K2Node_CallFunction'/Game/Za/Crowds/DisturbanceSource.DisturbanceSource:EventGraph.K2Node_CallFunction_4'"
+   FunctionReference=(MemberParent="/Script/CoreUObject.Class'/Script/ZoneGraphAnnotations.ZoneGraphDisturbanceAnnotationBPLibrary'",MemberName="TriggerDanger")
+   NodePosX=672
+   NodePosY=208
+   NodeGuid=CBF5AE0947D44BAB67299BA3B518E31C
+   CustomProperties Pin (PinId=48FE8DAF4F5353CFA30697A6DEEF74F8,PinName="execute",PinToolTip="\n실행",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,LinkedTo=(K2Node_Event_1 276F60D0464F854E6FE5098B8D811E65,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=20E3DF184033C0958766A7831D9FBCAA,PinName="then",PinToolTip="\n실행",Direction="EGPD_Output",PinType.PinCategory="exec",PinType.PinSubCategory="",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=32FF92624C8D8C412890B6B438B7EE43,PinName="self",PinFriendlyName=NSLOCTEXT("K2Node", "Target", "Target"),PinToolTip="Target\n존 그래프 교란 주석 BP 라이브러리 오브젝트 레퍼런스",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.Class'/Script/ZoneGraphAnnotations.ZoneGraphDisturbanceAnnotationBPLibrary'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,DefaultObject="/Script/ZoneGraphAnnotations.Default__ZoneGraphDisturbanceAnnotationBPLibrary",PersistentGuid=00000000000000000000000000000000,bHidden=True,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=49F70020465526DFC261318D10383A37,PinName="WorldContextObject",PinToolTip="World Context Object\n오브젝트 레퍼런스",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.Class'/Script/CoreUObject.Object'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=False,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,PersistentGuid=00000000000000000000000000000000,bHidden=True,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=D866EDD244B5DFC52D0390B7FDB73B6A,PinName="Instigator",PinToolTip="Instigator\n액터 오브젝트 레퍼런스\n\n특정 인스티게이터에서 온 이 이벤트를 식별합니다(선택 사항). 이때 인스티게이터당 하나의 위험만 유지됩니다. *",PinType.PinCategory="object",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.Class'/Script/Engine.Actor'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=True,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,LinkedTo=(K2Node_Event_1 0570DC6040A247374847DCBF86802546,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=F24AF45042538675A090E9B879FA5B48,PinName="Position",PinToolTip="Position\n벡터\n\n위험의 위치입니다. *",PinType.PinCategory="struct",PinType.PinSubCategory="",PinType.PinSubCategoryObject="/Script/CoreUObject.ScriptStruct'/Script/CoreUObject.Vector'",PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=True,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,DefaultValue="0, 0, 0",AutogeneratedDefaultValue="0, 0, 0",LinkedTo=(K2Node_CallFunction_0 A5E90B194905C7FFEA34CABA61058CCF,),PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=6908AE424FB69207A5D9C2A80703992C,PinName="Radius",PinToolTip="Radius\n플로트(단정밀도)\n\n위험의 반경입니다. *",PinType.PinCategory="real",PinType.PinSubCategory="float",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=True,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,DefaultValue="256.000000",AutogeneratedDefaultValue="0.0",PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+   CustomProperties Pin (PinId=1BEB8477429493030EFFD2822E0C4B75,PinName="Duration",PinToolTip="Duration\n플로트(단정밀도)\n\n위험의 경과시간입니다.",PinType.PinCategory="real",PinType.PinSubCategory="float",PinType.PinSubCategoryObject=None,PinType.PinSubCategoryMemberReference=(),PinType.PinValueType=(),PinType.ContainerType=None,PinType.bIsReference=False,PinType.bIsConst=True,PinType.bIsWeakPointer=False,PinType.bIsUObjectWrapper=False,PinType.bSerializeAsSinglePrecisionFloat=False,DefaultValue="10.000000",AutogeneratedDefaultValue="0.0",PersistentGuid=00000000000000000000000000000000,bHidden=False,bNotConnectable=False,bDefaultValueIsReadOnly=False,bDefaultValueIsIgnored=False,bAdvancedView=False,bOrphanedPin=False,)
+End Object
+</UEBlueprint>
+
+
+크래시 내역
+
+```
+Assertion failed: FloatFitsIn<OutType>(In, Precision) [File:D:\build++UE5\Sync\Engine\Source\Runtime\Core\Public\Templates\UnrealTemplate.h] [Line: 197]
+Loss of data caused by narrowing conversion
+UnrealEditor_Core
+UnrealEditor_ZoneGraphAnnotations
+UnrealEditor_ZoneGraphAnnotations
+UnrealEditor_Engine
+UnrealEditor_Engine
+UnrealEditor_Renderer
+UnrealEditor_Renderer
+UnrealEditor_Engine
+UnrealEditor_Engine
+UnrealEditor_Engine
+UnrealEditor_Engine
+UnrealEditor_Engine
+UnrealEditor_Engine
+UnrealEditor_UnrealEd
+UnrealEditor_UnrealEd
+UnrealEditor
+UnrealEditor
+UnrealEditor
+UnrealEditor
+UnrealEditor
+UnrealEditor
+kernel32
+ntdll
+```
+
+콜스택 보면 시작점이 `UnrealEditor_ZoneGraphAnnotations` 쪽이고, 그 다음이 `Engine`, 그리고 `Renderer`로 이어지는데 보통 게임플레이 로직보단 디버그 드로잉/렌더링 경로에서 무언가 터졌음을 의미한다.
+
+## LWC + ZoneGraph + float 캐스팅 문제
+
+Mass AI의 ZoneGraph 시스템은 다수 에이전트를 처리하려고 런타임 데이터를 “정해진 비트 수 / 정해진 정밀도” 형태로 압축해서 다룬다.
+
+UE5 LWC(Large World Coordinates)에서는 월드 좌표가 `double(64-bit)` 기반이라 멀리 나가도 버티지만 문제는 이 값이 어디선가 `float`나 정수로 좁혀질 때인데 UE는 여기서 잘라먹고 넘어가는 걸 (narrowing) 막으려고 `FloatFitsIn` 계열 보호 assert를 걸어둔다. 그래서 값이 일정 범위 넘으면 그냥 바로 종료된다.
+
+## 코드 확인 및 문제 분석
+
+### 디버그 드로잉에서 “거리의 제곱”이 float 한계를 넘는 케이스
+
+`UZoneGraphDisturbanceAnnotation::DebugDraw()` 쪽 보면 대충 이런 패턴이 있다.
+
+```cpp
+// DebugDraw() 내부
+const float DistanceSq =
+    FloatCastChecked<float>(FVector::DistSquared(ViewLocation, SomePosition),
+                            UE::LWC::DefaultFloatPrecision);
+```
+
+문제는 `DistSquared`가 이름 그대로 “거리의 제곱”이라 숫자가 빠르게 커진다. LWC 월드에서 카메라랑 대상이 좀 멀어지기만 해도 이 값이 `float` 최대치를 넘는데 생각보다 쉽게 일어난다.
+
+그래서 어떤 프레임에서는 `DistSquared` 자체는 계산이 되는데(원래는 `double` 쪽에서), 그걸 `FloatCastChecked<float>`로 옮기는 순간 assert가 터진다.
+
+## 해결 방법
+
+![image](/markdown-memo/images/zonegraph-disturbance-annotation/1.png)
+
+해결 방법은 디버그 드로잉 옵션을 끄는 것이다.
+
+`ZoneGraphDisturbanceAnnotation` 컴포넌트의 **Enable Debug Drawing** 옵션을 끄면, 최소한 “렌더링 프레임에서 float 캐스팅 하다 죽는” 경로는 바로 차단된다.
+
+## 근본적인 해결 방법
+
+이 문제 핵심은 디버그 드로잉 환경에서 float로 캐스팅하다가 크래시가 나는 것인데 DistSquared 값에 대해서 float 캐스팅 체크를 걸어둔 자세한 이유는 모르겠지만 double로 처리하면 해결될 것으로 보인다.
+
+성능을 위해 ZoneGraph에서 데이터 정밀도 압축 검증이랑, LWC 환경에서 값이 생각보다 쉽게 커지는 특성이 디버그 드로잉 경로에서 충돌한 케이스.
+
+디버그 드로잉 끄는 게 제일 빠르고 제대로 고치려면 디버그 거리 판단은 double로 처리하고 안전할 때만 float로 바꾸는 것이 제일 깔끔하다.

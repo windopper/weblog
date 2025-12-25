@@ -11,6 +11,16 @@
             "fileName": "gas-blueprintnativeevent"
           }
         ]
+      },
+      {
+        "name": "UE5",
+        "subTreeMenus": [
+          {
+            "name": "Bug",
+            "subTreeMenus": [],
+            "fileName": "zonegraph-disturbance-annotation"
+          }
+        ]
       }
     ]
   },
