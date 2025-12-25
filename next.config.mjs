@@ -1,7 +1,4 @@
 import createMDX from '@next/mdx'
-import remarkGfm from 'remark-gfm'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import rehypePrettyCode from 'rehype-pretty-code'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -11,6 +8,16 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 86400,
+    // Allow next/image to optimize local API-generated images with querystrings.
+    localPatterns: [
+      { pathname: '/api/post/thumbnail' },
+      // Blog post images under /public/markdown/**
+      { pathname: '/markdown/**' },
+      // Memo images under /public/markdown-memo/**
+      { pathname: '/markdown-memo/**' },
+      // Site assets under /public/image/**
+      { pathname: '/image/**' },
+    ],
   },  
   experimental: {
     useCache: true,
@@ -46,10 +53,12 @@ const options = {
 
 const withMDX = createMDX({
   options: {
-    remarkPlugins: [remarkGfm],
+    // Turbopack requires loader options to be serializable.
+    // Pass plugins by string identifier instead of imported functions.
+    remarkPlugins: ['remark-gfm'],
     rehypePlugins: [
-      rehypeAutolinkHeadings,
-      [rehypePrettyCode, options],
+      'rehype-autolink-headings',
+      ['rehype-pretty-code', options],
     ],
   }
 })

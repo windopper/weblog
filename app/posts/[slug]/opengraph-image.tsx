@@ -1,21 +1,37 @@
 import getPostThumbnailImage from "@/app/action/image";
-import { getMarkdownFile, getMarkdownFileWithFetch } from "@/app/action/markdown";
-import { prefixUrl } from "@/app/libs/constants";
-import { readFileSync } from "fs";
-import { ImageResponse } from "next/og";
-import { join } from "path";
+import { getMarkdownFile } from "@/app/action/markdown";
 
 const size = {
   width: 1200,
   height: 630,
 };
 
+async function loadSeoulAlrimFont(font: string) {
+  const res = await fetch(
+    new URL(`../../../public/fonts/${font}.ttf`, import.meta.url)
+  );
+
+  if (!res.ok) {
+    throw new Error(`Font file not found: ${font}.ttf`);
+  }
+
+  return res.arrayBuffer();
+}
+
+function resolveSlug(params: { slug?: string; __metadata_id__?: string }) {
+  // In Next.js, opengraph image routes may be invoked with __metadata_id__.
+  return params.slug ?? params.__metadata_id__ ?? "";
+}
+
 export async function generateImageMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug?: string; __metadata_id__?: string }>;
 }) {
-  const { slug } = await params;
+  const p = await params;
+  const slug = resolveSlug(p);
+  if (!slug) return [];
+
   const file = await getMarkdownFile(slug);
 
   return [
@@ -31,14 +47,32 @@ export async function generateImageMetadata({
 export default async function OpengraphImage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug?: string; __metadata_id__?: string }>;
 }) {
-  const { slug } = await params;
-  const file = await getMarkdownFileWithFetch(slug);
-  const { title, tags } = file || { title: "", tags: [] };
-  const image = await fetch(
-    `${prefixUrl}/api/post/thumbnail?title=${encodeURIComponent(title)}&tags=${tags.map(encodeURIComponent).join(",")}`
-  );
+  const p = await params;
+  const slug = resolveSlug(p);
+  const file = slug ? await getMarkdownFile(slug) : null;
 
-  return image;
+  const title = file?.title ?? "";
+  const tags = (file?.tags ?? []).filter(Boolean);
+
+  const imageOptions: any = {
+    ...size,
+    fonts: [
+      {
+        name: "SeoulAlrimTTF-Medium",
+        data: await loadSeoulAlrimFont("SeoulAlrimTTF-Medium"),
+        style: "normal",
+        weight: 400,
+      },
+      {
+        name: "SeoulAlrimTTF-Heavy",
+        data: await loadSeoulAlrimFont("SeoulAlrimTTF-Heavy"),
+        style: "normal",
+        weight: 700,
+      },
+    ],
+  };
+
+  return getPostThumbnailImage({ title, tags, imageOptions });
 }

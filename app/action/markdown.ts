@@ -24,6 +24,7 @@ export const getMarkdownFiles = async (): Promise<MarkdownFile[]> => {
 };
 
 export const getMarkdownFile = async (file: string) => {
+  if (!file) return null;
   const fileName = file.replace(/\.(mdx|md)$/, "");
 
   try {
