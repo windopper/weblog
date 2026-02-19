@@ -97,7 +97,7 @@ export default async function Home() {
       {/* Preferences */}
       <Preferences />
 
-      <div className="fixed top-0 left-0 w-full h-full z-10 overflow-hidden">
+      <div className="fixed top-0 left-0 w-full h-full z-10 overflow-hidden pointer-events-none">
         <StarsBackground />
         <ShootingStars />
       </div>
