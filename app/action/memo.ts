@@ -1,7 +1,6 @@
 "use server";
 
 import { Memo, MemoTreeMenu } from "../types/memo";
-import { prefixUrl } from "../libs/constants";
 import fs from "fs";
 import path from "path";
 
@@ -21,6 +20,7 @@ export const getMemoFiles = async (): Promise<MemoFile[]> => {
       ...file,
       createdAt: file.createdAt ? new Date(file.createdAt) : undefined,
       updatedAt: file.updatedAt ? new Date(file.updatedAt) : undefined,
+      tags: Array.isArray(file.tags) ? file.tags : [],
     }));
     return sortedMemoLists.sort((a: MemoFile, b: MemoFile) => {
       const aTime = a.createdAt?.getTime() || 0;
@@ -50,17 +50,7 @@ export const getMemoFile = async (file: string) => {
 
 export const getMemoFileWithFetch = async (file: string) => {
   try {
-    const fileContent = await fetch(`${prefixUrl}/memo-lists.json`).then(
-      (res) => res.json()
-    );
-    const memoMetadata = fileContent.find((memoFile: MemoFile) => memoFile.name === file);
-    if (memoMetadata) {
-      return {
-        ...memoMetadata,
-        createdAt: memoMetadata.createdAt ? new Date(memoMetadata.createdAt) : undefined,
-        updatedAt: memoMetadata.updatedAt ? new Date(memoMetadata.updatedAt) : undefined,
-      }
-    }
+    return await getMemoFile(file);
   } catch (error) {
     console.error(`메타데이터 추출 오류 - ${file}:`, error);
     return null;

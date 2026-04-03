@@ -22,6 +22,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const result = await getMarkdownFile(slug);
+  const tags = Array.isArray(result?.tags) ? result.tags : [];
 
   return {
     title: result?.title || "",
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: result?.title || "",
       description: result?.slicedContent || "",
     },
-    keywords: result?.tags || [],
+    keywords: tags,
   };
 }
 
@@ -38,6 +39,8 @@ export default async function PostLayout({ children, params }: { children: React
   const { slug } = await params;
 
   const result = await getMarkdownFile(slug);
+  const tags = Array.isArray(result?.tags) ? result.tags : [];
+  const publishedAt = result?.createdAt?.toISOString() || "";
 
   const jsonLdData: WithContext<BlogPosting> = {
     "@id": "https://kamilereon.net/posts/" + slug,
@@ -46,8 +49,8 @@ export default async function PostLayout({ children, params }: { children: React
     headline: result?.title || "",
     description: result?.slicedContent || "",
     url: "https://kamilereon.net/posts/" + slug,
-    datePublished: result?.createdAt.toString() || "",
-    dateModified: result?.createdAt.toString() || "",
+    datePublished: publishedAt,
+    dateModified: publishedAt,
     author: {
       "@type": "Person",
       name: "kamilereon",
@@ -71,7 +74,7 @@ export default async function PostLayout({ children, params }: { children: React
       name: "kamilereon 기술 블로그",
       description: "웹 개발, AI 기술, 소프트웨어 아키텍처 기술 블로그"
     },
-    keywords: result?.tags || []
+    keywords: tags
   }
 
   return (

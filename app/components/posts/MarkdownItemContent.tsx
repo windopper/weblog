@@ -17,9 +17,10 @@ export default function MarkdownItemContent({
   file,
   hideThumbnail = false,
 }: MarkdownItemContentProps) {
+  const tags = Array.isArray(file.tags) ? file.tags : [];
   const thumbnail = file.thumbnail
     ? file.thumbnail
-    : `/api/post/thumbnail?title=${file.title}&tags=${file.tags.join(",")}`;
+    : `/api/post/thumbnail?title=${file.title}&tags=${tags.join(",")}`;
 
   return (
     <div className="relative flex flex-col justify-start gap-2">
@@ -41,9 +42,9 @@ export default function MarkdownItemContent({
         <p className="text-zinc-300 text-sm mb-2">{file.description}</p>
       )}
 
-      {file.tags.length > 0 && (
+      {tags.length > 0 && (
         <div className="flex gap-2 mb-3 flex-wrap">
-          {file.tags.map((tag) => (
+          {tags.map((tag) => (
             <span
               key={tag}
               className="px-2 py-1 text-xs font-medium text-zinc-300 bg-zinc-800 rounded-md border border-zinc-700"

@@ -1,4 +1,8 @@
-export default function PostTags({ tags }: { tags: string[] }) {
+export default function PostTags({ tags = [] }: { tags?: string[] }) {
+  if (tags.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex flex-wrap gap-2 my-4">
       {tags.map((tag) => (

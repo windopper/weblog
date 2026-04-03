@@ -15,9 +15,13 @@ interface FolderStructureProps {
 }
 
 export default function FolderStructure({
-  folderStructure,
+  folderStructure = [],
   level = 0,
 }: FolderStructureProps) {
+  if (folderStructure.length === 0) {
+    return null;
+  }
+
   return (
     <div className="p-2 bg-zinc-900 rounded-md my-2">
       <RecursiveFolderStructure
@@ -29,7 +33,7 @@ export default function FolderStructure({
 }
 
 function RecursiveFolderStructure({
-  folderStructure,
+  folderStructure = [],
   level = 0,
 }: FolderStructureProps) {
   return (

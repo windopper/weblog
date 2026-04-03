@@ -13,7 +13,7 @@ import MoveToTopButton from "./common/MoveToTopButton";
 
 interface FrontMatter {
   title: string;
-  tags: string[];
+  tags?: string[];
   date: string;
 }
 
@@ -37,17 +37,19 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
       components: getMdxComponents(slug),
     });
 
+    const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
+
     // table of contents 추출
     const toc = extractTOC(source);
 
     // check has takeoff tag
-    const hasTakeoffTag = frontmatter.tags.includes("takeoff");
+    const hasTakeoffTag = tags.includes("takeoff");
 
     return (
       <div className="relative">
         <ConditionalPostHeader title={frontmatter.title} />
         <TableOfContents toc={toc} />
-        <PostTags tags={frontmatter.tags} />
+        <PostTags tags={tags} />
         <div
           className="prose-zinc prose prose-sm md:prose-md lg:prose-lg prose-invert 
     max-w-none w-full px-4 lg:px-0 [&_figure]:m-0 [&_img]:m-0"

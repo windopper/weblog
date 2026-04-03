@@ -41,6 +41,7 @@ const sbAggroM = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kamilereon.net"),
   title: "kamilereon",
   applicationName: "kamilereon",
   description: `웹 개발, AI 기술, 소프트웨어 아키텍처 기술 블로그`,
