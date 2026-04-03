@@ -1,0 +1,6 @@
+# Agents Guidance
+
+## Markdown Posts
+- 사용자가 `public/markdown-posts`에 새 포스트 작성을 요청하면 `markdown-post-writer` 스킬을 우선 적용한다.
+- 포스트는 기존 저장소 관례(`title`, `tags`, `date` frontmatter + 한국어 기술 블로그 톤)를 따른다.
+- 파일명은 kebab-case slug를 사용하고, 이미지 경로는 `/markdown/<slug>/...` 패턴을 기본으로 한다.
