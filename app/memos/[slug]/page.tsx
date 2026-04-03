@@ -8,8 +8,10 @@ import { getMemoTree } from "@/app/action/memo";
 
 export default async function MemoPageRoute({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const memoData = await CompiledMemoContent({ slug });
-    const memoTree = await getMemoTree();
+    const [memoData, memoTree] = await Promise.all([
+        CompiledMemoContent({ slug }),
+        getMemoTree(),
+    ]);
 
     if (!memoData) {
         return (

@@ -24,18 +24,20 @@ export default async function CompiledMDXContent({ slug }: { slug: string }) {
       path.join(process.cwd(), "public", "markdown-posts", `${slug}.mdx`),
       "utf8"
     );
-    const markdownLists = await getMarkdownFiles();
+    const [markdownLists, compiled] = await Promise.all([
+      getMarkdownFiles(),
+      // MDX 컴파일
+      compileMDX<FrontMatter>({
+        source,
+        options: getMdxOptions() as any,
+        components: getMdxComponents(slug),
+      }),
+    ]);
+    const { content, frontmatter } = compiled;
 
     const currentIndex = markdownLists.findIndex((file) => file.name === slug);
     const nextPost = markdownLists[currentIndex - 1];
     const prevPost = markdownLists[currentIndex + 1];
-
-    // MDX 컴파일
-    const { content, frontmatter } = await compileMDX<FrontMatter>({
-      source,
-      options: getMdxOptions() as any,
-      components: getMdxComponents(slug),
-    });
 
     const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
 

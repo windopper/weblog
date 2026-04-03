@@ -56,18 +56,23 @@ export default async function OpengraphImage({
   const title = file?.title ?? "";
   const tags = (file?.tags ?? []).filter(Boolean);
 
+  const [mediumFont, heavyFont] = await Promise.all([
+    loadSeoulAlrimFont("SeoulAlrimTTF-Medium"),
+    loadSeoulAlrimFont("SeoulAlrimTTF-Heavy"),
+  ]);
+
   const imageOptions: any = {
     ...size,
     fonts: [
       {
         name: "SeoulAlrimTTF-Medium",
-        data: await loadSeoulAlrimFont("SeoulAlrimTTF-Medium"),
+        data: mediumFont,
         style: "normal",
         weight: 400,
       },
       {
         name: "SeoulAlrimTTF-Heavy",
-        data: await loadSeoulAlrimFont("SeoulAlrimTTF-Heavy"),
+        data: heavyFont,
         style: "normal",
         weight: 700,
       },

@@ -21,6 +21,7 @@ const nextConfig = {
   },  
   experimental: {
     useCache: true,
+    optimizePackageImports: ["react-icons", "lucide-react", "motion"],
   },
   webpack: (config, { isServer, dev, webpack }) => {
     config.output.webassemblyModuleFilename =

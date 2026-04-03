@@ -41,8 +41,10 @@ const jsonLdData: WithContext<Blog> = {
 };
 
 export default async function Home() {
-  const markdownFiles = await getMarkdownFiles();
-  const memos = await getMemoFiles();
+  const [markdownFiles, memos] = await Promise.all([
+    getMarkdownFiles(),
+    getMemoFiles(),
+  ]);
   const latest4Memos = memos.slice(0, 4);
   const publicMarkdownFiles = markdownFiles.filter((file) => !file.isPrivate);
   const latest4PublicMarkdownFiles = publicMarkdownFiles.slice(0, 4);
