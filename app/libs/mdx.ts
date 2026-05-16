@@ -40,6 +40,8 @@ export const autolinkHeadingsOptions = {
 export function getMdxOptions() {
   return {
     parseFrontmatter: true,
+    blockJS: false,
+    blockDangerousJS: true,
     mdxOptions: {
       remarkPlugins: [remarkGfm],
       rehypePlugins: [

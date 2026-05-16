@@ -1,5 +1,20 @@
 [
   {
+    "name": "ampliare-unreal-mcp-bridge-development",
+    "title": "Unreal Editor와 MCP를 연결하는 Ampliare 개발기",
+    "tags": [
+      "Unreal Engine",
+      "MCP",
+      "Codex",
+      "TypeScript",
+      "C++"
+    ],
+    "createdAt": "2026-05-16T00:00:00.000Z",
+    "path": "/posts/ampliare-unreal-mcp-bridge-development",
+    "slicedContent": "\n# Unreal Editor와 MCP를 연결하는 Ampliare 개발기\n\n`Ampliare`는 Unreal Editor와 MCP 클라이언트를 연결하기 위해 만든 에디터 플러그인이다.\nCodex 같은 MCP 클라이언트가 실행 중인 Unreal Editor의 월드, 액터, 에셋, Blueprint, Material Graph 상태를 읽고,\n필요한 편집 작업을...",
+    "readingMinutes": 13
+  },
+  {
     "name": "automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts",
     "title": "특정 이슈가 되는 게시물을 찾아서 자동으로 게시물을 작성하기 (Takeoff. 제작기)",
     "tags": [
