@@ -11,8 +11,8 @@
     ],
     "createdAt": "2026-05-16T00:00:00.000Z",
     "path": "/posts/ampliare-unreal-mcp-bridge-development",
-    "slicedContent": "\n# Unreal Editor와 MCP를 연결하는 Ampliare 개발기\n\n`Ampliare`는 Unreal Editor와 MCP 클라이언트를 연결하기 위해 만든 에디터 플러그인이다.\nCodex 같은 MCP 클라이언트가 실행 중인 Unreal Editor의 월드, 액터, 에셋, Blueprint, Material Graph 상태를 읽고,\n필요한 편집 작업을...",
-    "readingMinutes": 13
+    "slicedContent": "\r\n# Unreal Editor와 MCP를 연결하는 Ampliare 개발기\r\n\r\n`Ampliare`는 Unreal Editor와 MCP 클라이언트를 연결하기 위해 만든 에디터 플러그인이다.\r\nCodex 같은 MCP 클라이언트가 실행 중인 Unreal Editor의 월드, 액터, 에셋, Blueprint, Material Graph 상태를 읽고,\r\n필요한 편...",
+    "readingMinutes": 12
   },
   {
     "name": "automatically-finding-posts-about-specific-trending-issues-and-generating-new-posts",
@@ -157,6 +157,22 @@
     "path": "/posts/rust-ownership",
     "slicedContent": "\r\n# 러스트의 소유권 이해하기\r\n\r\n소유권 개념은 러스트를 특별하게 만드는 방식 중 하나이다. 자바, 자바스크립트, 파이썬 같은 언어는 가비지 컬렉션을 통해 사용하지 않는 객체들을 \r\n정기적으로 제거하는 방식을 선택했고, C++ 같은 언어들은 개발자가 직접 수동으로 메모리를 할당하고 해제하도록 하였다.\r\n\r\nC++는 높은 수준의 제어권을 보장하지만, 메모...",
     "readingMinutes": 5
+  },
+  {
+    "name": "tps-fps-ads-recoil",
+    "title": "TPS/FPS 전환과 ADS, Recoil 구현 정리",
+    "tags": [
+      "Unreal Engine",
+      "TPS",
+      "FPS",
+      "ADS",
+      "Recoil",
+      "Blueprint"
+    ],
+    "createdAt": "2026-06-03T00:00:00.000Z",
+    "path": "/posts/tps-fps-ads-recoil",
+    "slicedContent": "\n# TPS/FPS 전환과 ADS, Recoil 구현 정리\n\n액션 슈터 캐릭터를 만들다 보면 시점 전환, 조준, 손 IK, 카메라 반동이 서로 얽힌다.\nTPS에서는 전신 캐릭터가 자연스럽게 보여야 하고, FPS에서는 팔과 무기가 카메라 기준으로 안정적으로 보여야 한다.\nADS 상태에서는 조준점, 무기 스코프, 손 위치가 같은 방향을 바라봐야 하며, 발사 시...",
+    "readingMinutes": 6
   },
   {
     "name": "use-wasm-with-rust",

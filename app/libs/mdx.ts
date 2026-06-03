@@ -20,6 +20,7 @@ import Callout from "../components/mdx/Callout";
 import Details from "../components/mdx/Details";
 import Terminal from "../components/mdx/Terminal";
 import UEBlueprintMDX from "../components/mdx/UEBlueprintMDX";
+import YouTube from "../components/mdx/YouTube";
 
 /** @type {import('rehype-pretty-code').Options} */
 export const prettyCodeOptions = {
@@ -68,6 +69,7 @@ export const defaultComponents = {
   Details,
   Terminal,
   UEBlueprint: UEBlueprintMDX,
+  YouTube,
 };
 
 /**
