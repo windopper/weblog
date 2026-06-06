@@ -1,0 +1,297 @@
+---
+title: "UE5 무기 홀스터 전환과 Drop, Procedural Pickup 구현"
+tags: ["Unreal Engine", "C++", "Blueprint", "Weapon System", "Animation"]
+date: "2026-06-06"
+description: "WeaponInventoryComponent와 ActionCombatCharacter를 중심으로 무기 홀스터 전환, 드롭, 픽업, CCDIK 손 보정을 구현한 과정을 정리한다."
+---
+
+# UE5 무기 홀스터 전환과 Drop, Procedural Pickup 구현
+
+액션 게임의 무기 시스템은 현재 무기를 손 소켓에 붙일 뿐만 아니라
+사용하지 않는 무기는 캐릭터의 등이나 허리에 보여야 하며, 무기를 교체할 때는 애니메이션의 정확한 프레임에 손과 홀스터 사이를 이동해야 한다.
+필드에 버린 무기는 물리 오브젝트가 되어야 하며, 다시 주울 때는 캐릭터의 손이 실제 아이템 위치까지 자연스럽게 도달해야 한다.
+
+이번 구현에서는 이 흐름을 하나의 클래스에 몰아넣지 않고 다음과 같이 역할을 나눴다.
+
+- `WeaponInventoryComponent`: 슬롯 데이터와 저장된 무기 액터의 수명주기
+- `ActionCombatCharacter`: 현재 장착 상태, 메쉬 생성, 소켓 부착, 전투 및 Ability 상태
+- Character Blueprint: 입력, 몽타주, 드롭과 픽업 상호작용
+- Animation Blueprint: Pickup Target을 향한 CCDIK 보정
+
+초기 프로토타입에서는 홀스터 메쉬 부착도 Character Blueprint가 담당했다.
+현재 C++ 구현에서는 반복적으로 사용되는 슬롯 갱신과 소켓 정렬 로직을 `ActionCombatCharacter`로 옮겼고,
+Blueprint는 애니메이션 타이밍과 월드 상호작용을 담당하도록 정리했다.
+
+<Callout type="info">
+이 글의 C++ 설명은 현재 `ActionCombatCharacter.cpp`와 `WeaponInventoryComponent`를 기준으로 한다.
+드롭 입력, Line Trace, Pickup 인터페이스 호출, CCDIK 구성은 Blueprint와 Animation Blueprint 구현이다.
+</Callout>
+
+## Weapon Inventory의 역할
+
+인벤토리는 기본적으로 세 개의 무기 슬롯을 갖도록 설정하였다.
+슬롯 수는 `MaxInventorySlots`로 노출되어 있으므로 필요하면 캐릭터 Blueprint의 기본값에서 변경할 수 있다.
+
+각 슬롯은 무기 설정인 `WeaponData`와, 액터 기반 무기일 때 보관할 `StoredEquippableActor`를 가진다.
+
+```cpp
+USTRUCT(BlueprintType)
+struct ACTIONCOMBAT_API FWeaponInventorySlot
+{
+    GENERATED_BODY()
+
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+    TObjectPtr<UWeaponData> WeaponData;
+
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+    TObjectPtr<AActor> StoredEquippableActor;
+
+    bool IsEmpty() const { return WeaponData == nullptr; }
+};
+```
+
+`WeaponData`는 스켈레탈 메쉬, 스태틱 메쉬, 장착 가능한 액터 클래스 중 정확히 하나를 장착 소스로 사용한다.
+메쉬 기반 무기는 캐릭터가 슬롯별 `UMeshComponent`를 만들고, 액터 기반 무기는 인벤토리 컴포넌트가 액터를 생성해 슬롯에 보관한다.
+
+이 구분 덕분에 검이나 단순 총기처럼 메쉬만 필요한 무기와, 탄약이나 별도 컴포넌트 상태를 가진 액터 기반 총기를 같은 슬롯 인터페이스로 처리할 수 있다.
+
+### 새 무기와 필드 액터를 추가하는 두 경로
+
+처음 무기를 지급할 때는 `TryAddWeapon` 또는 `TryAddWeaponAtIndex`를 사용한다.
+액터 클래스 기반 무기라면 인벤토리 컴포넌트가 `SpawnActorDeferred`로 저장 액터를 생성하고 `WeaponData`를 설정한다.
+
+필드에 떨어진 액터를 다시 줍는 경우에는 장착 아이템 전용 액터를 다시 구축하여 넘긴다.
+`TryAddExistingWeaponActor`가 기존 액터의 클래스와 `WeaponData`를 검증하고, 소유자를 캐릭터로 변경한 뒤 빈 슬롯에 그대로 저장한다.
+
+```cpp
+bool UWeaponInventoryComponent::TryAddExistingWeaponActor(
+    UWeaponData* WeaponData,
+    AActor* ExistingActor,
+    int32& OutIndex)
+{
+    EnsureSlotsInitialized();
+    OutIndex = INDEX_NONE;
+
+    for (int32 Index = 0; Index < WeaponSlots.Num(); ++Index)
+    {
+        if (WeaponSlots[Index].IsEmpty()
+            && TryAddExistingWeaponActorAtIndex(
+                WeaponData, ExistingActor, Index))
+        {
+            OutIndex = Index;
+            return true;
+        }
+    }
+
+    return false;
+}
+```
+
+### 슬롯 변경 이벤트
+
+인벤토리 컴포넌트에서 캐릭터의 메쉬를 직접 설정하지 않는 대신 슬롯이 바뀌면 `OnWeaponInventorySlotChanged`를 발생시키고, 제거 직전에는 `OnWeaponInventorySlotRemoving`을 발생시킨다.
+
+캐릭터는 `BeginPlay`에서 두 이벤트를 구독한다.
+
+```cpp
+WeaponInventoryComponent->OnWeaponInventorySlotChanged.AddDynamic(
+    this,
+    &AActionCombatCharacter::HandleWeaponInventorySlotChanged);
+
+WeaponInventoryComponent->OnWeaponInventorySlotRemoving.AddUObject(
+    this,
+    &AActionCombatCharacter::HandleWeaponInventorySlotRemoving);
+```
+
+추가된 무기가 현재 장착 슬롯이 아니라면 바로 홀스터에 표시한다.
+장착 중인 슬롯을 제거할 때는 먼저 Weapon Ability와 장착 상태를 정리한 뒤 저장 액터와 슬롯 데이터를 제거한다.
+
+## 슬롯별 홀스터 설정
+
+무기마다 원점과 축 방향이 다르기 때문에 캐릭터 소켓 하나에 모든 무기의 루트를 바로 붙이면 위치가 맞지 않는다.
+이를 해결하기 위해 각 인벤토리 슬롯에는 캐릭터 측 소켓과 무기 측 기준 소켓을 함께 설정한다.
+
+```cpp
+USTRUCT(BlueprintType)
+struct ACTIONCOMBAT_API FWeaponInventoryHolsterAttachment
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FName CharacterSocketName = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FName WeaponSocketName = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FTransform RelativeTransform = FTransform::Identity;
+};
+```
+
+예를 들어 0번 슬롯은 등에 메는 주무기, 1번 슬롯은 허리의 보조 무기, 2번 슬롯은 반대쪽 허리의 장비로 구성할 수 있다.
+`CharacterSocketName`은 캐릭터 스켈레톤의 홀스터 위치이고, `WeaponSocketName`은 무기 메쉬에서 정렬 기준으로 사용할 소켓이다.
+
+### 두 소켓을 일치시키는 트랜스폼 계산
+
+목표는 무기 루트가 아니라 **무기 소켓**을 캐릭터 홀스터 소켓에 맞추는 것이다.
+현재 구현은 다음 순서로 부착 컴포넌트의 월드 트랜스폼을 역산한다.
+
+```cpp
+const FTransform CharacterSocketWorldTransform =
+    GetMesh()->GetSocketTransform(CharacterSocketName, RTS_World);
+
+const FTransform DesiredWeaponSocketWorldTransform =
+    HolsterAttachment.RelativeTransform * CharacterSocketWorldTransform;
+
+const FTransform WeaponSocketWorldTransform =
+    WeaponSocketMeshComponent->GetSocketTransform(
+        WeaponSocketName, RTS_World);
+
+const FTransform WeaponSocketRelativeToAttachComponent =
+    WeaponSocketWorldTransform.GetRelativeTransform(
+        AttachComponent->GetComponentTransform());
+
+const FTransform DesiredAttachComponentWorldTransform =
+    WeaponSocketRelativeToAttachComponent.Inverse()
+    * DesiredWeaponSocketWorldTransform;
+```
+
+먼저 무기 소켓이 부착 루트에서 얼마나 떨어져 있는지 구한다.
+그 오프셋의 역변환을 목표 홀스터 소켓 트랜스폼에 적용하면, 무기 소켓이 목표 위치에 도달하기 위해 루트가 있어야 할 월드 트랜스폼을 얻을 수 있다.
+
+계산된 위치로 컴포넌트를 이동한 다음 `KeepWorldTransform`으로 캐릭터 메쉬에 부착한다.
+이 방식은 무기 루트가 손잡이나 피벗과 일치하지 않아도 안정적으로 정렬된다.
+
+소켓 설정이 없거나 무기 메쉬에서 소켓을 찾지 못하면 경고 로그를 남기고,
+캐릭터 소켓에 무기 루트를 `SnapToTargetNotIncludingScale`로 붙이는 fallback 경로를 사용한다.
+설정 오류 때문에 무기가 완전히 사라지는 것보다 잘못된 위치라도 화면에 표시되는 편이 디버깅하기 쉽다.
+
+## 무기 전환 흐름
+
+무기 전환 입력이 들어오자마자 `EquipWeaponAtIndex`를 호출하면 기존 무기가 순간적으로 사라지고 새 무기가 손에 나타난다.
+그래서 Blueprint에서는 스왑 몽타주를 먼저 재생하고, 손이 홀스터에 도달하는 Anim Notify 시점에 실제 슬롯 전환을 호출한다.
+
+`EquipWeaponAtIndex` 내부의 처리 순서는 다음과 같다.
+
+1. 요청한 슬롯과 `WeaponData`를 검증한다.
+2. `UnequipWeaponInternal(false)`로 이전 Weapon Ability와 장착 상태를 정리한다.
+3. 이전 무기 액터 또는 메쉬를 기존 슬롯의 홀스터로 돌려보낸다.
+4. 새 무기가 메쉬 기반인지 액터 기반인지에 따라 손 소켓에 부착한다.
+5. `CombatComponent`와 `ActionCombatAbilityComponent`에 새 무기를 반영한다.
+6. `OnWeaponEquipped` 이벤트를 전달한다.
+
+```cpp
+UnequipWeaponInternal(false);
+EquippedWeaponData = WeaponData;
+EquippedWeaponSlotIndex = Index;
+
+if (WeaponData->HasUsableMesh())
+{
+    ConfigureStoredWeaponMeshComponent(
+        Index, WeaponData, ActiveWeaponMeshComponent);
+
+    bEquipped = ActiveWeaponMeshComponent->AttachToComponent(
+        GetMesh(),
+        FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+        WeaponData->GetAttachSocketName());
+}
+else if (WeaponData->EquippableActorClass)
+{
+    SetEquippedWeaponActorInternal(Slot.StoredEquippableActor);
+    bEquipped = AttachEquippableActor(
+        EquippedWeaponActor, WeaponData);
+}
+```
+
+장착에 실패하면 현재 슬롯 인덱스와 무기 데이터를 되돌리고, 성공했을 때만 전투 데이터와 Weapon Ability를 교체한다.
+따라서 애니메이션은 전환 시점을 결정하지만, 실제 장착 상태의 일관성은 C++에서 보장한다.
+
+## 물리 무기로 Drop하기
+
+장착된 액터를 그대로 물리 시뮬레이션 상태로 바꾸면 인벤토리가 소유한 저장 액터와 월드 아이템의 책임이 섞이기 쉽다.
+이번 Blueprint 구현에서는 `BP Gun Dropped`라는 물리 전용 액터를 별도로 생성한다.
+
+<MDXComponentWrapper bottomDescription="장착 무기의 메쉬, 탄약, 클래스, WeaponData를 BP Gun Dropped로 전달한다.">
+![드롭 무기 액터 생성 Blueprint](/markdown/weapon-holster-switching-drop-procedural-pickup/drop-weapon-blueprint.png)
+</MDXComponentWrapper>
+
+드롭 액터에는 원본 무기의 다음 상태를 전달한다.
+
+- 스폰 위치와 회전
+- 총기 메쉬
+- 현재 탄약과 남은 탄약
+- 원본 총기 클래스
+- `WeaponData`
+
+입력 처리 쪽에서는 현재 슬롯의 `StoredEquippableActor`를 가져와 `Throw Item` 인터페이스를 호출한 다음,
+`RemoveWeaponAtIndex`로 인벤토리 슬롯을 비운다.
+
+<MDXComponentWrapper bottomDescription="드롭 표현을 생성한 뒤 현재 장착 슬롯을 인벤토리에서 제거한다.">
+![드롭 입력과 인벤토리 제거 Blueprint](/markdown/weapon-holster-switching-drop-procedural-pickup/drop-weapon-result.png)
+</MDXComponentWrapper>
+
+`RemoveWeaponAtIndex`는 제거 이벤트를 전달한 뒤 인벤토리가 보관하던 액터를 파괴하기 때문에,
+드롭 액터에 필요한 상태를 먼저 복사해야 한다.
+
+현재 Blueprint 경로는 `StoredEquippableActor`를 사용하는 액터 기반 무기를 전제로 한다.
+메쉬 데이터만 사용하는 무기까지 버릴 수 있게 확장하려면 `WeaponData`로부터 드롭 표현을 생성하는 별도 경로가 필요하다.
+
+## Line Trace로 Pickable 찾기
+
+픽업 입력이 들어오면 현재 활성 카메라의 위치에서 전방으로 Line Trace를 수행한다.
+TPS와 FPS 카메라를 전환할 수 있기 때문에, 먼저 현재 시점에 맞는 카메라를 선택하고 그 카메라의 Forward Vector를 사용한다.
+
+<MDXComponentWrapper bottomDescription="현재 카메라를 기준으로 Line Trace를 수행하고 Hit 위치를 Pickup Target으로 계산한다.">
+![픽업 Line Trace Blueprint](/markdown/weapon-holster-switching-drop-procedural-pickup/pickup-line-trace.png)
+</MDXComponentWrapper>
+
+Trace에 맞은 액터가 `BPI_Pickable`을 구현하는지 확인한 뒤 픽업 몽타주를 재생한다.
+서 있는 상태와 자세에 따라 사용할 몽타주를 선택하고, 실제 손이 아이템에 도달하는 시점에 `Pick Item` 이벤트를 호출한다.
+
+<MDXComponentWrapper bottomDescription="픽업 몽타주 재생과 BPI_Pickable 호출, 기존 무기 액터의 인벤토리 전달 흐름">
+![Pick Item 인터페이스 Blueprint](/markdown/weapon-holster-switching-drop-procedural-pickup/pick-item-interface.png)
+</MDXComponentWrapper>
+
+필드 액터는 `Pick Item` 인터페이스에서 장착 가능한 액터를 반환한다.
+캐릭터는 반환된 액터와 `WeaponData`를 `TryAddExistingWeaponActor`에 전달한다.
+추가에 성공하면 슬롯 변경 이벤트가 발생하고, 캐릭터가 해당 무기를 빈 슬롯의 홀스터 위치에 배치한다.
+
+이 구조에서는 픽업 대상이 캐릭터 클래스를 직접 알 필요가 없다.
+캐릭터는 `BPI_Pickable`만 호출하고, 각 아이템은 자신을 어떤 장착 액터와 데이터로 변환할지 결정한다.
+
+## CCDIK로 손을 실제 아이템 위치에 맞추기
+
+고정된 픽업 애니메이션만 사용하면 아이템 높이가 조금만 달라져도 손이 바닥을 뚫거나 공중을 잡는다.
+Line Trace에서 계산한 `PickUpItemLocation`을 Animation Blueprint로 넘기고, 상체 애니메이션 결과에 CCDIK를 적용해 손끝을 목표 위치로 보정했다.
+
+<MDXComponentWrapper bottomDescription="PickUpItemLocation을 Effector로 사용하고 애니메이션 커브 값을 CCDIK Alpha에 연결한다.">
+![Pickup CCDIK Anim Graph](/markdown/weapon-holster-switching-drop-procedural-pickup/pickup-ccdik-anim-graph.png)
+</MDXComponentWrapper>
+
+CCDIK를 항상 활성화하면 이동이나 공격 중에도 손이 마지막 픽업 위치로 끌려간다.
+그래서 픽업 애니메이션에 `EnablePickUpItemIK` 커브를 추가하고, 커브 값을 CCDIK의 Alpha에 연결했다.
+
+<MDXComponentWrapper bottomDescription="손이 목표에 접근하는 구간에서만 1에 가까워지는 EnablePickUpItemIK 커브">
+![Pickup IK Animation Curve](/markdown/weapon-holster-switching-drop-procedural-pickup/pickup-animation-curve.png)
+</MDXComponentWrapper>
+
+커브가 0이면 원본 애니메이션을 그대로 사용하고, 값이 올라가는 구간에서만 손이 아이템 위치를 따라간다.
+애니메이션의 전체 동작은 유지하면서 접촉 직전의 오차만 절차적으로 보정할 수 있다.
+
+## 전체 데이터 흐름
+
+무기를 버리고 다시 줍는 과정은 다음과 같다.
+
+1. 현재 슬롯의 저장 무기 상태를 `BP Gun Dropped`에 복사한다.
+2. `RemoveWeaponAtIndex`가 장착 상태와 인벤토리 슬롯을 정리한다.
+3. 카메라 Line Trace가 `BPI_Pickable`을 구현한 필드 액터를 찾는다.
+4. Trace 위치를 `PickUpItemLocation`으로 저장하고 픽업 몽타주를 재생한다.
+5. Animation Curve가 활성화된 구간에서 CCDIK가 손을 목표 위치로 보정한다.
+6. Anim Notify 시점에 `Pick Item`을 호출한다.
+7. 반환된 액터를 `TryAddExistingWeaponActor`로 빈 슬롯에 넣는다.
+8. 슬롯 변경 이벤트를 받은 캐릭터가 무기를 홀스터에 배치한다.
+9. 필요하면 스왑 몽타주의 Notify에서 `EquipWeaponAtIndex`를 호출해 즉시 장착한다.
+
+## 완성본
+
+<YouTube url="https://www.youtube.com/watch?v=oFyRDMDGJlQ" title="무기 홀스터, 교체, 드롭과 절차적 픽업 구현 정리" caption="완성 영상" />

@@ -213,5 +213,21 @@
     "path": "/posts/wasm-conways-game",
     "slicedContent": "\r\n# 웹어셈블리로 콘웨이의 생명 게임 만들기 (with Rust)\r\n## 콘웨이의 생명 게임이란\r\n영국의 수학자 [존 호른 콘웨이](https://en.wikipedia.org/wiki/John_Horton_Conway)가 고안해낸 [세포자동자](https://en.wikipedia.org/wiki/Cellular_automaton)\r\n의 일종이다.\r\n\r...",
     "readingMinutes": 11
+  },
+  {
+    "name": "weapon-holster-switching-drop-procedural-pickup",
+    "title": "UE5 무기 홀스터 전환과 Drop, Procedural Pickup 구현",
+    "tags": [
+      "Unreal Engine",
+      "C++",
+      "Blueprint",
+      "Weapon System",
+      "Animation"
+    ],
+    "createdAt": "2026-06-06T00:00:00.000Z",
+    "path": "/posts/weapon-holster-switching-drop-procedural-pickup",
+    "description": "WeaponInventoryComponent와 ActionCombatCharacter를 중심으로 무기 홀스터 전환, 드롭, 픽업, CCDIK 손 보정을 구현한 과정을 정리한다.",
+    "slicedContent": "\n# UE5 무기 홀스터 전환과 Drop, Procedural Pickup 구현\n\n액션 게임의 무기 시스템은 현재 무기를 손 소켓에 붙일 뿐만 아니라\n사용하지 않는 무기는 캐릭터의 등이나 허리에 보여야 하며, 무기를 교체할 때는 애니메이션의 정확한 프레임에 손과 홀스터 사이를 이동해야 한다.\n필드에 버린 무기는 물리 오브젝트가 되어야 하며, 다시 주울 때는...",
+    "readingMinutes": 12
   }
 ]
