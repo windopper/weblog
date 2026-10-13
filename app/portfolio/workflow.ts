@@ -1,7 +1,7 @@
 // AI 협업 방식 콘텐츠입니다. 프로젝트의 AGENTS.md, 메모리, 스킬, 대화 기록에서 확인한 사실만 적습니다.
 
 export const headline = {
-  sub: "AI 에이전트에게 일을 맡기는 방식과 작업 흐름을 정리했습니다.",
+  sub: "",
 };
 
 export const layers: { name: string; role: string; detail: string }[] = [
@@ -12,20 +12,20 @@ export const layers: { name: string; role: string; detail: string }[] = [
       "한국어 주석, 테스트 작성과 실행 금지, 수정 후 빌드, 영어 커밋 메시지를 적어 두었습니다.",
   },
   {
-    name: "장기 메모리 (91)",
-    role: "결정과 함정",
+    name: "장기 메모리",
+    role: "결정",
     detail:
-      "결정의 이유와 다음에 적용할 방법을 남겨, 같은 지적을 반복하지 않게 합니다.",
+      "결정의 이유와 다음에 적용할 방법을 남겨, 같은 실수를 반복하지 않게 합니다.",
   },
   {
-    name: "설계 문서 (35)",
+    name: "설계 문서",
     role: "기능 명세",
-    detail: "구현 전에 결정을 확정해 문서로 남기고, 코드와 함께 갱신합니다.",
+    detail: "구현 전에 결정을 확정해 문서로 남기고, 코드와 함께 업데이트 합니다.",
   },
   {
     name: "위키 결정서",
-    role: "작업 약속",
-    detail: "설계 결정 19개와 데이터 형식을 한 문서에 모아 작업이 어긋나지 않게 합니다.",
+    role: "작업",
+    detail: "설계와 데이터 형식을 한 문서에 모아 작업이 어긋나지 않게 합니다.",
   },
 ];
 
@@ -45,7 +45,7 @@ export const engineAccess: { title: string; detail: string }[] = [
   },
   {
     title: "외부 생성 도구",
-    detail: "영상(Higgsfield)과 3D(Tripo) 결과는 재료로만 쓰고 직접 편집합니다.",
+    detail: "영상(Omni Flash 1.1)과 3D(Tripo) 결과는 재료로만 쓰고 직접 편집합니다.",
   },
 ];
 
@@ -76,29 +76,46 @@ export const pipelines: Pipeline[] = [
   },
   {
     index: "02",
-    title: "Blender → 에셋 → Niagara → 수치 노출",
-    summary: "메시, 절차적 머티리얼, 데칼을 겹쳐 만드는 방식을 VFX 기준으로 삼았습니다.",
+    title: "Blender → NumPy 텍스처 → Niagara → 수치 노출",
+    summary:
+      "메시, 절차적 머티리얼, 데칼을 겹쳐 만들고 모든 단계를 스크립트로 둡니다. 에디터를 닫은 상태에서 커맨드렛으로 실행합니다.",
     steps: [
-      "Blender로 메시 생성",
-      "머티리얼 스크립트",
-      "Niagara 커맨드렛",
-      "미리보기로 검토",
-      "수치를 파라미터로 공개",
+      "Blender CLI로 메시 생성",
+      "NumPy로 텍스처 마스크 생성",
+      "머티리얼 HLSL과 NumPy 미리보기",
+      "Niagara 커맨드렛으로 조립",
+      "수치를 BP로 공개",
     ],
-    gate: "높이, 크기, 시간 같은 수치는 BP와 Niagara 파라미터로 열어 둡니다.",
+    gate: "텍스처는 명암 값만 담고 색은 머티리얼이 입혀서, 같은 텍스처를 흙, 금빛, 물에 다시 씁니다. 높이, 크기, 시간은 User 파라미터와 BP 속성으로 열어 둡니다.",
   },
   {
     index: "03",
     title: "레퍼런스 영상 → 마커 추적 → 리그 키",
-    summary: "영상에서 읽은 궤적을 키포즈로 옮깁니다. 프레임별 베이크는 하지 않습니다.",
+    summary:
+      "영상 모델이 만든 레퍼런스에서 다리와 손가락 같은 세부 움직임을 수치로 읽어 리그에 옮깁니다.",
     steps: [
-      "마커 영상 생성",
+      "Blender에서 부위별 색을 입혀 렌더",
+      "측면과 정면 분할 영상 생성",
       "프레임에서 마커 추적",
       "3D 궤적으로 풀기",
       "리그에 키 입력",
-      "영상과 비교하며 보정",
+      "영상과 나란히 비교하며 보정",
     ],
-    gate: "이 기준을 메모리에 남겨 같은 지적을 반복하지 않게 했습니다.",
+    gate: "AI 영상은 좌우 패널의 박자가 따로 노는 경우가 많아서, 다리별로 시간을 맞춰 푸는 모드를 스킬에 추가했습니다.",
+  },
+  {
+    index: "04",
+    title: "NumPy 생성기 → 임포트 → 위젯 블루프린트",
+    summary:
+      "UI 텍스처는 위젯마다 생성기를 두고, 생성기끼리 그리기 도구를 공유해 UI 전체가 같은 질감을 가지게 합니다. 시드를 고정해 다시 실행해도 같은 결과가 나옵니다.",
+    steps: [
+      "NumPy로 텍스처 생성",
+      "밝은 배경과 어두운 배경에서 가독성 확인",
+      "커맨드렛으로 임포트",
+      "위젯 블루프린트 생성",
+      "위젯 이름으로 C++ 연결",
+    ],
+    gate: "C++는 위젯 이름과 이벤트만 정하고 모양은 블루프린트에서 고칩니다. 글자는 프로젝트 폰트에 있는 문자만 씁니다.",
   },
 ];
 
@@ -132,21 +149,6 @@ export const gates: { title: string; detail: string }[] = [
   },
 ];
 
-export const failures: { title: string; detail: string }[] = [
-  {
-    title: "곰 보스 1차 폐기",
-    detail: "접근이 실패해 버리고, Tripo 원본을 직접 편집하는 2차로 바꿨습니다.",
-  },
-  {
-    title: "엔진 함정은 메모리로",
-    detail: "Niagara의 smoothstep 미지원, 포트 충돌 같은 함정을 기록해 반복하지 않습니다.",
-  },
-  {
-    title: "긴 세션은 나눈다",
-    detail: "컨텍스트가 길어지면 새 세션이나 서브 에이전트로 작업을 나눕니다.",
-  },
-];
-
 export const aiTools: { group: string; items: string[] }[] = [
   {
     group: "Agent",
@@ -157,7 +159,8 @@ export const aiTools: { group: string; items: string[] }[] = [
     items: [
       "unreal-mcp",
       "Blender MCP",
-      "Higgsfield MCP",
+      "Omni Flash 1.1",
+      "GPT Image 2.5",
       "Tripo",
       "send2ue",
       "UE 커맨드렛 + Python",

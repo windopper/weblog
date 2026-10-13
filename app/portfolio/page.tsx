@@ -21,7 +21,6 @@ import {
 import {
   aiTools,
   engineAccess,
-  failures,
   gates,
   headline,
   layers,
@@ -146,6 +145,36 @@ async function CompactCase({ study }: { study: CaseStudy }) {
             </li>
           ))}
         </ul>
+
+        {study.metrics && (
+          <figure className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/40 print:break-inside-avoid">
+            <table className="w-full min-w-[420px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-800 text-zinc-400">
+                  {study.metrics.head.map((cell, i) => (
+                    <th key={i} className="px-4 py-2 font-normal">
+                      {cell}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800 text-zinc-200">
+                {study.metrics.rows.map((row) => (
+                  <tr key={row[0]}>
+                    {row.map((cell, i) => (
+                      <td key={i} className={i === 0 ? "px-4 py-2 text-zinc-400" : "px-4 py-2"}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <figcaption className="border-t border-zinc-800 px-4 py-2 text-xs text-zinc-500">
+              {study.metrics.caption}
+            </figcaption>
+          </figure>
+        )}
 
         <CodeBlock sample={study.code} />
 
@@ -282,20 +311,9 @@ export default function PortfolioPage() {
           ))}
         </Reveal>
 
-        {/* 실패와 교정 */}
-        <SectionTitle index="05">실패와 교정</SectionTitle>
-        <Reveal className="grid gap-4 sm:grid-cols-3">
-          {failures.map((failure) => (
-            <Card key={failure.title}>
-              <h3 className="font-sb-aggro-b font-normal text-zinc-100">{failure.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-zinc-300">{failure.detail}</p>
-            </Card>
-          ))}
-        </Reveal>
-
         {/* 산출물 */}
-        <SectionTitle index="06">산출물</SectionTitle>
-        <Lead>세 시스템의 핵심만 줄여 보여 드립니다.</Lead>
+        <SectionTitle index="05">산출물</SectionTitle>
+        <Lead>여섯 시스템의 핵심만 줄여 보여 드립니다.</Lead>
         <Reveal className="mb-12 grid grid-cols-3 gap-4">
           {stats.map((stat) => (
             <div
