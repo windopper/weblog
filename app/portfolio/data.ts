@@ -133,55 +133,8 @@ export const caseStudies: CaseStudy[] = [
     ],
   },
   {
-    id: "entity-ai",
-    index: "02",
-    title: "엔티티 베이스와 StateTree AI",
-    tagline: "보스와 까마귀가 공통 규칙을 공유하고 각자 확장되게 만들기",
-    tags: ["StateTree", "Class Design", "Animation Notify", "Replication"],
-    problem:
-      "보스 다음으로 까마귀를 만들면서, 체력과 상태 이상과 사망 연출처럼 똑같아야 하는 부분이 보스 클래스 안에 갇혀 있다는 것을 알았습니다.",
-    approach: [
-      "공통 부분을 베이스로 추출하고 사망 확장점 3개 제공",
-      "StateTree는 흐름만 정하고 동작은 서버 함수가 수행",
-      "노티파이 구간과 캡슐 스윕으로 타격 판정",
-      "서버는 판정, 클라이언트는 연출",
-    ],
-    code: {
-      title: "관절 캡슐 스윕 판정",
-      file: "Boss/BossPawn.cpp",
-      lang: "cpp",
-      code: `for (int32 Index = 0; Index < Capsules.Num(); ++Index)
-{
-    const FBossHitCapsule& Capsule = Capsules[Index];
-    const FCollisionShape Shape = Capsule.GetShape();
-    const FQuat Rotation = Capsule.GetRotation();
-    const FVector Center = Capsule.GetCenter();
-
-    TArray<FOverlapResult> Overlaps;
-    World->OverlapMultiByObjectType(Overlaps, Center, Rotation, Objects, Shape, Query);
-    for (const FOverlapResult& Overlap : Overlaps) TryHit(Overlap.GetActor(), Center);
-
-    // 지난 프레임 자리에서 지금 자리까지 쓸어, 빠른 휘두르기가 프레임 사이로 대상을 건너뛰지 않게 합니다.
-    if (Active.PreviousCapsules.IsValidIndex(Index))
-    {
-        const FVector PreviousCenter = Active.PreviousCapsules[Index].GetCenter();
-        if (FVector::DistSquared(PreviousCenter, Center) > FMath::Square(BossPawnHit::MinSweepDistance))
-        {
-            TArray<FHitResult> Hits;
-            World->SweepMultiByObjectType(Hits, PreviousCenter, Center, Rotation, Objects, Shape, Query);
-            for (const FHitResult& Hit : Hits) TryHit(Hit.GetActor(), Hit.ImpactPoint);
-        }
-    }
-}`,
-    },
-    result: [
-      "새 엔티티는 베이스 상속, 사망 확장점, StateTree 지정만으로 만들 수 있습니다.",
-      "공격 타이밍이 애니메이션 에셋에 있어, 몽타주를 고쳐도 코드는 그대로입니다.",
-    ],
-  },
-  {
     id: "grass-streaming",
-    index: "03",
+    index: "02",
     title: "잔디 스트리밍",
     tagline: "월드 전체에 깔던 HISM 잔디를 플레이어 주변 격자만 올리는 방식으로 바꾸기",
     tags: ["HISM", "Streaming", "Landscape Grass", "Profiling"],
@@ -237,7 +190,7 @@ for (const TPair<double, int32>& Load : Loads) PendingLoads.Add(Load.Value);`,
   },
   {
     id: "crow-state-tree",
-    index: "04",
+    index: "03",
     title: "까마귀 StateTree: 열매 먹기와 수레 탑승",
     tagline: "행동 세 개를 한 트리에 합치면서 서로 굶기지 않고, 끊겨도 자원이 새지 않게 만들기",
     tags: ["StateTree", "Custom Task", "Transition Priority", "Resource Ownership"],
@@ -282,7 +235,7 @@ void FCrowRideWagonTask::ExitState(FStateTreeExecutionContext& Context, const FS
   },
   {
     id: "seed-laser",
-    index: "06",
+    index: "04",
     title: "충전 레이저 VFX와 네트워크 재생",
     tagline: "모았다가 떼면 쏘는 레이저를 소유자에게는 지연 없이, 다른 플레이어에게는 같은 세기로 보여 주기",
     tags: ["Niagara", "Client Prediction", "Cosmetic Event", "Python Authoring"],

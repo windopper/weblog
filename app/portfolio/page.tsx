@@ -301,7 +301,7 @@ export default function PortfolioPage() {
         </Reveal>
 
         {/* 사람이 선을 긋는 곳 */}
-        <SectionTitle index="04">사람이 선을 긋는 곳</SectionTitle>
+        <SectionTitle index="04">직접 하는 것</SectionTitle>
         <Reveal className="grid gap-4 sm:grid-cols-2">
           {gates.map((gate) => (
             <Card key={gate.title}>
