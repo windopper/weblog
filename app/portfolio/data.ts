@@ -57,7 +57,6 @@ export const stats: { value: string; label: string }[] = [
   { value: "약 6.2만 줄", label: "C++ 코드 (352개 파일)" },
   { value: "150+", label: "UCLASS" },
   { value: "57", label: "네트워크 RPC" },
-  { value: "35편", label: "기능 설계 문서" },
 ];
 
 export const scope: { area: string; detail: string }[] = [
